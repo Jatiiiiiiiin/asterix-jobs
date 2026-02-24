@@ -402,7 +402,7 @@ const ApplicationsPage: React.FC<{
       // Query by candidateUid (written by saveApplication) AND userId as fallback
       const q = query(
         collection(db, "applications"),
-        where("candidateUid", "==", uid)
+        where("userId", "==", uid)
       );
 
       unsubscribe = onSnapshot(q, (snapshot) => {

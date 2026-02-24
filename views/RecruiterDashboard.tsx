@@ -168,7 +168,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
     const unsub = onSnapshot(q, async (snap) => {
       console.log('🔍 FIRESTORE SNAPSHOT - Total docs:', snap.docs.length);
-      
+
       const raw = snap.docs.map((d) => {
         const data = d.data() as Omit<Application, 'id'>;
         console.log(`📄 Doc ID: ${d.id}`);
@@ -178,6 +178,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
         return {
           id: d.id,
           ...data,
+          autoApplied: Boolean((data as any).aiApplied ?? data.autoApplied),
         };
       });
 
@@ -212,7 +213,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               candidateEmail: p.contact?.email ?? p.profile?.email ?? '',
               candidateManifesto: p.profile?.manifesto ?? '',
               candidateEducation: p.education ?? '',
-              candidateSkills: (p.skills ?? []).map((s: any) => s.s ?? s.skill ?? '').filter(Boolean),
+              candidateSkills: (p.skills ?? [])
+                .map((s: any) => (s?.s ?? s?.skill ?? '').toString())
+                .filter((s: string) => typeof s === 'string' && s.length > 0),
               candidateExperience: p.deployments ?? [],
               resumeUrl: p.resumeUrl ?? app.resumeUrl ?? undefined,
               status: (app.status ?? 'Submitted') as Application['status'],
@@ -222,6 +225,14 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
             return {
               ...app,
               matchScore: appMatchScore,
+              candidateName:
+                app.candidateName ??
+                `Candidate (${app.candidateUid?.slice(0, 6) ?? 'Anon'})`,
+              candidateTitle: '',
+              candidateSkills: [],
+              candidateExperience: [],
+              candidateEducation: '',
+              resumeUrl: undefined,
               status: (app.status ?? 'Submitted') as Application['status'],
             };
           }
@@ -229,15 +240,22 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
       );
 
       hydrated.sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
-      
+
       console.log('✅ FINAL HYDRATED APPS:');
       hydrated.forEach(app => {
         console.log(`  ID: ${app.id}`);
         console.log(`    - status: "${app.status}"`);
         console.log(`    - name: ${app.candidateName}`);
       });
-      
-      setApplications(hydrated);
+
+      const finalApps = hydrated.map(app => ({
+        ...app,
+        candidateName:
+          app.candidateName ??
+          `Candidate (${app.candidateUid?.slice(0, 6) ?? 'Anon'})`,
+      }));
+
+      setApplications(finalApps);
       setLoadingApplicants(false);
     }, (err) => {
       console.error('[RecruiterDashboard] Applicants error:', err.message);
@@ -263,13 +281,54 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
   /* ── Applicant actions ─────────────────────────────────────── */
   const handleShortlist = async (app: Application) => {
-    console.log('Shortlisting app:', app.id, 'Current status:', app.status);
     setActionInProgress('shortlist');
     try {
-      await setDoc(doc(db, 'applications', app.id), { status: 'shortlisted', shortlistedAt: Timestamp.now() }, { merge: true });
-      console.log('Shortlist success, app id:', app.id);
-    } catch (err) { console.error('Shortlist failed:', err); }
-    finally { setActionInProgress(null); }
+      // 1️⃣ Update application
+      await setDoc(
+        doc(db, 'applications', app.id),
+        {
+          status: 'shortlisted',
+          shortlistedAt: Timestamp.now(),
+        },
+        { merge: true }
+      );
+
+      // 2️⃣ Add to Talent Pipeline
+      const pipelineId = `${app.candidateUid}_${selectedJob!.id}`;
+
+      await setDoc(
+        doc(db, 'talentPipeline', pipelineId),
+        {
+          recruiterId,
+          jobId: selectedJob!.id,
+          jobTitle: selectedJob!.title,     // 🔥 ADD THIS
+
+          candidateUid: app.candidateUid,
+          candidateName: app.candidateName,
+          candidateTitle: app.candidateTitle,
+          candidateEmail: app.candidateEmail,
+          candidateSkills: app.candidateSkills,
+          candidateExperience: app.candidateExperience,
+          candidateEducation: app.candidateEducation,
+          candidateManifesto: app.candidateManifesto,
+          resumeUrl: app.resumeUrl,
+
+          matchScore: app.matchScore,
+          autoApplied: app.autoApplied ?? false,
+
+          pipelineStage: 'shortlisted',      // 🔥 ADD THIS
+          addedAt: Timestamp.now(),
+          source: 'shortlist',
+        },
+        { merge: true }
+      );
+
+      console.log('✅ Added to Talent Pipeline');
+    } catch (err) {
+      console.error('❌ Shortlist failed:', err);
+    } finally {
+      setActionInProgress(null);
+    }
   };
 
   const handleReject = async (app: Application) => {
@@ -323,7 +382,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
     return !q ||
       (a.candidateName ?? '').toLowerCase().includes(q) ||
       (a.candidateTitle ?? '').toLowerCase().includes(q) ||
-      (a.candidateSkills ?? []).some((s) => s.toLowerCase().includes(q));
+      (a.candidateSkills ?? []).some(
+        (s) => typeof s === 'string' && s.toLowerCase().includes(q)
+      );
   });
 
   const avgScore = applications.length > 0
@@ -367,9 +428,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
   const ApplicationStatusBadge = ({ status }: { status?: Application['status'] }) => {
     const statusMap: Record<string, { bg: string; border: string; text: string; label: string }> = {
-      Submitted:   { bg: 'bg-blue-500/10',    border: 'border-blue-500/20',    text: 'text-blue-400',    label: 'Submitted' },
+      Submitted: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400', label: 'Submitted' },
       shortlisted: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', label: 'Shortlisted' },
-      rejected:    { bg: 'bg-red-500/10',     border: 'border-red-500/20',     text: 'text-red-400',     label: 'Rejected' },
+      rejected: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', label: 'Rejected' },
     };
     const safeStatus = (status && status in statusMap) ? status : 'Submitted';
     const config = statusMap[safeStatus];
@@ -387,8 +448,8 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
   const CandidateDetailContent = ({ applicant, job }: { applicant: Application; job: PostedJob }) => {
     const scoreColor =
       applicant.matchScore >= 80 ? 'text-emerald-400' :
-      applicant.matchScore >= 60 ? 'text-amber-400' :
-      applicant.matchScore > 0   ? 'text-red-400'    : 'text-white/30';
+        applicant.matchScore >= 60 ? 'text-amber-400' :
+          applicant.matchScore > 0 ? 'text-red-400' : 'text-white/30';
 
     const initials = (applicant.candidateName?.trim() || '?')[0].toUpperCase();
     const isAboveThreshold = job.matchThreshold != null && applicant.matchScore >= job.matchThreshold;
@@ -406,203 +467,199 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
       <div className="flex flex-col h-full">
         {/* SCROLLABLE CONTENT AREA */}
         <div className="flex-1 overflow-y-auto flex flex-col">
-        {/* GRID FOR HEADER AND TABS */}
-        <div className="grid grid-rows-[auto_auto_1fr] gap-0">
-        {/* ── Hero (Row 1) ──────────────────────────────────────── */}
-        <div className="px-6 md:px-10 py-6 md:py-8 border-b border-white/5 bg-white/[0.01]">
-          <div className="flex items-start justify-between gap-6">
-            <div className="flex items-center gap-4 md:gap-6">
-              <div className={`size-16 md:size-20 flex items-center justify-center text-2xl md:text-3xl font-black border-2 ${
-                isAboveThreshold
-                  ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
-                  : 'bg-white/5 border-white/10 text-white/30'
-              }`}>
-                {initials}
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">
-                  {applicant.candidateName ?? 'Unknown'}
-                </h3>
-                <p className="text-xs md:text-sm font-black uppercase tracking-widest text-white/40">
-                  {applicant.candidateTitle}
-                </p>
-                {applicant.candidateEmail && (
-                  <p className="text-[9px] md:text-[10px] font-medium text-white/30 tracking-wide">
-                    {applicant.candidateEmail}
-                  </p>
-                )}
-                {applicant.autoApplied && (
-                  <span className="inline-flex items-center gap-1 text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-emerald-400 border border-emerald-500/30 px-2 py-0.5">
-                    <span className="material-symbols-outlined text-[9px]">auto_awesome</span>
-                    Auto-matched
-                  </span>
-                )}
+          {/* GRID FOR HEADER AND TABS */}
+          <div className="grid grid-rows-[auto_auto_1fr] gap-0">
+            {/* ── Hero (Row 1) ──────────────────────────────────────── */}
+            <div className="px-6 md:px-10 py-6 md:py-8 border-b border-white/5 bg-white/[0.01]">
+              <div className="flex items-start justify-between gap-6">
+                <div className="flex items-center gap-4 md:gap-6">
+                  <div className={`size-16 md:size-20 flex items-center justify-center text-2xl md:text-3xl font-black border-2 ${isAboveThreshold
+                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                    : 'bg-white/5 border-white/10 text-white/30'
+                    }`}>
+                    {initials}
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">
+                      {applicant.candidateName ?? 'Unknown'}
+                    </h3>
+                    <p className="text-xs md:text-sm font-black uppercase tracking-widest text-white/40">
+                      {applicant.candidateTitle}
+                    </p>
+                    {applicant.candidateEmail && (
+                      <p className="text-[9px] md:text-[10px] font-medium text-white/30 tracking-wide">
+                        {applicant.candidateEmail}
+                      </p>
+                    )}
+                    {applicant.autoApplied && (
+                      <span className="inline-flex items-center gap-1 text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-emerald-400 border border-emerald-500/30 px-2 py-0.5">
+                        <span className="material-symbols-outlined text-[9px]">auto_awesome</span>
+                        Auto-matched
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Score + threshold */}
+                <div className="text-right shrink-0 space-y-1 md:space-y-2">
+                  <div className={`text-5xl md:text-6xl font-black tabular-nums leading-none ${scoreColor}`}>
+                    {applicant.matchScore > 0 ? `${applicant.matchScore}%` : '—'}
+                  </div>
+                  <p className="text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-white/30">Fidelity</p>
+
+                  {job.matchThreshold != null && applicant.matchScore > 0 && (
+                    <div className={`inline-flex items-center gap-1 px-2 py-1 text-[6px] md:text-[7px] font-black uppercase tracking-widest ${isAboveThreshold
+                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                      : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                      }`}>
+                      <span className="material-symbols-outlined text-[8px] md:text-[10px]">
+                        {isAboveThreshold ? 'check_circle' : 'cancel'}
+                      </span>
+                      {isAboveThreshold ? `≥${job.matchThreshold}%` : `<${job.matchThreshold}%`}
+                    </div>
+                  )}
+
+                  {applicant.matchScore === 0 && (
+                    <p className="text-[7px] font-black uppercase tracking-widest text-white/20 max-w-[100px]">
+                      Score pending sync
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Score + threshold */}
-            <div className="text-right shrink-0 space-y-1 md:space-y-2">
-              <div className={`text-5xl md:text-6xl font-black tabular-nums leading-none ${scoreColor}`}>
-                {applicant.matchScore > 0 ? `${applicant.matchScore}%` : '—'}
-              </div>
-              <p className="text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-white/30">Fidelity</p>
+            {/* ── Tab Bar (Row 2) ───────────────────────────────────── */}
+            <div className="border-b border-white/5 flex z-10 bg-[#080808]">
+              <button
+                onClick={() => setDetailTab('profile')}
+                className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all border-b-2 ${detailTab === 'profile'
+                  ? 'text-white border-b-emerald-400'
+                  : 'text-white/40 border-b-transparent hover:text-white/70'
+                  }`}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-sm">person</span>
+                  Profile
+                </span>
+              </button>
 
-              {job.matchThreshold != null && applicant.matchScore > 0 && (
-                <div className={`inline-flex items-center gap-1 px-2 py-1 text-[6px] md:text-[7px] font-black uppercase tracking-widest ${
-                  isAboveThreshold
-                    ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                    : 'bg-red-500/10 border border-red-500/20 text-red-400'
-                }`}>
-                  <span className="material-symbols-outlined text-[8px] md:text-[10px]">
-                    {isAboveThreshold ? 'check_circle' : 'cancel'}
-                  </span>
-                  {isAboveThreshold ? `≥${job.matchThreshold}%` : `<${job.matchThreshold}%`}
+              <button
+                onClick={() => setDetailTab('resume')}
+                className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all border-b-2 ${detailTab === 'resume'
+                  ? 'text-white border-b-emerald-400'
+                  : 'text-white/40 border-b-transparent hover:text-white/70'
+                  }`}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-sm">description</span>
+                  Resume
+                  {!applicant.resumeUrl && (
+                    <span className="text-[5px] font-black uppercase tracking-widest text-white/20 border border-white/10 px-1 py-0.5">
+                      Profile
+                    </span>
+                  )}
+                </span>
+              </button>
+            </div>
+
+            {/* ── Content (Row 3 - Scrollable) ──────────────────────── */}
+            <div className="overflow-y-auto">
+              {/* PROFILE TAB */}
+              {detailTab === 'profile' && (
+                <div className="px-6 md:px-10 py-6 md:py-8 space-y-8 md:space-y-10">
+                  {applicant.candidateManifesto && (
+                    <section className="space-y-4">
+                      <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                        <span className="flex-1 h-px bg-white/5" />About<span className="flex-1 h-px bg-white/5" />
+                      </h4>
+                      <p className="text-sm md:text-base font-medium text-white/70 leading-relaxed">
+                        {applicant.candidateManifesto}
+                      </p>
+                    </section>
+                  )}
+
+                  {(applicant.candidateSkills ?? []).length > 0 && (
+                    <section className="space-y-4">
+                      <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                        <span className="flex-1 h-px bg-white/5" />Skills<span className="flex-1 h-px bg-white/5" />
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {applicant.candidateSkills!.map((s) => (
+                          <span
+                            key={s}
+                            className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 md:px-4 py-1.5 md:py-2 border border-white/10 text-white/60 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {(applicant.candidateExperience ?? []).length > 0 && (
+                    <section className="space-y-4">
+                      <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                        <span className="flex-1 h-px bg-white/5" />Experience<span className="flex-1 h-px bg-white/5" />
+                      </h4>
+                      <div className="space-y-6">
+                        {applicant.candidateExperience!.map((exp, i) => (
+                          <div key={i} className="border-l-2 border-white/10 pl-4 md:pl-5 space-y-1.5">
+                            <p className="text-sm md:text-base font-black uppercase tracking-tight">
+                              {exp.role}
+                              <span className="text-white/30 font-medium mx-2">@</span>
+                              {exp.co}
+                            </p>
+                            <p className="text-xs md:text-sm font-medium text-white/40 leading-relaxed">
+                              {exp.desc}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {applicant.candidateEducation && (
+                    <section className="space-y-4">
+                      <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                        <span className="flex-1 h-px bg-white/5" />Education<span className="flex-1 h-px bg-white/5" />
+                      </h4>
+                      <p className="text-xs md:text-sm font-medium text-white/50 leading-relaxed">
+                        {applicant.candidateEducation}
+                      </p>
+                    </section>
+                  )}
+
+                  <div className="h-20 md:h-32" />
                 </div>
               )}
 
-              {applicant.matchScore === 0 && (
-                <p className="text-[7px] font-black uppercase tracking-widest text-white/20 max-w-[100px]">
-                  Score pending sync
-                </p>
+              {/* RESUME TAB */}
+              {detailTab === 'resume' && (
+                applicant.resumeUrl ? (
+                  <div className="w-full h-full min-h-[600px] bg-white/[0.02]">
+                    <iframe
+                      src={`${applicant.resumeUrl}#toolbar=0`}
+                      className="w-full h-full border-0"
+                      title="Candidate Resume"
+                      style={{ minHeight: '600px' }}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full gap-6 p-10 text-center">
+                    <span className="material-symbols-outlined text-5xl text-white/10">description</span>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/30">
+                        No resume uploaded
+                      </p>
+                      <p className="text-[8px] font-medium text-white/20 uppercase tracking-widest max-w-xs">
+                        Candidate hasn't synced a resume file yet. Their profile is visible in the Profile tab.
+                      </p>
+                    </div>
+                  </div>
+                )
               )}
             </div>
           </div>
-        </div>
-
-        {/* ── Tab Bar (Row 2) ───────────────────────────────────── */}
-        <div className="border-b border-white/5 flex z-10 bg-[#080808]">
-          <button
-            onClick={() => setDetailTab('profile')}
-            className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all border-b-2 ${
-              detailTab === 'profile'
-                ? 'text-white border-b-emerald-400'
-                : 'text-white/40 border-b-transparent hover:text-white/70'
-            }`}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-sm">person</span>
-              Profile
-            </span>
-          </button>
-
-          <button
-            onClick={() => setDetailTab('resume')}
-            className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all border-b-2 ${
-              detailTab === 'resume'
-                ? 'text-white border-b-emerald-400'
-                : 'text-white/40 border-b-transparent hover:text-white/70'
-            }`}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-sm">description</span>
-              Resume
-              {!applicant.resumeUrl && (
-                <span className="text-[5px] font-black uppercase tracking-widest text-white/20 border border-white/10 px-1 py-0.5">
-                  Profile
-                </span>
-              )}
-            </span>
-          </button>
-        </div>
-
-        {/* ── Content (Row 3 - Scrollable) ──────────────────────── */}
-        <div className="overflow-y-auto">
-          {/* PROFILE TAB */}
-          {detailTab === 'profile' && (
-            <div className="px-6 md:px-10 py-6 md:py-8 space-y-8 md:space-y-10">
-              {applicant.candidateManifesto && (
-                <section className="space-y-4">
-                  <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
-                    <span className="flex-1 h-px bg-white/5" />About<span className="flex-1 h-px bg-white/5" />
-                  </h4>
-                  <p className="text-sm md:text-base font-medium text-white/70 leading-relaxed">
-                    {applicant.candidateManifesto}
-                  </p>
-                </section>
-              )}
-
-              {(applicant.candidateSkills ?? []).length > 0 && (
-                <section className="space-y-4">
-                  <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
-                    <span className="flex-1 h-px bg-white/5" />Skills<span className="flex-1 h-px bg-white/5" />
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {applicant.candidateSkills!.map((s) => (
-                      <span
-                        key={s}
-                        className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 md:px-4 py-1.5 md:py-2 border border-white/10 text-white/60 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {(applicant.candidateExperience ?? []).length > 0 && (
-                <section className="space-y-4">
-                  <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
-                    <span className="flex-1 h-px bg-white/5" />Experience<span className="flex-1 h-px bg-white/5" />
-                  </h4>
-                  <div className="space-y-6">
-                    {applicant.candidateExperience!.map((exp, i) => (
-                      <div key={i} className="border-l-2 border-white/10 pl-4 md:pl-5 space-y-1.5">
-                        <p className="text-sm md:text-base font-black uppercase tracking-tight">
-                          {exp.role}
-                          <span className="text-white/30 font-medium mx-2">@</span>
-                          {exp.co}
-                        </p>
-                        <p className="text-xs md:text-sm font-medium text-white/40 leading-relaxed">
-                          {exp.desc}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {applicant.candidateEducation && (
-                <section className="space-y-4">
-                  <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
-                    <span className="flex-1 h-px bg-white/5" />Education<span className="flex-1 h-px bg-white/5" />
-                  </h4>
-                  <p className="text-xs md:text-sm font-medium text-white/50 leading-relaxed">
-                    {applicant.candidateEducation}
-                  </p>
-                </section>
-              )}
-
-              <div className="h-20 md:h-32" />
-            </div>
-          )}
-
-          {/* RESUME TAB */}
-          {detailTab === 'resume' && (
-            applicant.resumeUrl ? (
-              <div className="w-full h-full min-h-[600px] bg-white/[0.02]">
-                <iframe
-                  src={`${applicant.resumeUrl}#toolbar=0`}
-                  className="w-full h-full border-0"
-                  title="Candidate Resume"
-                  style={{ minHeight: '600px' }}
-                />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full gap-6 p-10 text-center">
-                <span className="material-symbols-outlined text-5xl text-white/10">description</span>
-                <div className="space-y-2">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-white/30">
-                    No resume uploaded
-                  </p>
-                  <p className="text-[8px] font-medium text-white/20 uppercase tracking-widest max-w-xs">
-                    Candidate hasn't synced a resume file yet. Their profile is visible in the Profile tab.
-                  </p>
-                </div>
-              </div>
-            )
-          )}
-        </div>
-        </div>
         </div>
 
         {/* ── ACTION BAR (OUTSIDE SCROLL - ALWAYS VISIBLE) ──────── */}
@@ -957,13 +1014,11 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                           <button
                             key={app.id}
                             onClick={() => { setSelectedApplicant(app); setDetailTab('profile'); }}
-                            className={`w-full text-left px-5 py-4 border-b border-white/5 transition-all flex items-center gap-4 group ${
-                              selectedApplicant?.id === app.id ? 'bg-white/[0.06] border-l-2 border-l-emerald-500' : 'hover:bg-white/[0.03]'
-                            }`}
+                            className={`w-full text-left px-5 py-4 border-b border-white/5 transition-all flex items-center gap-4 group ${selectedApplicant?.id === app.id ? 'bg-white/[0.06] border-l-2 border-l-emerald-500' : 'hover:bg-white/[0.03]'
+                              }`}
                           >
-                            <div className={`size-10 shrink-0 flex items-center justify-center text-[11px] font-black border ${
-                              isAbove ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'
-                            }`}>
+                            <div className={`size-10 shrink-0 flex items-center justify-center text-[11px] font-black border ${isAbove ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'
+                              }`}>
                               {(app.candidateName?.trim() || '?')[0].toUpperCase()}
                             </div>
                             <div className="flex-grow min-w-0 space-y-0.5">
@@ -1055,9 +1110,8 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                             onClick={() => { setSelectedApplicant(app); setDetailTab('profile'); }}
                             className="w-full text-left px-4 py-3 border-b border-white/5 transition-all flex items-center gap-3 active:bg-white/[0.03]"
                           >
-                            <div className={`size-9 shrink-0 flex items-center justify-center text-[10px] font-black border ${
-                              isAbove ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'
-                            }`}>
+                            <div className={`size-9 shrink-0 flex items-center justify-center text-[10px] font-black border ${isAbove ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'
+                              }`}>
                               {(app.candidateName?.trim() || '?')[0].toUpperCase()}
                             </div>
                             <div className="flex-grow min-w-0">
