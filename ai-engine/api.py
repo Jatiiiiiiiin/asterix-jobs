@@ -12,7 +12,6 @@ import re
 import os
 import hmac
 import hashlib
-import razorpay
 from functools import lru_cache
 from io import BytesIO
 
@@ -560,52 +559,10 @@ async def chat(req: ChatRequest):
 
 load_dotenv()
 
-razorpay_client = razorpay.Client(
-    auth=(
-        os.getenv("RAZORPAY_KEY_ID", "dummy_key"),
-        os.getenv("RAZORPAY_KEY_SECRET", "dummy_secret")
-    )
-)
 
 
 class CreateOrderRequest(BaseModel):
     amount: int
-
-
-@app.post("/payments/create-order")
-async def create_order(data: CreateOrderRequest):
-    try:
-        return razorpay_client.order.create({
-            "amount": data.amount * 100,
-            "currency": "INR",
-            "receipt": f"asterix_{os.urandom(4).hex()}"
-        })
-    except Exception as e:
-        print(f"[PAYMENT ERROR] {e}")
-        return {"error": str(e)}
-
-
-class VerifyPaymentRequest(BaseModel):
-    razorpay_order_id: str
-    razorpay_payment_id: str
-    razorpay_signature: str
-
-
-@app.post("/payments/verify")
-async def verify_payment(data: VerifyPaymentRequest):
-    try:
-        body = f"{data.razorpay_order_id}|{data.razorpay_payment_id}"
-        
-        expected = hmac.new(
-            os.getenv("RAZORPAY_KEY_SECRET", "dummy_secret").encode(),
-            body.encode(),
-            hashlib.sha256
-        ).hexdigest()
-        
-        return {"success": expected == data.razorpay_signature}
-    except Exception as e:
-        print(f"[PAYMENT ERROR] {e}")
-        return {"success": False, "error": str(e)}
 
 
 # ================= RUN =================
