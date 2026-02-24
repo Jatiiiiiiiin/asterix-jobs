@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+pdfplumber
+numpy
+sentence-transformers
+optimum[onnxruntime]
+onnxruntime
+python-dotenv
+razorpay
