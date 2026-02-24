@@ -1,6 +1,7 @@
 import React, { useEffect, useState, ReactNode } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
+import { Analytics } from "@vercel/analytics/react";
 
 import { auth } from "./firebase";
 import { authService, AuthUser } from "./authService";
@@ -239,6 +240,7 @@ const App: React.FC = () => {
       </Routes>
 
       <AIChatOverlay />
+      <Analytics />
     </div>
   );
 };
