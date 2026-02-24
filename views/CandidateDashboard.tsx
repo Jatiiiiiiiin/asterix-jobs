@@ -43,26 +43,26 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /* ── Persistent refs (survive re-renders without triggering them) ── */
-  const resumeFileRef   = useRef<File | null>(null);
-  const jobsRef         = useRef<Job[]>([]);
-  const autoPilotRef    = useRef<boolean>(false);
-  const vectorizingRef  = useRef<boolean>(false);
-  const lastSyncRef     = useRef<number | null>(null);
-  const mountedUidRef   = useRef<string | null>(null);
+  const resumeFileRef = useRef<File | null>(null);
+  const jobsRef = useRef<Job[]>([]);
+  const autoPilotRef = useRef<boolean>(false);
+  const vectorizingRef = useRef<boolean>(false);
+  const lastSyncRef = useRef<number | null>(null);
+  const mountedUidRef = useRef<string | null>(null);
 
   /* ── State ── */
-  const [userId, setUserId]                         = useState<string | null>(null);
-  const [isUploading, setIsUploading]               = useState(false);
-  const [isVectorizing, setIsVectorizing]           = useState(false);
-  const [isMenuOpen, setIsMenuOpen]                 = useState(false);
-  const [notifications, setNotifications]           = useState<Notification[]>([]);
-  const [resumeName, setResumeName]                 = useState('Resume.pdf');
-  const [isAutoPilotOn, setIsAutoPilotOn]           = useState(false);
-  const [dynamicJobs, setDynamicJobs]               = useState<Job[]>([]);
-  const [isLoadingJobs, setIsLoadingJobs]           = useState(true);
-  const [isResumeViewOpen, setIsResumeViewOpen]     = useState(false);
-  const [resumePreviewUrl, setResumePreviewUrl]     = useState<string | null>(null);
-  const [profileData, setProfileData]               = useState<ProfileData | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isVectorizing, setIsVectorizing] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [resumeName, setResumeName] = useState('Resume.pdf');
+  const [isAutoPilotOn, setIsAutoPilotOn] = useState(false);
+  const [dynamicJobs, setDynamicJobs] = useState<Job[]>([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true);
+  const [isResumeViewOpen, setIsResumeViewOpen] = useState(false);
+  const [resumePreviewUrl, setResumePreviewUrl] = useState<string | null>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
 
   /* ── Plan ── */
   const { canManualApply, plan, isLoading: isPlanLoading } = usePlan();
@@ -80,8 +80,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
       mountedUidRef.current = uid;
 
       const savedResumeName = localStorage.getItem(`asterix_resume_name_${uid}`);
-      const savedAuto       = localStorage.getItem(`asterix_autopilot_${uid}`);
-      const savedJobs       = localStorage.getItem(`asterix_jobs_${uid}`);
+      const savedAuto = localStorage.getItem(`asterix_autopilot_${uid}`);
+      const savedJobs = localStorage.getItem(`asterix_jobs_${uid}`);
 
       if (savedResumeName) setResumeName(savedResumeName);
 
@@ -99,11 +99,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
               : jobDataMap[liveJob.id];
             return {
               ...liveJob,
-              matchScore:      saved?.matchScore      ?? 0,
-              applied:         saved?.applied         ?? false,
-              analyzing:       false,
+              matchScore: saved?.matchScore ?? 0,
+              applied: saved?.applied ?? false,
+              analyzing: false,
               matchHighlights: saved?.matchHighlights ?? [],
-              breakdown:       saved?.breakdown       ?? null,
+              breakdown: saved?.breakdown ?? null,
             };
           });
           jobsRef.current = merged;
@@ -175,12 +175,12 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         .filter((s: any) => s.skill.length > 0);
 
       setProfileData({
-        name:        data.profile?.name,
-        title:       data.profile?.title,
-        manifesto:   data.profile?.manifesto,
-        skills:      candidateSkills,
+        name: data.profile?.name,
+        title: data.profile?.title,
+        manifesto: data.profile?.manifesto,
+        skills: candidateSkills,
         deployments: data.deployments ?? [],
-        education:   data.education,
+        education: data.education,
       });
 
       const profileText = [
@@ -217,7 +217,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
      SEMANTIC SYNC  — scores every job against resume
   ════════════════════════════════════════════════════════ */
   const performSemanticSync = async () => {
-    if (!resumeFileRef.current || vectorizingRef.current) return;
+    if (
+      !resumeFileRef.current ||
+      resumeFileRef.current.size === 0 || // 🔥 mobile fix
+      vectorizingRef.current
+    ) return;
 
     vectorizingRef.current = true;
     setIsVectorizing(true);
@@ -270,11 +274,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             const updated = [...prev];
             updated[index] = {
               ...updated[index],
-              matchScore:      score,
+              matchScore: score,
               matchHighlights: audit.matchHighlights,
-              breakdown:       audit.breakdown,
-              applied:         shouldAutoApply ? true : updated[index].applied,
-              analyzing:       false,
+              breakdown: audit.breakdown,
+              applied: shouldAutoApply ? true : updated[index].applied,
+              analyzing: false,
             };
             return updated;
           });
@@ -351,10 +355,17 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
     addNotification('Resume Loaded', `${file.name} ready for neural matching`, 'success');
 
-    setTimeout(async () => {
-      setIsUploading(false);
+    setIsUploading(false);
+
+    requestAnimationFrame(async () => {
       await performSemanticSync();
-    }, 600);
+    });
+    console.log(
+      '[UPLOAD]',
+      file.name,
+      file.size,
+      file.type
+    );
   };
 
   /* ════════════════════════════════════════════════════════
@@ -369,7 +380,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   };
 
   /* ── Sorted jobs by match score ── */
-  const sortedJobs    = [...dynamicJobs].sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+  const sortedJobs = [...dynamicJobs].sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
   const canViewResume = !!resumeFileRef.current;
 
   /* ════════════════════════════════════════════════════════
@@ -388,8 +399,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
               key={n.id}
               className={`pointer-events-auto border-l-4 p-5 md:p-6 shadow-[0_30px_60px_rgba(0,0,0,0.25)] animate-in slide-in-from-right-full duration-500 flex flex-col gap-3
                 ${n.type === 'success' ? 'bg-emerald-500 text-white border-white' :
-                  n.type === 'alert'   ? 'bg-black text-white border-emerald-500 dark:bg-white dark:text-black' :
-                                         'bg-white text-black border-black dark:bg-zinc-900 dark:text-white dark:border-white'}`}
+                  n.type === 'alert' ? 'bg-black text-white border-emerald-500 dark:bg-white dark:text-black' :
+                    'bg-white text-black border-black dark:bg-zinc-900 dark:text-white dark:border-white'}`}
             >
               <div className="flex justify-between items-start gap-4">
                 <div className="space-y-1">
@@ -509,10 +520,10 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
           {/* ── STATS ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 border border-black dark:border-white/20">
             {[
-              { label: 'Network Mandates',  val: isLoadingJobs ? '...' : dynamicJobs.length },
+              { label: 'Network Mandates', val: isLoadingJobs ? '...' : dynamicJobs.length },
               { label: 'Applied Protocols', val: dynamicJobs.filter(j => j.applied).length },
-              { label: 'Neural Accuracy',   val: '98.2%' },
-              { label: 'Agent Logic',       val: isAutoPilotOn ? 'READY' : 'IDLE' },
+              { label: 'Neural Accuracy', val: '98.2%' },
+              { label: 'Agent Logic', val: isAutoPilotOn ? 'READY' : 'IDLE' },
             ].map((s, i) => (
               <div
                 key={i}
