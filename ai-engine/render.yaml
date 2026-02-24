@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: asterix-backend
+    env: python
+    plan: free
+    # Point to ai-engine subfolder
+    root: ai-engine
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
+    
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: PORT
+        value: 8000
+      
+      # Razorpay (add your actual keys in Render dashboard)
+      - key: RAZORPAY_KEY_ID
+        fromService:
+          type: env
+          name: RAZORPAY_KEY_ID
+      
+      - key: RAZORPAY_KEY_SECRET
+        fromService:
+          type: env
+          name: RAZORPAY_KEY_SECRET
+      
+      # Frontend URL for CORS
+      - key: FRONTEND_URL
+        fromService:
+          type: env
+          name: FRONTEND_URL
