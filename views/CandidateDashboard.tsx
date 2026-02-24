@@ -44,7 +44,6 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
   /* ── Persistent refs (survive re-renders without triggering them) ── */
   const resumeFileRef = useRef<File | null>(null);
-  const jobsRef = useRef<Job[]>([]);
   const autoPilotRef = useRef<boolean>(false);
   const vectorizingRef = useRef<boolean>(false);
   const lastSyncRef = useRef<number | null>(null);
@@ -106,7 +105,6 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
               breakdown: saved?.breakdown ?? null,
             };
           });
-          jobsRef.current = merged;
           setDynamicJobs(merged);
           setIsLoadingJobs(false);
         },
@@ -126,7 +124,6 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   /* ── Persist jobs to localStorage ── */
   useEffect(() => {
     if (!userId) return;
-    jobsRef.current = dynamicJobs;
     localStorage.setItem(`asterix_jobs_${userId}`, JSON.stringify(dynamicJobs));
   }, [dynamicJobs, userId]);
 
@@ -234,8 +231,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
       : { profileText: '', candidateSkills: [] };
 
     try {
-      for (let index = 0; index < jobsRef.current.length; index++) {
-        const job = jobsRef.current[index];
+      for (let index = 0; index < dynamicJobs.length; index++) {
+        const job = dynamicJobs[index];
 
         setDynamicJobs(prev => {
           const updated = [...prev];
@@ -312,9 +309,10 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     await performSemanticSync();
   };
 
-  /* ── Auto-pilot interval: every 15 min while tab is visible ── */
+  /* ── Auto-pilot interval: */
   useEffect(() => {
     if (!isAutoPilotOn) return;
+
     const interval = setInterval(() => {
       if (
         document.visibilityState !== 'visible' ||
@@ -322,11 +320,23 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         vectorizingRef.current ||
         !resumeFileRef.current
       ) return;
+
       triggerAutoSync();
-    }, 15 * 60_000);
+    }, 30 * 10000); // every 10 minutes
+
     return () => clearInterval(interval);
   }, [isAutoPilotOn]);
 
+  useEffect(() => {
+    if (
+      resumeFileRef.current &&
+      resumeFileRef.current.size > 0 &&
+      dynamicJobs.length > 0 &&
+      !vectorizingRef.current
+    ) {
+      performSemanticSync();
+    }
+  }, [dynamicJobs.length]);
   /* ════════════════════════════════════════════════════════
      AUTO-PILOT TOGGLE
   ════════════════════════════════════════════════════════ */
@@ -353,13 +363,13 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     setResumeName(file.name);
     setIsUploading(true);
 
+    // 🔥 FORCE mobile browsers to load the PDF bytes
+    await file.arrayBuffer();
+
     addNotification('Resume Loaded', `${file.name} ready for neural matching`, 'success');
 
     setIsUploading(false);
 
-    requestAnimationFrame(async () => {
-      await performSemanticSync();
-    });
     console.log(
       '[UPLOAD]',
       file.name,
