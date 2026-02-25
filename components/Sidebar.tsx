@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
 import { authService, AuthUser } from '../authService';
+import '../App.css';
+
 
 interface SidebarProps {
   role: UserRole;

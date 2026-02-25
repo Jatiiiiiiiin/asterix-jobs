@@ -4,6 +4,7 @@ import { db } from "../firebase";
 import { authService } from "../authService";
 import { readSessionUid } from "../authService";
 import Sidebar from "../components/Sidebar";
+import '../App.css';
 
 /* ================= TYPES ================= */
 

@@ -10,6 +10,8 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { usePlan } from '../usePlan';
 import UpgradeModal from '../components/UpgradeModal';
+import '../App.css';
+
 
 /* ── Types ── */
 interface Notification {

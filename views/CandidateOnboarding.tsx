@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { readSessionUid } from '../authService';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import '../App.css';
+
 
 const STEPS = [
   { id: 'identity',   label: 'Identity Matrix' },
