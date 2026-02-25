@@ -49,6 +49,7 @@ export interface ApplicationPayload {
   employmentType?: string;
   lastActivity?: string;
   notes?: string;
+  resumeUrl?: string;
 }
 
 /* ================= HELPERS ================= */
@@ -212,7 +213,8 @@ export function buildApplicationPayload(
     recruiterId?: string;
   },
   matchScore: number,
-  aiApplied: boolean
+  aiApplied: boolean,
+  resumeUrl?: string
 ): ApplicationPayload {
   // Resolve company name regardless of shape
   const companyName = resolveCompanyName(job.company as any);
@@ -255,6 +257,7 @@ export function buildApplicationPayload(
       day: "numeric",
       year: "numeric",
     })}`,
+    resumeUrl: resumeUrl,
   };
 }
 

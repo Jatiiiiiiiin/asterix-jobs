@@ -182,18 +182,31 @@ export async function calculateSemanticFidelityBackend(
 
   // Diagnostic: log the exact payload sent and score received for each job.
 
-  const res = await fetch(`${API_BASE}/match`, {
-    method: "POST",
-    body: formData,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-  const text = await res.text();
   try {
-    const result = JSON.parse(text);
-    
-    return result;
-  } catch {
-    throw new Error("Backend returned non-JSON response");
+    const res = await fetch(`${API_BASE}/match`, {
+      method: "POST",
+      body: formData,
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    const text = await res.text();
+    try {
+      const result = JSON.parse(text);
+      return result;
+    } catch {
+      throw new Error("Backend returned non-JSON response");
+    }
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error("Neural sync timed out - check backend connectivity");
+    }
+    throw err;
   }
 }
 

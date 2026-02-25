@@ -65,6 +65,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   const [isResumeViewOpen, setIsResumeViewOpen] = useState(false);
   const [resumePreviewUrl, setResumePreviewUrl] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
 
   /* ── Plan ── */
   const { canManualApply, plan, isLoading: isPlanLoading } = usePlan();
@@ -80,6 +81,14 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
       setUserId(uid);
       mountedUidRef.current = uid;
+
+      // Fetch profile in background to avoid blocking job load
+      getDoc(doc(db, 'profiles', uid)).then(snap => {
+        if (snap.exists()) {
+          const p = snap.data();
+          if (p.resumeUrl) setResumeUrl(p.resumeUrl);
+        }
+      }).catch(err => console.warn('Profile fetch failed:', err));
 
       const savedResumeName = localStorage.getItem(`asterix_resume_name_${uid}`);
       const savedAuto = localStorage.getItem(`asterix_autopilot_${uid}`);
@@ -201,12 +210,24 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   };
 
   /* ════════════════════════════════════════════════════════
-     RESUME VIEWER  (in-memory blob URL only)
+     RESUME VIEWER  (Hybrid: Local Ref + Base64 Vault)
   ════════════════════════════════════════════════════════ */
   const openResumeViewer = () => {
-    if (!resumeFileRef.current) return;
-    setResumePreviewUrl(URL.createObjectURL(resumeFileRef.current));
-    setIsResumeViewOpen(true);
+    // Priority 1: Current session file (fast/blob)
+    if (resumeFileRef.current) {
+      setResumePreviewUrl(URL.createObjectURL(resumeFileRef.current));
+      setIsResumeViewOpen(true);
+      return;
+    }
+
+    // Priority 2: Persistent Vault (Firestore Base64)
+    if (resumeUrl && resumeUrl.startsWith('data:')) {
+      setResumePreviewUrl(resumeUrl);
+      setIsResumeViewOpen(true);
+      return;
+    }
+
+    addNotification('Resume Missing', 'Please upload your resume to sync your identity.', 'alert');
   };
 
   const closeResumeViewer = () => {
@@ -237,7 +258,9 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
         setDynamicJobs(prev => {
           const updated = [...prev];
-          updated[index] = { ...updated[index], analyzing: true };
+          if (!updated[index].analyzing) {
+            updated[index] = { ...updated[index], analyzing: true };
+          }
           return updated;
         });
 
@@ -261,7 +284,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
               const alreadyApplied = await hasApplied(uid, job.id);
 
               if (!alreadyApplied) {
-                const payload = buildApplicationPayload(uid, job, score, true);
+                const payload = buildApplicationPayload(uid, job, score, true, resumeUrl || undefined);
                 await saveApplication(payload);
                 autoAppliedCount++;
                 addNotification('Auto-Applied', `${job.title} (${score}%)`, 'success');
@@ -294,9 +317,15 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
           });
         }
       }
+    } catch (err) {
+      console.error('[Asterix] Global sync failure:', err);
     } finally {
       vectorizingRef.current = false;
       setIsVectorizing(false);
+      // Wait a moment before clearing analyzing states to prevent flicker
+      setTimeout(() => {
+        setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: false })));
+      }, 500);
       addNotification(
         'Neural Sync Complete',
         autoAppliedCount ? `${autoAppliedCount} mandates executed` : 'No new compatible mandates',
@@ -345,22 +374,66 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   };
 
   /* ════════════════════════════════════════════════════════
-     FILE UPLOAD  — in-memory only, no Firebase Storage
+     FILE UPLOAD  — Base64 Identity Vault (ISP Proof)
   ════════════════════════════════════════════════════════ */
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Reject files > 1MB to avoid Firestore document limits
+    if (file.size > 1024 * 1024) {
+      addNotification('File Too Large', 'Resume must be under 1MB for the secure vault.', 'alert');
+      return;
+    }
+
     resumeFileRef.current = file;
     setResumeName(file.name);
     setIsUploading(true);
 
-    addNotification('Resume Loaded', `${file.name} ready for neural matching`, 'success');
+    // Immediate visual feedback: mark all cards as analyzing
+    setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: true })));
 
-    setTimeout(async () => {
-      setIsUploading(false);
-      await performSemanticSync();
-    }, 600);
+    const uid = readSessionUid();
+    addNotification('Vault Sync', `Archiving ${file.name} to secure vault...`, 'info');
+
+    // Helper: File to Base64
+    const toBase64 = (f: File): Promise<string> => new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(f);
+      reader.onload = () => res(reader.result as string);
+      reader.onerror = e => rej(e);
+    });
+
+    // Proceed with Base64 encoding and Firestore update
+    const syncToVault = async () => {
+      try {
+        if (!uid) {
+          addNotification('Ready', `${file.name} synced for this session`, 'success');
+          return;
+        }
+
+        const base64 = await toBase64(file);
+
+        await setDoc(doc(db, 'profiles', uid), {
+          resumeUrl: base64, // Keep key 'resumeUrl' for compatibility
+          resumeName: file.name
+        }, { merge: true });
+
+        setResumeUrl(base64);
+        addNotification('Identity Vaulted', 'Resume securely stored in your profile', 'success');
+      } catch (err: any) {
+        console.error('[Vault Sync] Failed:', err);
+        addNotification('Vault Error', 'Internal storage error. Matches will still work.', 'alert');
+      } finally {
+        setIsUploading(false);
+      }
+    };
+
+    // Trigger storage in background
+    syncToVault();
+
+    // Start matching immediately using the local file memory (Zero Lag)
+    performSemanticSync();
   };
 
   /* ════════════════════════════════════════════════════════
@@ -476,9 +549,14 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex-grow md:flex-grow-0 bg-black dark:bg-white text-white dark:text-black px-6 md:px-10 py-3 md:py-4 text-[10px] font-black uppercase tracking-widest hover:invert transition-all"
+              disabled={isUploading || isVectorizing}
+              className={`flex-grow md:flex-grow-0 bg-black dark:bg-white text-white dark:text-black px-6 md:px-10 py-3 md:py-4 text-[10px] font-black uppercase tracking-widest hover:invert transition-all flex items-center justify-center gap-3
+                ${(isUploading || isVectorizing) ? 'opacity-80 cursor-wait' : ''}`}
             >
-              {isUploading ? 'SCANNING...' : 'Sync Identity'}
+              {(isUploading || isVectorizing) && (
+                <span className="material-symbols-outlined text-sm animate-circular-spin">progress_activity</span>
+              )}
+              {isUploading ? 'ARCHIVING...' : isVectorizing ? 'SCANNING...' : 'Sync Identity'}
             </button>
 
             {canViewResume && (
@@ -559,8 +637,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                     >
                       {/* Analyzing overlay */}
                       {job.analyzing && (
-                        <div className="absolute inset-0 z-20 bg-black/10 dark:bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                          <span className="material-symbols-outlined animate-spin text-4xl opacity-60">neurology</span>
+                        <div className="absolute inset-0 z-20 bg-black/40 dark:bg-white/40 backdrop-blur-sm flex items-center justify-center">
+                          <div className="flex flex-col items-center gap-4">
+                            <span className="material-symbols-outlined animate-circular-spin text-5xl text-white dark:text-black">neurology</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white dark:text-black animate-pulse">Analyzing Nodes...</span>
+                          </div>
                         </div>
                       )}
 
@@ -754,6 +835,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
       <style>{`
         @keyframes spin-slow { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
         .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+        @keyframes circular-spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+        .animate-circular-spin { animation: circular-spin 1.5s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(-100%) } 100% { transform: translateX(300%) } }
         .animate-marquee { animation: marquee 3s linear infinite; }
       `}</style>

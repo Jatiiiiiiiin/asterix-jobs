@@ -191,6 +191,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   : 0;
 
             try {
+              if (!app.candidateUid) throw new Error('Missing candidateUid');
               const pSnap = await getDoc(doc(db, 'profiles', app.candidateUid));
 
               if (!pSnap.exists()) {
@@ -975,9 +976,12 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         key={job.id}
                         className="border border-white/10 bg-gradient-to-br from-white/[0.02] to-white/[0.01] hover:border-white/20 hover:from-white/[0.04] hover:to-white/[0.02] transition-all group relative overflow-hidden"
                       >
-                        <button
+                        <div
+                          role="button"
+                          tabIndex={0}
                           onClick={() => openJob(job)}
-                          className="w-full text-left p-4 md:p-6 space-y-4"
+                          onKeyDown={(e) => e.key === 'Enter' && openJob(job)}
+                          className="w-full text-left p-4 md:p-6 space-y-4 cursor-pointer"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex flex-wrap items-center gap-2">
@@ -1087,7 +1091,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                               </span>
                             </div>
                           )}
-                        </button>
+                        </div>
 
                         <div className="hidden md:block absolute top-4 right-4">
                           {isConfirming ? (
@@ -1166,315 +1170,320 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                 </div>
               )}
             </div>
-          )}
+          )
+          }
 
           {/* VIEW: APPLICANTS */}
-          {view === 'applicants' && selectedJob && (
-            <>
-              {/* DESKTOP */}
-              <div className="hidden lg:flex flex-1 overflow-hidden">
-                <div
-                  className={`flex flex-col border-r border-white/5 shrink-0 transition-all duration-300 ${selectedApplicant ? 'w-[340px] lg:w-[380px]' : 'w-full max-w-2xl'
-                    }`}
-                >
-                  <div className="shrink-0 px-6 py-5 border-b border-white/5 space-y-4 bg-[#080808]">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 space-y-1">
-                        <h2 className="text-base font-black uppercase tracking-tight leading-tight truncate">
-                          {selectedJob.title}
-                        </h2>
-                        <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30">
-                          {resolveLocation(selectedJob.location)}
-                        </p>
+          {
+            view === 'applicants' && selectedJob && (
+              <>
+                {/* DESKTOP */}
+                <div className="hidden lg:flex flex-1 overflow-hidden">
+                  <div
+                    className={`flex flex-col border-r border-white/5 shrink-0 transition-all duration-300 ${selectedApplicant ? 'w-[340px] lg:w-[380px]' : 'w-full max-w-2xl'
+                      }`}
+                  >
+                    <div className="shrink-0 px-6 py-5 border-b border-white/5 space-y-4 bg-[#080808]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 space-y-1">
+                          <h2 className="text-base font-black uppercase tracking-tight leading-tight truncate">
+                            {selectedJob.title}
+                          </h2>
+                          <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30">
+                            {resolveLocation(selectedJob.location)}
+                          </p>
+                        </div>
+                        <StatusPill status={selectedJob.status} />
                       </div>
-                      <StatusPill status={selectedJob.status} />
-                    </div>
 
-                    <div className="grid grid-cols-3 border border-white/5">
-                      <div className="px-4 py-3 border-r border-white/5">
-                        <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Total</p>
-                        <p className="text-xl font-black tabular-nums">{applications.length}</p>
+                      <div className="grid grid-cols-3 border border-white/5">
+                        <div className="px-4 py-3 border-r border-white/5">
+                          <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Total</p>
+                          <p className="text-xl font-black tabular-nums">{applications.length}</p>
+                        </div>
+                        <div className="px-4 py-3 border-r border-white/5">
+                          <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Avg Score</p>
+                          <p className="text-xl font-black tabular-nums text-emerald-400">
+                            {avgScore > 0 ? `${avgScore}%` : '—'}
+                          </p>
+                        </div>
+                        <div className="px-4 py-3">
+                          <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Threshold</p>
+                          {selectedJob.matchThreshold != null ? (
+                            <p className="text-xl font-black tabular-nums text-emerald-400">{selectedJob.matchThreshold}%</p>
+                          ) : (
+                            <p className="text-xl font-black tabular-nums text-white/20">—</p>
+                          )}
+                        </div>
                       </div>
-                      <div className="px-4 py-3 border-r border-white/5">
-                        <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Avg Score</p>
-                        <p className="text-xl font-black tabular-nums text-emerald-400">
-                          {avgScore > 0 ? `${avgScore}%` : '—'}
-                        </p>
-                      </div>
-                      <div className="px-4 py-3">
-                        <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Threshold</p>
-                        {selectedJob.matchThreshold != null ? (
-                          <p className="text-xl font-black tabular-nums text-emerald-400">{selectedJob.matchThreshold}%</p>
-                        ) : (
-                          <p className="text-xl font-black tabular-nums text-white/20">—</p>
-                        )}
-                      </div>
-                    </div>
 
-                    {aboveThreshold != null && selectedJob.matchThreshold != null && (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/5 border border-emerald-500/20">
-                        <span className="material-symbols-outlined text-emerald-400 text-sm">verified</span>
-                        <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">
-                          {aboveThreshold} of {applications.length} above {selectedJob.matchThreshold}% threshold
+                      {aboveThreshold != null && selectedJob.matchThreshold != null && (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/5 border border-emerald-500/20">
+                          <span className="material-symbols-outlined text-emerald-400 text-sm">verified</span>
+                          <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">
+                            {aboveThreshold} of {applications.length} above {selectedJob.matchThreshold}% threshold
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="relative">
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-base">
+                          search
                         </span>
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search by name, title, skill…"
+                          className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-4 py-2.5 text-[10px] font-medium uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors"
+                        />
                       </div>
-                    )}
-
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-base">
-                        search
-                      </span>
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search by name, title, skill…"
-                        className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-4 py-2.5 text-[10px] font-medium uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors"
-                      />
                     </div>
-                  </div>
 
-                  <div className="flex-1 overflow-y-auto">
-                    {loadingApplicants ? (
-                      <div className="flex items-center gap-3 text-white/30 p-8">
-                        <span className="material-symbols-outlined animate-spin text-sm">autorenew</span>
-                        <span className="text-[9px] font-black uppercase tracking-widest">Loading applicants…</span>
-                      </div>
-                    ) : filteredApplicants.length === 0 ? (
-                      <div className="p-10 text-center space-y-3">
-                        <span className="material-symbols-outlined text-4xl text-white/10">person_off</span>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-white/30">
-                          {applications.length === 0 ? 'No applications yet' : 'No matches'}
-                        </p>
-                      </div>
-                    ) : (
-                      filteredApplicants.map((app) => {
-                        const isAbove =
-                          selectedJob.matchThreshold != null && app.matchScore >= selectedJob.matchThreshold;
-                        const scoreColor =
-                          app.matchScore >= 80
-                            ? 'text-emerald-400'
-                            : app.matchScore >= 60
-                              ? 'text-amber-400'
-                              : app.matchScore > 0
-                                ? 'text-red-400'
-                                : 'text-white/20';
+                    <div className="flex-1 overflow-y-auto">
+                      {loadingApplicants ? (
+                        <div className="flex items-center gap-3 text-white/30 p-8">
+                          <span className="material-symbols-outlined animate-spin text-sm">autorenew</span>
+                          <span className="text-[9px] font-black uppercase tracking-widest">Loading applicants…</span>
+                        </div>
+                      ) : filteredApplicants.length === 0 ? (
+                        <div className="p-10 text-center space-y-3">
+                          <span className="material-symbols-outlined text-4xl text-white/10">person_off</span>
+                          <p className="text-[9px] font-black uppercase tracking-widest text-white/30">
+                            {applications.length === 0 ? 'No applications yet' : 'No matches'}
+                          </p>
+                        </div>
+                      ) : (
+                        filteredApplicants.map((app) => {
+                          const isAbove =
+                            selectedJob.matchThreshold != null && app.matchScore >= selectedJob.matchThreshold;
+                          const scoreColor =
+                            app.matchScore >= 80
+                              ? 'text-emerald-400'
+                              : app.matchScore >= 60
+                                ? 'text-amber-400'
+                                : app.matchScore > 0
+                                  ? 'text-red-400'
+                                  : 'text-white/20';
 
-                        return (
-                          <button
-                            key={app.id}
-                            onClick={() => {
-                              setSelectedApplicant(app);
-                              setDetailTab('profile');
-                            }}
-                            className={`w-full text-left px-5 py-4 border-b border-white/5 transition-all flex items-center gap-4 group relative ${selectedApplicant?.id === app.id
-                              ? 'bg-white/[0.08] border-l-2 border-l-emerald-500'
-                              : 'hover:bg-white/[0.02]'
-                              }`}
-                          >
-                            <div
-                              className={`size-12 shrink-0 flex items-center justify-center text-sm font-black border-2 transition-all ${isAbove
-                                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
-                                : 'bg-white/5 border-white/10 text-white/40'
+                          return (
+                            <button
+                              key={app.id}
+                              onClick={() => {
+                                setSelectedApplicant(app);
+                                setDetailTab('profile');
+                              }}
+                              className={`w-full text-left px-5 py-4 border-b border-white/5 transition-all flex items-center gap-4 group relative ${selectedApplicant?.id === app.id
+                                ? 'bg-white/[0.08] border-l-2 border-l-emerald-500'
+                                : 'hover:bg-white/[0.02]'
                                 }`}
                             >
-                              {(app.candidateName?.trim() || '?')[0].toUpperCase()}
-                            </div>
+                              <div
+                                className={`size-12 shrink-0 flex items-center justify-center text-sm font-black border-2 transition-all ${isAbove
+                                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                                  : 'bg-white/5 border-white/10 text-white/40'
+                                  }`}
+                              >
+                                {(app.candidateName?.trim() || '?')[0].toUpperCase()}
+                              </div>
 
-                            <div className="flex-grow min-w-0 space-y-1.5">
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm font-black uppercase tracking-tight truncate">
-                                  {app.candidateName ?? 'Unknown Candidate'}
+                              <div className="flex-grow min-w-0 space-y-1.5">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-black uppercase tracking-tight truncate">
+                                    {app.candidateName ?? 'Unknown Candidate'}
+                                  </p>
+                                  {app.autoApplied && (
+                                    <span className="flex items-center gap-1 px-2 py-0.5 text-[6px] font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/30 bg-emerald-500/5 shrink-0">
+                                      <span className="material-symbols-outlined text-[10px]">auto_awesome</span>
+                                      Auto
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[9px] font-medium uppercase tracking-widest text-white/40 truncate">
+                                  {app.candidateTitle || 'Job Seeker'}
                                 </p>
-                                {app.autoApplied && (
-                                  <span className="flex items-center gap-1 px-2 py-0.5 text-[6px] font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/30 bg-emerald-500/5 shrink-0">
-                                    <span className="material-symbols-outlined text-[10px]">auto_awesome</span>
-                                    Auto
+                                {selectedJob.matchThreshold != null && (
+                                  <p className="text-[7px] font-black uppercase tracking-widest text-white/25">
+                                    {isAbove ? '✓ Above threshold' : '↓ Below threshold'}
+                                  </p>
+                                )}
+                              </div>
+
+                              <div className="shrink-0 text-right flex flex-col items-end gap-1">
+                                <div className={`text-3xl font-black tabular-nums leading-none ${scoreColor}`}>
+                                  {app.matchScore > 0 ? `${app.matchScore}%` : '—'}
+                                </div>
+                                <p className="text-[6px] font-black uppercase tracking-[0.3em] text-white/30">Match</p>
+                                {selectedJob.matchThreshold != null && app.matchScore > 0 && (
+                                  <span
+                                    className={`text-[5px] font-black uppercase tracking-widest px-1.5 py-0.5 border ${isAbove
+                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                      : 'bg-red-500/10 border-red-500/20 text-red-400'
+                                      }`}
+                                  >
+                                    {isAbove ? `≥${selectedJob.matchThreshold}%` : `<${selectedJob.matchThreshold}%`}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[9px] font-medium uppercase tracking-widest text-white/40 truncate">
-                                {app.candidateTitle || 'Job Seeker'}
-                              </p>
-                              {selectedJob.matchThreshold != null && (
-                                <p className="text-[7px] font-black uppercase tracking-widest text-white/25">
-                                  {isAbove ? '✓ Above threshold' : '↓ Below threshold'}
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="shrink-0 text-right flex flex-col items-end gap-1">
-                              <div className={`text-3xl font-black tabular-nums leading-none ${scoreColor}`}>
-                                {app.matchScore > 0 ? `${app.matchScore}%` : '—'}
-                              </div>
-                              <p className="text-[6px] font-black uppercase tracking-[0.3em] text-white/30">Match</p>
-                              {selectedJob.matchThreshold != null && app.matchScore > 0 && (
-                                <span
-                                  className={`text-[5px] font-black uppercase tracking-widest px-1.5 py-0.5 border ${isAbove
-                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                    : 'bg-red-500/10 border-red-500/20 text-red-400'
-                                    }`}
-                                >
-                                  {isAbove ? `≥${selectedJob.matchThreshold}%` : `<${selectedJob.matchThreshold}%`}
-                                </span>
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })
-                    )}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
+
+                  {selectedApplicant ? (
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                      <CandidateDetailContent applicant={selectedApplicant} job={selectedJob} />
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center p-10">
+                      <div className="size-20 border border-white/5 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-4xl text-white/10">person_search</span>
+                      </div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/20">
+                        Select a candidate to review
+                      </p>
+                    </div>
+                  )}
                 </div>
 
-                {selectedApplicant ? (
+                {/* MOBILE */}
+                <div className="lg:hidden flex-1 flex flex-col overflow-hidden">
                   <div className="flex-1 flex flex-col overflow-hidden">
-                    <CandidateDetailContent applicant={selectedApplicant} job={selectedJob} />
-                  </div>
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center p-10">
-                    <div className="size-20 border border-white/5 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-4xl text-white/10">person_search</span>
-                    </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20">
-                      Select a candidate to review
-                    </p>
-                  </div>
-                )}
-              </div>
+                    <div className="shrink-0 px-4 py-4 border-b border-white/5 space-y-3 bg-[#080808]">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 space-y-1">
+                          <h2 className="text-sm font-black uppercase tracking-tight leading-tight truncate">
+                            {selectedJob.title}
+                          </h2>
+                          <p className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30">
+                            {resolveLocation(selectedJob.location)}
+                          </p>
+                        </div>
+                        <StatusPill status={selectedJob.status} />
+                      </div>
 
-              {/* MOBILE */}
-              <div className="lg:hidden flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <div className="shrink-0 px-4 py-4 border-b border-white/5 space-y-3 bg-[#080808]">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 space-y-1">
-                        <h2 className="text-sm font-black uppercase tracking-tight leading-tight truncate">
-                          {selectedJob.title}
-                        </h2>
-                        <p className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30">
-                          {resolveLocation(selectedJob.location)}
-                        </p>
+                      <div className="grid grid-cols-3 border border-white/5 text-[10px]">
+                        <div className="px-3 py-2 border-r border-white/5">
+                          <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Total</p>
+                          <p className="text-lg font-black">{applications.length}</p>
+                        </div>
+                        <div className="px-3 py-2 border-r border-white/5">
+                          <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Avg Score</p>
+                          <p className="text-lg font-black text-emerald-400">
+                            {avgScore > 0 ? `${avgScore}%` : '—'}
+                          </p>
+                        </div>
+                        <div className="px-3 py-2">
+                          <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Threshold</p>
+                          <p className="text-lg font-black text-emerald-400">
+                            {selectedJob.matchThreshold != null ? `${selectedJob.matchThreshold}%` : '—'}
+                          </p>
+                        </div>
                       </div>
-                      <StatusPill status={selectedJob.status} />
-                    </div>
 
-                    <div className="grid grid-cols-3 border border-white/5 text-[10px]">
-                      <div className="px-3 py-2 border-r border-white/5">
-                        <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Total</p>
-                        <p className="text-lg font-black">{applications.length}</p>
-                      </div>
-                      <div className="px-3 py-2 border-r border-white/5">
-                        <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Avg Score</p>
-                        <p className="text-lg font-black text-emerald-400">
-                          {avgScore > 0 ? `${avgScore}%` : '—'}
-                        </p>
-                      </div>
-                      <div className="px-3 py-2">
-                        <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Threshold</p>
-                        <p className="text-lg font-black text-emerald-400">
-                          {selectedJob.matchThreshold != null ? `${selectedJob.matchThreshold}%` : '—'}
-                        </p>
+                      <div className="relative">
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-base">
+                          search
+                        </span>
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search…"
+                          className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-4 py-2 text-[9px] font-medium uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors"
+                        />
                       </div>
                     </div>
 
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-base">
-                        search
-                      </span>
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search…"
-                        className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-4 py-2 text-[9px] font-medium uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors"
-                      />
-                    </div>
-                  </div>
+                    <div className="flex-1 overflow-y-auto">
+                      {loadingApplicants ? (
+                        <div className="flex items-center gap-3 text-white/30 p-6">
+                          <span className="material-symbols-outlined animate-spin text-sm">autorenew</span>
+                          <span className="text-[8px] font-black uppercase tracking-widest">Loading…</span>
+                        </div>
+                      ) : filteredApplicants.length === 0 ? (
+                        <div className="p-8 text-center space-y-2">
+                          <span className="material-symbols-outlined text-3xl text-white/10">person_off</span>
+                          <p className="text-[8px] font-black uppercase tracking-widest text-white/30">
+                            {applications.length === 0 ? 'No applications' : 'No matches'}
+                          </p>
+                        </div>
+                      ) : (
+                        filteredApplicants.map((app) => {
+                          const isAbove =
+                            selectedJob.matchThreshold != null && app.matchScore >= selectedJob.matchThreshold;
+                          const scoreColor =
+                            app.matchScore >= 80
+                              ? 'text-emerald-400'
+                              : app.matchScore >= 60
+                                ? 'text-amber-400'
+                                : app.matchScore > 0
+                                  ? 'text-red-400'
+                                  : 'text-white/20';
 
-                  <div className="flex-1 overflow-y-auto">
-                    {loadingApplicants ? (
-                      <div className="flex items-center gap-3 text-white/30 p-6">
-                        <span className="material-symbols-outlined animate-spin text-sm">autorenew</span>
-                        <span className="text-[8px] font-black uppercase tracking-widest">Loading…</span>
-                      </div>
-                    ) : filteredApplicants.length === 0 ? (
-                      <div className="p-8 text-center space-y-2">
-                        <span className="material-symbols-outlined text-3xl text-white/10">person_off</span>
-                        <p className="text-[8px] font-black uppercase tracking-widest text-white/30">
-                          {applications.length === 0 ? 'No applications' : 'No matches'}
-                        </p>
-                      </div>
-                    ) : (
-                      filteredApplicants.map((app) => {
-                        const isAbove =
-                          selectedJob.matchThreshold != null && app.matchScore >= selectedJob.matchThreshold;
-                        const scoreColor =
-                          app.matchScore >= 80
-                            ? 'text-emerald-400'
-                            : app.matchScore >= 60
-                              ? 'text-amber-400'
-                              : app.matchScore > 0
-                                ? 'text-red-400'
-                                : 'text-white/20';
-
-                        return (
-                          <button
-                            key={app.id}
-                            onClick={() => {
-                              setSelectedApplicant(app);
-                              setDetailTab('profile');
-                            }}
-                            className="w-full text-left px-4 py-3 border-b border-white/5 transition-all flex items-center gap-3 active:bg-white/[0.03]"
-                          >
-                            <div
-                              className={`size-9 shrink-0 flex items-center justify-center text-[10px] font-black border ${isAbove
-                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                : 'bg-white/5 border-white/10 text-white/40'
-                                }`}
+                          return (
+                            <button
+                              key={app.id}
+                              onClick={() => {
+                                setSelectedApplicant(app);
+                                setDetailTab('profile');
+                              }}
+                              className="w-full text-left px-4 py-3 border-b border-white/5 transition-all flex items-center gap-3 active:bg-white/[0.03]"
                             >
-                              {(app.candidateName?.trim() || '?')[0].toUpperCase()}
-                            </div>
-                            <div className="flex-grow min-w-0">
-                              <p className="text-[10px] font-black uppercase tracking-tight truncate">
-                                {app.candidateName ?? 'Unknown'}
-                              </p>
-                              <p className="text-[7px] font-medium uppercase tracking-widest text-white/30 truncate">
-                                {app.candidateTitle ?? '—'}
-                              </p>
-                            </div>
-                            <div className="text-right shrink-0">
-                              <p className={`text-xl font-black ${scoreColor}`}>
-                                {app.matchScore > 0 ? `${app.matchScore}%` : '—'}
-                              </p>
-                              <p className="text-[5px] font-black uppercase text-white/20">Match</p>
-                            </div>
-                          </button>
-                        );
-                      })
-                    )}
+                              <div
+                                className={`size-9 shrink-0 flex items-center justify-center text-[10px] font-black border ${isAbove
+                                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                  : 'bg-white/5 border-white/10 text-white/40'
+                                  }`}
+                              >
+                                {(app.candidateName?.trim() || '?')[0].toUpperCase()}
+                              </div>
+                              <div className="flex-grow min-w-0">
+                                <p className="text-[10px] font-black uppercase tracking-tight truncate">
+                                  {app.candidateName ?? 'Unknown'}
+                                </p>
+                                <p className="text-[7px] font-medium uppercase tracking-widest text-white/30 truncate">
+                                  {app.candidateTitle ?? '—'}
+                                </p>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <p className={`text-xl font-black ${scoreColor}`}>
+                                  {app.matchScore > 0 ? `${app.matchScore}%` : '—'}
+                                </p>
+                                <p className="text-[5px] font-black uppercase text-white/20">Match</p>
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
-        </div>
-      </main>
+              </>
+            )
+          }
+        </div >
+      </main >
 
       {/* MOBILE MODAL */}
-      {selectedApplicant && isMobileView && view === 'applicants' && selectedJob && (
-        <div className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm lg:hidden flex flex-col">
-          <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/5 bg-[#080808]/95 backdrop-blur-xl">
-            <h3 className="text-sm font-black uppercase tracking-tight">Candidate Details</h3>
-            <button onClick={closeApplicantModal} className="p-2 hover:bg-white/10 transition-colors -mr-2">
-              <span className="material-symbols-outlined text-xl">close</span>
-            </button>
+      {
+        selectedApplicant && isMobileView && view === 'applicants' && selectedJob && (
+          <div className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm lg:hidden flex flex-col">
+            <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/5 bg-[#080808]/95 backdrop-blur-xl">
+              <h3 className="text-sm font-black uppercase tracking-tight">Candidate Details</h3>
+              <button onClick={closeApplicantModal} className="p-2 hover:bg-white/10 transition-colors -mr-2">
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+            </div>
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <CandidateDetailContent applicant={selectedApplicant} job={selectedJob} />
+            </div>
           </div>
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <CandidateDetailContent applicant={selectedApplicant} job={selectedJob} />
-          </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 };
 

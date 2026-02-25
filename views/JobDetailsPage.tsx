@@ -24,10 +24,31 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
   const location = useLocation();
   const passedJob = location.state?.job;
   const [job, setJob] = useState<any>(passedJob || null);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
 
   // ── Plan gating ─────────────────────────────────────────────
   const { canManualApply, isLoading: isPlanLoading } = usePlan();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  useEffect(() => {
+    const fetchResumeUrl = async () => {
+      try {
+        const { authService } = await import('../authService');
+        const user = await authService.getCurrentUser();
+        if (!user) return;
+
+        const { doc, getDoc } = await import('firebase/firestore');
+        const { db } = await import('../firebase');
+        const snap = await getDoc(doc(db, 'profiles', user.uid));
+        if (snap.exists() && snap.data().resumeUrl) {
+          setResumeUrl(snap.data().resumeUrl);
+        }
+      } catch (err) {
+        console.error('Failed to fetch resumeUrl', err);
+      }
+    };
+    fetchResumeUrl();
+  }, []);
 
   useEffect(() => {
     if (!job) {
@@ -74,7 +95,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
           const jobs = JSON.parse(saved);
           const match = jobs.find((j: any) => String(j.id) === String(job.id));
           if (match?.applied) setAppliedLocally(true);
-        } catch (_) {}
+        } catch (_) { }
       }
     };
     checkApplied();
@@ -135,7 +156,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
       const already = await checkAlreadyApplied(user.uid, jobIdStr);
 
       if (!already) {
-        const payload = buildApplicationPayload(user.uid, job, job.matchScore ?? 0, false);
+        const payload = buildApplicationPayload(user.uid, job, job.matchScore ?? 0, false, resumeUrl || undefined);
         await saveApplication(payload);
       }
 
@@ -148,7 +169,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
           );
           localStorage.setItem(`asterix_jobs_${user.uid}`, JSON.stringify(updated));
         }
-      } catch (_) {}
+      } catch (_) { }
 
       setAppliedLocally(true);
 

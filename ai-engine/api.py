@@ -555,16 +555,6 @@ async def chat(req: ChatRequest):
     return {"answer": answer}
 
 
-# ================= PAYMENTS =================
-
-load_dotenv()
-
-
-
-class CreateOrderRequest(BaseModel):
-    amount: int
-
-
 # ================= RUN =================
 
 if __name__ == "__main__":
