@@ -143,18 +143,10 @@ export async function saveApplication(
     candidateUid: uid,
   } as Record<string, unknown>);
 
-  console.log(
-    `[saveApplication] Writing doc ${docId}`,
-    "\n  company:", clean.company,
-    "\n  role:", clean.role,
-    "\n  userId:", clean.userId,
-    "\n  aiApplied:", clean.aiApplied
-  );
 
   await runTransaction(db, async (tx) => {
     const existing = await tx.get(appRef);
     if (existing.exists()) {
-      console.log(`[saveApplication] Skipping — doc ${docId} already exists.`);
       return;
     }
 
@@ -167,7 +159,6 @@ export async function saveApplication(
     tx.set(countRef, { count: increment(1) }, { merge: true });
   });
 
-  console.log(`[saveApplication] ✅ Saved ${docId}`);
   return docId;
 }
 

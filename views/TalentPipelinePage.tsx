@@ -148,34 +148,65 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
   }
 
   /* ── Move candidate to new stage ───────────── */
-  const moveToStage = useCallback(async (appId: string, stage: PipelineStage) => {
-    setMovingId(appId);
-    try {
-      // Map pipeline stage to the fields ApplicationsPage reads (stage + status)
-      const stageFieldMap: Record<PipelineStage, { stage: string; status: string }> = {
-        shortlisted: { stage: 'reviewing', status: 'shortlisted' },
-        interview: { stage: 'interview', status: 'interview' },
-        offer: { stage: 'offer', status: 'offer' },
-        hired: { stage: 'offer', status: 'hired' },
-      };
-      const appFields = stageFieldMap[stage] ?? { stage: 'submitted', status: 'applied' };
-      await setDoc(doc(db, 'applications', appId), {
-        pipelineStage: stage,           // read by TalentPipelinePage
-        stage: appFields.stage, // read by ApplicationsPage
-        status: appFields.status, // read by both
-      }, { merge: true });
-      setCandidates(prev =>
-        prev.map(c => c.applicationId === appId ? { ...c, pipelineStage: stage } : c)
-      );
-      if (selectedCandidate?.applicationId === appId) {
-        setSelectedCandidate(prev => prev ? { ...prev, pipelineStage: stage } : null);
+  const moveToStage = useCallback(
+    async (appId: string, stage: PipelineStage) => {
+      setMovingId(appId);
+
+      try {
+        const stageFieldMap: Record<PipelineStage, { stage: string; status: string }> = {
+          shortlisted: { stage: 'reviewing', status: 'shortlisted' },
+          interview: { stage: 'interview', status: 'interview' },
+          offer: { stage: 'offer', status: 'offer' },
+          hired: { stage: 'offer', status: 'hired' },
+        };
+
+        const appFields = stageFieldMap[stage];
+
+        // 1️⃣ Update Applications (used by RecruiterDashboard)
+        await setDoc(
+          doc(db, 'applications', appId),
+          {
+            pipelineStage: stage,
+            stage: appFields.stage,
+            status: appFields.status,
+            updatedAt: Timestamp.now(),
+          },
+          { merge: true }
+        );
+
+        // 2️⃣ Update Talent Pipeline (used by PipelinePage)
+        await setDoc(
+          doc(db, 'talentPipeline', appId),
+          {
+            pipelineStage: stage,
+            updatedAt: Timestamp.now(),
+          },
+          { merge: true }
+        );
+
+        // 3️⃣ Optimistic UI update
+        setCandidates(prev =>
+          prev.map(c =>
+            c.applicationId === appId
+              ? { ...c, pipelineStage: stage }
+              : c
+          )
+        );
+
+        if (selectedCandidate?.applicationId === appId) {
+          setSelectedCandidate(prev =>
+            prev ? { ...prev, pipelineStage: stage } : null
+          );
+        }
+
+      } catch (err) {
+        console.error('[Pipeline] Move failed:', err);
+      } finally {
+        setMovingId(null);
       }
-    } catch (err) {
-      console.error('[Pipeline] Move failed:', err);
-    } finally {
-      setMovingId(null);
-    }
-  }, [selectedCandidate]);
+    },
+    [selectedCandidate]
+  );
 
   /* ── Drag and drop ──────────────────────────── */
   const handleDragStart = (appId: string) => setDragging(appId);
@@ -320,8 +351,8 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                           {/* Top row: avatar + name + score */}
                           <div className="flex items-start gap-3">
                             <div className={`size-9 shrink-0 flex items-center justify-center text-[11px] font-black border ${c.matchScore >= (60)
-                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                : 'bg-white/5 border-white/10 text-white/40'
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                              : 'bg-white/5 border-white/10 text-white/40'
                               }`}>
                               {(c.name?.trim() || '?')[0].toUpperCase()}
                             </div>
@@ -434,8 +465,8 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className={`size-14 flex items-center justify-center text-xl font-black border-2 ${selectedCandidate.matchScore >= 65
-                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
-                      : 'bg-white/5 border-white/10 text-white/30'
+                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                    : 'bg-white/5 border-white/10 text-white/30'
                     }`}>
                     {(selectedCandidate.name?.trim() || '?')[0].toUpperCase()}
                   </div>
@@ -527,8 +558,8 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     onClick={() => moveToStage(selectedCandidate.applicationId, s.id)}
                     disabled={selectedCandidate.pipelineStage === s.id || movingId === selectedCandidate.applicationId}
                     className={`flex items-center gap-1.5 px-3 py-2 text-[7px] font-black uppercase tracking-widest transition-all border ${selectedCandidate.pipelineStage === s.id
-                        ? `${s.color} ${s.accent} bg-white/[0.03] cursor-default`
-                        : 'border-white/10 text-white/40 hover:border-white/30 hover:text-white'
+                      ? `${s.color} ${s.accent} bg-white/[0.03] cursor-default`
+                      : 'border-white/10 text-white/40 hover:border-white/30 hover:text-white'
                       } disabled:opacity-50`}
                   >
                     <span className={`size-1.5 rounded-full ${STAGE_DOT[s.id]}`} />

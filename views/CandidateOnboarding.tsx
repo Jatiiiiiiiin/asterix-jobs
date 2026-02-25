@@ -62,7 +62,6 @@ export default function CandidateOnboarding({
      ══════════════════════════════════════════════════════════════════ */
 
   const finalizeOnboarding = async () => {
-    console.log('[🎯 Onboarding] Finalizing profile');
     
     const uid = readSessionUid();
 
@@ -77,7 +76,6 @@ export default function CandidateOnboarding({
 
     try {
       // 1. Write full profile to profiles/{uid}
-      console.log('[💾 Onboarding] Writing profile to Firestore');
       await setDoc(doc(db, 'profiles', uid), {
         profile: {
           name:         form.name,
@@ -102,10 +100,8 @@ export default function CandidateOnboarding({
       });
 
       // 2. Mark isOnboarded = true in users/{uid}
-      console.log('[💾 Onboarding] Marking user as onboarded');
       await setDoc(doc(db, 'users', uid), { isOnboarded: true }, { merge: true });
 
-      console.log('[✅ Onboarding] Profile saved successfully');
 
       // 3. Call parent callback to handle routing
       // This will re-hydrate the user state and route to dashboard

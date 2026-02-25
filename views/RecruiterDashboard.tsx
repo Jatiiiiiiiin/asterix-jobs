@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { readSessionUid } from '../authService';
@@ -50,7 +50,6 @@ interface Application {
   candidateEducation?: string;
   candidateExperience?: Array<{ role: string; co: string; desc: string; date?: string }>;
   resumeUrl?: string;
-  // Actual Firestore values: "Submitted", "shortlisted", "rejected"
   status?: 'Submitted' | 'shortlisted' | 'rejected';
   stage?: string;
   shortlistedAt?: Timestamp;
@@ -124,36 +123,43 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
   /* ── Jobs listener ─────────────────────────────────────────── */
   useEffect(() => {
-    if (!recruiterId) { setLoadingJobs(false); return; }
+    if (!recruiterId) {
+      setLoadingJobs(false);
+      return;
+    }
     setLoadingJobs(true);
 
     const q = query(collection(db, 'jobs'), where('recruiterId', '==', recruiterId));
 
-    const unsub = onSnapshot(q, async (snap) => {
-      const jobs: PostedJob[] = snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as Omit<PostedJob, 'id'>),
-      }));
+    const unsub = onSnapshot(
+      q,
+      async (snap) => {
+        const jobs: PostedJob[] = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Omit<PostedJob, 'id'>),
+        }));
 
-      jobs.sort((a, b) => {
-        const ta = (a.createdAt as any)?.seconds ?? 0;
-        const tb = (b.createdAt as any)?.seconds ?? 0;
-        return tb - ta;
-      });
+        jobs.sort((a, b) => {
+          const ta = (a.createdAt as any)?.seconds ?? 0;
+          const tb = (b.createdAt as any)?.seconds ?? 0;
+          return tb - ta;
+        });
 
-      const withCounts = await Promise.all(
-        jobs.map(async (job) => {
-          const countSnap = await getDoc(doc(db, 'jobApplicationCounts', job.id)).catch(() => null);
-          return { ...job, applicationCount: (countSnap?.data()?.count as number) ?? 0 };
-        })
-      );
+        const withCounts = await Promise.all(
+          jobs.map(async (job) => {
+            const countSnap = await getDoc(doc(db, 'jobApplicationCounts', job.id)).catch(() => null);
+            return { ...job, applicationCount: (countSnap?.data()?.count as number) ?? 0 };
+          })
+        );
 
-      setPostedJobs(withCounts);
-      setLoadingJobs(false);
-    }, (err) => {
-      console.error('[RecruiterDashboard] Jobs error:', err.message);
-      setLoadingJobs(false);
-    });
+        setPostedJobs(withCounts);
+        setLoadingJobs(false);
+      },
+      (err) => {
+        console.error('[RecruiterDashboard] Jobs error:', err.message);
+        setLoadingJobs(false);
+      }
+    );
 
     return () => unsub();
   }, [recruiterId]);
@@ -166,101 +172,110 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
     const q = query(collection(db, 'applications'), where('jobId', '==', selectedJob.id));
 
-    const unsub = onSnapshot(q, async (snap) => {
-      console.log('🔍 FIRESTORE SNAPSHOT - Total docs:', snap.docs.length);
-
-      const raw = snap.docs.map((d) => {
-        const data = d.data() as Omit<Application, 'id'>;
-        console.log(`📄 Doc ID: ${d.id}`);
-        console.log(`   - Has status field? ${data.status !== undefined}`);
-        console.log(`   - Status value: "${data.status}"`);
-        console.log(`   - All field keys:`, Object.keys(data).sort());
-        return {
+    const unsub = onSnapshot(
+      q,
+      async (snap) => {
+        const raw = snap.docs.map((d) => ({
           id: d.id,
-          ...data,
-          autoApplied: Boolean((data as any).aiApplied ?? data.autoApplied),
-        };
-      });
+          ...(d.data() as Omit<Application, 'id'>),
+          autoApplied: Boolean((d.data() as any).aiApplied ?? (d.data() as any).autoApplied),
+        }));
 
-      const hydrated = await Promise.all(
-        raw.map(async (app) => {
-          const appMatchScore = typeof app.matchScore === 'number' ? app.matchScore : 0;
+        const hydrated = await Promise.all(
+          raw.map(async (app) => {
+            const appMatchScore =
+              typeof app.matchScore === 'number'
+                ? app.matchScore
+                : typeof (app as any).progress === 'number'
+                  ? (app as any).progress
+                  : 0;
 
-          try {
-            const pSnap = await getDoc(doc(db, 'profiles', app.candidateUid));
+            try {
+              const pSnap = await getDoc(doc(db, 'profiles', app.candidateUid));
 
-            if (!pSnap.exists()) {
+              if (!pSnap.exists()) {
+                return {
+                  ...app,
+                  matchScore: appMatchScore,
+                  candidateName: app.candidateName || `Candidate (${app.candidateUid.slice(0, 6)})`,
+                  status: (app.status ?? 'Submitted') as Application['status'],
+                };
+              }
+
+              const p = pSnap.data() as any;
+
+              // 🔥 Safe string extraction
+              const resolvedName =
+                (p.profile?.name && typeof p.profile.name === 'string' ? p.profile.name.trim() : '') ||
+                (app.candidateName && typeof app.candidateName === 'string' ? app.candidateName.trim() : '') ||
+                `Candidate (${app.candidateUid.slice(0, 6)})`;
+
+              // 🔥 Safe skills extraction
+              const candidateSkills = Array.isArray(p.skills)
+                ? p.skills
+                  .map((s: any) => {
+                    try {
+                      if (!s) return '';
+                      const skillValue = s?.s ?? s?.skill ?? '';
+                      return (typeof skillValue === 'string' ? skillValue : String(skillValue)).trim();
+                    } catch {
+                      return '';
+                    }
+                  })
+                  .filter((s: string) => s && s.length > 0)
+                : [];
+
               return {
                 ...app,
                 matchScore: appMatchScore,
-                candidateName: app.candidateName || `Candidate (${app.candidateUid.slice(0, 6)})`,
+                candidateName: resolvedName,
+                candidateTitle:
+                  (p.profile?.title && typeof p.profile.title === 'string' ? p.profile.title : '') ||
+                  app.candidateTitle ||
+                  '',
+                candidateEmail:
+                  (p.contact?.email && typeof p.contact.email === 'string' ? p.contact.email : '') ||
+                  (p.profile?.email && typeof p.profile.email === 'string' ? p.profile.email : '') ||
+                  '',
+                candidateManifesto:
+                  (p.profile?.manifesto && typeof p.profile.manifesto === 'string' ? p.profile.manifesto : '') || '',
+                candidateEducation:
+                  (p.education && typeof p.education === 'string' ? p.education : '') || '',
+                candidateSkills: candidateSkills,
+                candidateExperience: Array.isArray(p.deployments) ? p.deployments : [],
+                resumeUrl:
+                  (p.resumeUrl && typeof p.resumeUrl === 'string' ? p.resumeUrl : '') ||
+                  (app.resumeUrl && typeof app.resumeUrl === 'string' ? app.resumeUrl : '') ||
+                  undefined,
+                status: (app.status ?? 'Submitted') as Application['status'],
+              };
+            } catch (err) {
+              console.error('[RecruiterDashboard] Profile hydration failed:', err);
+              return {
+                ...app,
+                matchScore: appMatchScore,
+                candidateName:
+                  app.candidateName ?? `Candidate (${app.candidateUid?.slice(0, 6) ?? 'Anon'})`,
+                candidateTitle: '',
+                candidateSkills: [],
+                candidateExperience: [],
+                candidateEducation: '',
+                resumeUrl: undefined,
                 status: (app.status ?? 'Submitted') as Application['status'],
               };
             }
+          })
+        );
 
-            const p = pSnap.data() as any;
-
-            const resolvedName =
-              p.profile?.name?.trim() ||
-              app.candidateName?.trim() ||
-              `Candidate (${app.candidateUid.slice(0, 6)})`;
-
-            return {
-              ...app,
-              matchScore: appMatchScore,
-              candidateName: resolvedName,
-              candidateTitle: p.profile?.title ?? app.candidateTitle ?? '',
-              candidateEmail: p.contact?.email ?? p.profile?.email ?? '',
-              candidateManifesto: p.profile?.manifesto ?? '',
-              candidateEducation: p.education ?? '',
-              candidateSkills: (p.skills ?? [])
-                .map((s: any) => (s?.s ?? s?.skill ?? '').toString())
-                .filter((s: string) => typeof s === 'string' && s.length > 0),
-              candidateExperience: p.deployments ?? [],
-              resumeUrl: p.resumeUrl ?? app.resumeUrl ?? undefined,
-              status: (app.status ?? 'Submitted') as Application['status'],
-            };
-          } catch (err) {
-            console.error('[RecruiterDashboard] Profile hydration failed:', err);
-            return {
-              ...app,
-              matchScore: appMatchScore,
-              candidateName:
-                app.candidateName ??
-                `Candidate (${app.candidateUid?.slice(0, 6) ?? 'Anon'})`,
-              candidateTitle: '',
-              candidateSkills: [],
-              candidateExperience: [],
-              candidateEducation: '',
-              resumeUrl: undefined,
-              status: (app.status ?? 'Submitted') as Application['status'],
-            };
-          }
-        })
-      );
-
-      hydrated.sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
-
-      console.log('✅ FINAL HYDRATED APPS:');
-      hydrated.forEach(app => {
-        console.log(`  ID: ${app.id}`);
-        console.log(`    - status: "${app.status}"`);
-        console.log(`    - name: ${app.candidateName}`);
-      });
-
-      const finalApps = hydrated.map(app => ({
-        ...app,
-        candidateName:
-          app.candidateName ??
-          `Candidate (${app.candidateUid?.slice(0, 6) ?? 'Anon'})`,
-      }));
-
-      setApplications(finalApps);
-      setLoadingApplicants(false);
-    }, (err) => {
-      console.error('[RecruiterDashboard] Applicants error:', err.message);
-      setLoadingApplicants(false);
-    });
+        hydrated.sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
+        setApplications(hydrated);
+        setLoadingApplicants(false);
+      },
+      (err) => {
+        console.error('[RecruiterDashboard] Applicants error:', err.message);
+        setLoadingApplicants(false);
+      }
+    );
 
     return () => unsub();
   }, [selectedJob]);
@@ -279,11 +294,25 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
     }
   };
 
-  /* ── Applicant actions ─────────────────────────────────────── */
+  /* ── Applicant actions with immediate UI update ─────────────── */
+
   const handleShortlist = async (app: Application) => {
     setActionInProgress('shortlist');
     try {
-      // 1️⃣ Update application
+      // 🔥 Immediately update UI
+      setApplications((prev) =>
+        prev.map((a) =>
+          a.id === app.id ? { ...a, status: 'shortlisted' as Application['status'] } : a
+        )
+      );
+
+      if (selectedApplicant?.id === app.id) {
+        setSelectedApplicant((prev) =>
+          prev ? { ...prev, status: 'shortlisted' as Application['status'] } : null
+        );
+      }
+
+      // Update Firestore
       await setDoc(
         doc(db, 'applications', app.id),
         {
@@ -293,64 +322,135 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
         { merge: true }
       );
 
-      // 2️⃣ Add to Talent Pipeline
+      // Add to Talent Pipeline
       const pipelineId = `${app.candidateUid}_${selectedJob!.id}`;
 
-      await setDoc(
-        doc(db, 'talentPipeline', pipelineId),
-        {
-          recruiterId,
-          jobId: selectedJob!.id,
-          jobTitle: selectedJob!.title,     // 🔥 ADD THIS
+      const pipelineData = {
+        recruiterId,
+        jobId: selectedJob!.id,
+        jobTitle: selectedJob!.title,
+        candidateUid: app.candidateUid,
+        candidateName: app.candidateName,
+        candidateTitle: app.candidateTitle,
+        candidateEmail: app.candidateEmail,
+        candidateSkills: app.candidateSkills ?? [],
+        candidateExperience: app.candidateExperience ?? [],
+        candidateEducation: app.candidateEducation ?? '',
+        candidateManifesto: app.candidateManifesto ?? '',
+        matchScore: app.matchScore,
+        autoApplied: app.autoApplied ?? false,
+        pipelineStage: 'shortlisted',
+        addedAt: Timestamp.now(),
+        source: 'shortlist',
+        ...(app.resumeUrl ? { resumeUrl: app.resumeUrl } : {}),
+      };
 
-          candidateUid: app.candidateUid,
-          candidateName: app.candidateName,
-          candidateTitle: app.candidateTitle,
-          candidateEmail: app.candidateEmail,
-          candidateSkills: app.candidateSkills,
-          candidateExperience: app.candidateExperience,
-          candidateEducation: app.candidateEducation,
-          candidateManifesto: app.candidateManifesto,
-          resumeUrl: app.resumeUrl,
+      await setDoc(doc(db, 'talentPipeline', pipelineId), pipelineData, { merge: true });
 
-          matchScore: app.matchScore,
-          autoApplied: app.autoApplied ?? false,
-
-          pipelineStage: 'shortlisted',      // 🔥 ADD THIS
-          addedAt: Timestamp.now(),
-          source: 'shortlist',
-        },
-        { merge: true }
-      );
-
-      console.log('✅ Added to Talent Pipeline');
     } catch (err) {
       console.error('❌ Shortlist failed:', err);
+      // Revert UI on error
+      setApplications((prev) =>
+        prev.map((a) =>
+          a.id === app.id ? { ...a, status: 'Submitted' as Application['status'] } : a
+        )
+      );
     } finally {
       setActionInProgress(null);
     }
   };
 
   const handleReject = async (app: Application) => {
-    console.log('Rejecting app:', app.id, 'Current status:', app.status);
     setActionInProgress('pass');
     try {
-      await setDoc(doc(db, 'applications', app.id), { status: 'rejected', rejectedAt: Timestamp.now() }, { merge: true });
-      console.log('Reject success, app id:', app.id);
-    } catch (err) { console.error('Reject failed:', err); }
-    finally { setActionInProgress(null); }
+      // 🔥 Immediately update UI
+      setApplications((prev) =>
+        prev.map((a) =>
+          a.id === app.id ? { ...a, status: 'rejected' as Application['status'] } : a
+        )
+      );
+
+      if (selectedApplicant?.id === app.id) {
+        setSelectedApplicant((prev) =>
+          prev ? { ...prev, status: 'rejected' as Application['status'] } : null
+        );
+      }
+
+      // Update Firestore
+      await setDoc(
+        doc(db, 'applications', app.id),
+        { status: 'rejected', rejectedAt: Timestamp.now() },
+        { merge: true }
+      );
+
+    } catch (err) {
+      console.error('❌ Reject failed:', err);
+      // Revert UI on error
+      setApplications((prev) =>
+        prev.map((a) =>
+          a.id === app.id ? { ...a, status: 'Submitted' as Application['status'] } : a
+        )
+      );
+    } finally {
+      setActionInProgress(null);
+    }
   };
 
   const handleRestore = async (app: Application) => {
-    console.log('Restoring app:', app.id, 'Current status:', app.status);
     setActionInProgress('restore');
-    try {
-      await setDoc(doc(db, 'applications', app.id), { status: 'Submitted', stage: 'submitted', shortlistedAt: null, rejectedAt: null }, { merge: true });
-      console.log('Restore success, app id:', app.id);
-    } catch (err) { console.error('Restore failed:', err); }
-    finally { setActionInProgress(null); }
-  };
 
+    const pipelineId = `${app.candidateUid}_${selectedJob!.id}`;
+
+    try {
+      // 🔥 Immediate UI update
+      setApplications(prev =>
+        prev.map(a =>
+          a.id === app.id ? { ...a, status: 'Submitted' } : a
+        )
+      );
+
+      if (selectedApplicant?.id === app.id) {
+        setSelectedApplicant(prev =>
+          prev ? { ...prev, status: 'Submitted' } : null
+        );
+      }
+
+      // 1️⃣ Restore Application
+      await setDoc(
+        doc(db, 'applications', app.id),
+        {
+          status: 'Submitted',
+          stage: 'submitted',
+          shortlistedAt: null,
+          rejectedAt: null,
+        },
+        { merge: true }
+      );
+
+      // 2️⃣ Restore Pipeline (optional but recommended)
+      await setDoc(
+        doc(db, 'talentPipeline', pipelineId),
+        {
+          pipelineStage: 'shortlisted',
+          updatedAt: Timestamp.now(),
+        },
+        { merge: true }
+      );
+
+    } catch (err) {
+      console.error('❌ Restore failed:', err);
+
+      // rollback UI
+      const originalStatus = selectedApplicant?.status ?? 'Submitted';
+      setApplications(prev =>
+        prev.map(a =>
+          a.id === app.id ? { ...a, status: originalStatus } : a
+        )
+      );
+    } finally {
+      setActionInProgress(null);
+    }
+  };
   const handleMessage = async (app: Application) => {
     setActionInProgress('message');
     setTimeout(() => setActionInProgress(null), 1000);
@@ -379,40 +479,25 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
   /* ── Derived ───────────────────────────────────────────────── */
   const filteredApplicants = applications.filter((a) => {
     const q = searchQuery.toLowerCase();
-    return !q ||
+    return (
+      !q ||
       (a.candidateName ?? '').toLowerCase().includes(q) ||
       (a.candidateTitle ?? '').toLowerCase().includes(q) ||
-      (a.candidateSkills ?? []).some(
-        (s) => typeof s === 'string' && s.toLowerCase().includes(q)
-      );
+      (a.candidateSkills ?? []).some((s) => typeof s === 'string' && s.toLowerCase().includes(q))
+    );
   });
 
-  const avgScore = applications.length > 0
-    ? Math.round(applications.reduce((s, a) => s + (a.matchScore ?? 0), 0) / applications.length)
-    : 0;
+  const avgScore =
+    applications.length > 0
+      ? Math.round(applications.reduce((s, a) => s + (a.matchScore ?? 0), 0) / applications.length)
+      : 0;
 
-  const aboveThreshold = selectedJob?.matchThreshold != null
-    ? applications.filter(a => a.matchScore >= selectedJob.matchThreshold!).length
-    : null;
+  const aboveThreshold =
+    selectedJob?.matchThreshold != null
+      ? applications.filter((a) => a.matchScore >= selectedJob.matchThreshold!).length
+      : null;
 
-  /* ── Sub-components ────────────────────────────────────────── */
-  const ScoreBadge = ({ score, threshold }: { score: number; threshold?: number | null }) => {
-    const isAbove = threshold != null && score >= threshold;
-    const color = score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-amber-400' : score > 0 ? 'text-red-400' : 'text-white/20';
-    return (
-      <div className="flex flex-col items-end gap-0.5">
-        <span className={`font-black tabular-nums text-lg ${color}`}>
-          {score > 0 ? `${score}%` : '—'}
-        </span>
-        {threshold != null && score > 0 && (
-          <span className={`text-[6px] font-black uppercase tracking-widest ${isAbove ? 'text-emerald-500' : 'text-white/20'}`}>
-            {isAbove ? '▲ above threshold' : '▼ below threshold'}
-          </span>
-        )}
-      </div>
-    );
-  };
-
+  /* ── Status Badge Component ──────────────────────────────────── */
   const StatusPill = ({ status }: { status: PostedJob['status'] }) => {
     const map = {
       active: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
@@ -432,7 +517,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
       shortlisted: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', label: 'Shortlisted' },
       rejected: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', label: 'Rejected' },
     };
-    const safeStatus = (status && status in statusMap) ? status : 'Submitted';
+    const safeStatus = status && status in statusMap ? status : 'Submitted';
     const config = statusMap[safeStatus];
     return (
       <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[7px] font-black uppercase tracking-widest ${config.bg} border ${config.border} ${config.text}`}>
@@ -444,39 +529,34 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
     );
   };
 
-  /* ── Shared candidate detail content using GRID LAYOUT ───────── */
+  /* ── Candidate Detail Component ──────────────────────────────── */
   const CandidateDetailContent = ({ applicant, job }: { applicant: Application; job: PostedJob }) => {
     const scoreColor =
-      applicant.matchScore >= 80 ? 'text-emerald-400' :
-        applicant.matchScore >= 60 ? 'text-amber-400' :
-          applicant.matchScore > 0 ? 'text-red-400' : 'text-white/30';
+      applicant.matchScore >= 80
+        ? 'text-emerald-400'
+        : applicant.matchScore >= 60
+          ? 'text-amber-400'
+          : applicant.matchScore > 0
+            ? 'text-red-400'
+            : 'text-white/30';
 
     const initials = (applicant.candidateName?.trim() || '?')[0].toUpperCase();
     const isAboveThreshold = job.matchThreshold != null && applicant.matchScore >= job.matchThreshold;
 
-    // DEBUG: Log applicant object
-    useEffect(() => {
-      console.log('🎯 CandidateDetailContent LOADED');
-      console.log(`   ID: ${applicant.id}`);
-      console.log(`   status field value: "${applicant.status}"`);
-      console.log(`   typeof status: ${typeof applicant.status}`);
-      console.log(`   Full applicant object:`, applicant);
-    }, [applicant.id, applicant.status]);
-
     return (
       <div className="flex flex-col h-full">
-        {/* SCROLLABLE CONTENT AREA */}
         <div className="flex-1 overflow-y-auto flex flex-col">
-          {/* GRID FOR HEADER AND TABS */}
           <div className="grid grid-rows-[auto_auto_1fr] gap-0">
-            {/* ── Hero (Row 1) ──────────────────────────────────────── */}
+            {/* Hero Section */}
             <div className="px-6 md:px-10 py-6 md:py-8 border-b border-white/5 bg-white/[0.01]">
               <div className="flex items-start justify-between gap-6">
                 <div className="flex items-center gap-4 md:gap-6">
-                  <div className={`size-16 md:size-20 flex items-center justify-center text-2xl md:text-3xl font-black border-2 ${isAboveThreshold
-                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
-                    : 'bg-white/5 border-white/10 text-white/30'
-                    }`}>
+                  <div
+                    className={`size-16 md:size-20 flex items-center justify-center text-2xl md:text-3xl font-black border-2 ${isAboveThreshold
+                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                      : 'bg-white/5 border-white/10 text-white/30'
+                      }`}
+                  >
                     {initials}
                   </div>
                   <div className="space-y-1">
@@ -500,7 +580,6 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   </div>
                 </div>
 
-                {/* Score + threshold */}
                 <div className="text-right shrink-0 space-y-1 md:space-y-2">
                   <div className={`text-5xl md:text-6xl font-black tabular-nums leading-none ${scoreColor}`}>
                     {applicant.matchScore > 0 ? `${applicant.matchScore}%` : '—'}
@@ -508,10 +587,12 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   <p className="text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-white/30">Fidelity</p>
 
                   {job.matchThreshold != null && applicant.matchScore > 0 && (
-                    <div className={`inline-flex items-center gap-1 px-2 py-1 text-[6px] md:text-[7px] font-black uppercase tracking-widest ${isAboveThreshold
-                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                      : 'bg-red-500/10 border border-red-500/20 text-red-400'
-                      }`}>
+                    <div
+                      className={`inline-flex items-center gap-1 px-2 py-1 text-[6px] md:text-[7px] font-black uppercase tracking-widest ${isAboveThreshold
+                        ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                        : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                        }`}
+                    >
                       <span className="material-symbols-outlined text-[8px] md:text-[10px]">
                         {isAboveThreshold ? 'check_circle' : 'cancel'}
                       </span>
@@ -528,7 +609,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               </div>
             </div>
 
-            {/* ── Tab Bar (Row 2) ───────────────────────────────────── */}
+            {/* Tab Bar */}
             <div className="border-b border-white/5 flex z-10 bg-[#080808]">
               <button
                 onClick={() => setDetailTab('profile')}
@@ -562,15 +643,16 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               </button>
             </div>
 
-            {/* ── Content (Row 3 - Scrollable) ──────────────────────── */}
+            {/* Content */}
             <div className="overflow-y-auto">
-              {/* PROFILE TAB */}
               {detailTab === 'profile' && (
                 <div className="px-6 md:px-10 py-6 md:py-8 space-y-8 md:space-y-10">
                   {applicant.candidateManifesto && (
                     <section className="space-y-4">
                       <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
-                        <span className="flex-1 h-px bg-white/5" />About<span className="flex-1 h-px bg-white/5" />
+                        <span className="flex-1 h-px bg-white/5" />
+                        About
+                        <span className="flex-1 h-px bg-white/5" />
                       </h4>
                       <p className="text-sm md:text-base font-medium text-white/70 leading-relaxed">
                         {applicant.candidateManifesto}
@@ -581,7 +663,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   {(applicant.candidateSkills ?? []).length > 0 && (
                     <section className="space-y-4">
                       <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
-                        <span className="flex-1 h-px bg-white/5" />Skills<span className="flex-1 h-px bg-white/5" />
+                        <span className="flex-1 h-px bg-white/5" />
+                        Skills
+                        <span className="flex-1 h-px bg-white/5" />
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {applicant.candidateSkills!.map((s) => (
@@ -599,7 +683,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   {(applicant.candidateExperience ?? []).length > 0 && (
                     <section className="space-y-4">
                       <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
-                        <span className="flex-1 h-px bg-white/5" />Experience<span className="flex-1 h-px bg-white/5" />
+                        <span className="flex-1 h-px bg-white/5" />
+                        Experience
+                        <span className="flex-1 h-px bg-white/5" />
                       </h4>
                       <div className="space-y-6">
                         {applicant.candidateExperience!.map((exp, i) => (
@@ -609,9 +695,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                               <span className="text-white/30 font-medium mx-2">@</span>
                               {exp.co}
                             </p>
-                            <p className="text-xs md:text-sm font-medium text-white/40 leading-relaxed">
-                              {exp.desc}
-                            </p>
+                            <p className="text-xs md:text-sm font-medium text-white/40 leading-relaxed">{exp.desc}</p>
                           </div>
                         ))}
                       </div>
@@ -621,7 +705,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   {applicant.candidateEducation && (
                     <section className="space-y-4">
                       <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
-                        <span className="flex-1 h-px bg-white/5" />Education<span className="flex-1 h-px bg-white/5" />
+                        <span className="flex-1 h-px bg-white/5" />
+                        Education
+                        <span className="flex-1 h-px bg-white/5" />
                       </h4>
                       <p className="text-xs md:text-sm font-medium text-white/50 leading-relaxed">
                         {applicant.candidateEducation}
@@ -633,9 +719,8 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                 </div>
               )}
 
-              {/* RESUME TAB */}
-              {detailTab === 'resume' && (
-                applicant.resumeUrl ? (
+              {detailTab === 'resume' &&
+                (applicant.resumeUrl ? (
                   <div className="w-full h-full min-h-[600px] bg-white/[0.02]">
                     <iframe
                       src={`${applicant.resumeUrl}#toolbar=0`}
@@ -648,32 +733,28 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   <div className="flex flex-col items-center justify-center h-full gap-6 p-10 text-center">
                     <span className="material-symbols-outlined text-5xl text-white/10">description</span>
                     <div className="space-y-2">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/30">
-                        No resume uploaded
-                      </p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/30">No resume uploaded</p>
                       <p className="text-[8px] font-medium text-white/20 uppercase tracking-widest max-w-xs">
                         Candidate hasn't synced a resume file yet. Their profile is visible in the Profile tab.
                       </p>
                     </div>
                   </div>
-                )
-              )}
+                ))}
             </div>
           </div>
         </div>
 
-        {/* ── ACTION BAR (OUTSIDE SCROLL - ALWAYS VISIBLE) ──────── */}
+        {/* Action Bar */}
         <div className="shrink-0 pt-4 md:pt-6 pb-6 md:pb-8 px-6 md:px-10 bg-gradient-to-t from-[#080808] via-[#080808]/95 to-transparent border-t border-white/5">
           <div className="space-y-3">
-            {/* Use applicant.status directly - real-time listener keeps it in sync */}
             {(() => {
               const currentStatus = applicant.status ?? 'Submitted';
-              console.log(`🎬 RENDER BUTTONS - App ${applicant.id}: status="${applicant.status}" → showing ${currentStatus} buttons`);
+
               return (
                 <>
                   <ApplicationStatusBadge status={currentStatus as Application['status']} />
 
-                  {/* SUBMITTED/APPLIED — primary action row */}
+                  {/* SUBMITTED */}
                   {(currentStatus === 'Submitted' || !currentStatus) && (
                     <div className="flex flex-col md:flex-row gap-2 md:gap-3">
                       <button
@@ -705,7 +786,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     </div>
                   )}
 
-                  {/* SHORTLISTED — show confirmation + undo */}
+                  {/* SHORTLISTED */}
                   {currentStatus === 'shortlisted' && (
                     <div className="space-y-2">
                       <div className="p-3 md:p-4 bg-emerald-500/10 border border-emerald-500/30 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-2">
@@ -742,12 +823,12 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     </div>
                   )}
 
-                  {/* REJECTED — show status + prominent reconsider button */}
+                  {/* REJECTED */}
                   {currentStatus === 'rejected' && (
                     <div className="space-y-2">
                       <div className="p-3 md:p-4 bg-red-500/5 border border-red-500/20 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-400/70 flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">cancel</span>
-                        Marked as passed — use the buttons below to reconsider
+                        Marked as passed — use buttons below to reconsider
                       </div>
                       <div className="flex gap-2">
                         <button
@@ -841,19 +922,22 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               <div className="space-y-1">
                 <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.5em] text-white/30">Recruiter Command</p>
                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none">
-                  Talent<br /><span className="text-white/20">Inventory</span>
+                  Talent<br />
+                  <span className="text-white/20">Inventory</span>
                 </h1>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 border border-white/5">
                 {[
                   { label: 'Jobs Posted', val: postedJobs.length },
-                  { label: 'Active', val: postedJobs.filter(j => j.status === 'active').length },
+                  { label: 'Active', val: postedJobs.filter((j) => j.status === 'active').length },
                   { label: 'Total Applicants', val: postedJobs.reduce((s, j) => s + (j.applicationCount ?? 0), 0) },
-                  { label: 'Closed', val: postedJobs.filter(j => j.status === 'closed').length },
+                  { label: 'Closed', val: postedJobs.filter((j) => j.status === 'closed').length },
                 ].map((s, i) => (
                   <div key={i} className="p-4 md:p-6 border-r last:border-r-0 border-b md:border-b-0 border-white/5 group hover:bg-white/[0.02] transition-colors">
-                    <p className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-white/30 mb-1">{s.label}</p>
+                    <p className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-white/30 mb-1">
+                      {s.label}
+                    </p>
                     <p className="text-2xl md:text-3xl font-black tabular-nums">{s.val}</p>
                   </div>
                 ))}
@@ -867,8 +951,13 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               ) : postedJobs.length === 0 ? (
                 <div className="py-32 text-center space-y-4">
                   <span className="material-symbols-outlined text-4xl md:text-5xl text-white/10">work_off</span>
-                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/30">No jobs posted yet</p>
-                  <Link to="/post-job" className="inline-block mt-4 border border-white/20 px-6 md:px-8 py-2 md:py-3 text-[8px] md:text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/30">
+                    No jobs posted yet
+                  </p>
+                  <Link
+                    to="/post-job"
+                    className="inline-block mt-4 border border-white/20 px-6 md:px-8 py-2 md:py-3 text-[8px] md:text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+                  >
                     Post First Job
                   </Link>
                 </div>
@@ -882,54 +971,195 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     const isDeleting = deletingJobId === job.id;
 
                     return (
-                      <div key={job.id} className="border border-white/5 hover:border-white/10 bg-white/[0.01] transition-all group flex flex-col md:flex-row md:items-center">
+                      <div
+                        key={job.id}
+                        className="border border-white/10 bg-gradient-to-br from-white/[0.02] to-white/[0.01] hover:border-white/20 hover:from-white/[0.04] hover:to-white/[0.02] transition-all group relative overflow-hidden"
+                      >
                         <button
                           onClick={() => openJob(job)}
-                          className="flex-1 text-left p-4 md:p-6 lg:p-8 flex flex-col md:flex-row md:items-center gap-4 md:gap-6"
+                          className="w-full text-left p-4 md:p-6 space-y-4"
                         >
-                          <div className="flex-grow space-y-2">
-                            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <StatusPill status={job.status} />
                               {job.employmentType && (
-                                <span className="text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-white/30 border border-white/10 px-2 py-1">
+                                <span className="text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-white/40 border border-white/10 px-2 py-1 bg-white/[0.02]">
                                   {job.employmentType}
                                 </span>
                               )}
-                              {job.matchThreshold != null && (
-                                <span className="text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-emerald-400/70 border border-emerald-500/20 px-2 py-1">
-                                  ≥{job.matchThreshold}% threshold
-                                </span>
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (isConfirming) {
+                                  handleDeleteJob(job.id);
+                                } else {
+                                  setConfirmDeleteId(job.id);
+                                }
+                              }}
+                              className={`shrink-0 p-2 transition-colors md:hidden ${isConfirming ? 'bg-red-500/20 text-red-400' : 'text-white/20 hover:text-red-400'
+                                }`}
+                              title={isConfirming ? 'Confirm delete' : 'Delete job'}
+                            >
+                              <span className="material-symbols-outlined text-lg">
+                                {isDeleting ? 'hourglass_empty' : 'delete'}
+                              </span>
+                            </button>
+                          </div>
+
+                          <div>
+                            <h3 className="text-xl md:text-2xl lg:text-2xl font-black uppercase tracking-tight leading-tight mb-2">
+                              {job.title}
+                            </h3>
+
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-white/50">
+                              {companyStr !== '—' && (
+                                <>
+                                  <span className="flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[12px]">business</span>
+                                    {companyStr}
+                                  </span>
+                                </>
+                              )}
+                              {locationStr !== '—' && (
+                                <>
+                                  {companyStr !== '—' && <span className="text-white/20">•</span>}
+                                  <span className="flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[12px]">location_on</span>
+                                    {locationStr}
+                                  </span>
+                                </>
                               )}
                             </div>
-                            <h3 className="text-lg md:text-xl lg:text-2xl font-black uppercase tracking-tight">{job.title}</h3>
-                            <p className="text-[8px] md:text-[9px] font-medium uppercase tracking-widest text-white/40 line-clamp-2">
-                              {companyStr}{locationStr !== '—' ? ` · ${locationStr}` : ''}{salaryStr ? ` · ${salaryStr}` : ''}
-                            </p>
+
+                            {salaryStr && (
+                              <div className="mt-2 flex items-center gap-1.5 text-[10px] md:text-[11px] font-black uppercase tracking-wider text-emerald-400">
+                                <span className="material-symbols-outlined text-[14px]">payments</span>
+                                {salaryStr}
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-6 md:gap-8 shrink-0">
-                            <div className="text-right">
-                              <p className="text-2xl md:text-3xl font-black tabular-nums text-emerald-400">{job.applicationCount ?? 0}</p>
-                              <p className="text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-white/30">Applicants</p>
+
+                          <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                            <div className="flex items-center gap-4 md:gap-6">
+                              <div className="flex items-center gap-2">
+                                <div className="size-10 md:size-12 bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                                  <span className="text-lg md:text-xl font-black text-emerald-400 tabular-nums">
+                                    {job.applicationCount ?? 0}
+                                  </span>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] md:text-[11px] font-black uppercase tracking-tight leading-none">
+                                    Applicants
+                                  </p>
+                                  <p className="text-[7px] md:text-[8px] font-bold uppercase tracking-wider text-white/30">
+                                    Total received
+                                  </p>
+                                </div>
+                              </div>
+
+                              {job.matchThreshold != null && (
+                                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/20 rounded-sm">
+                                  <span className="material-symbols-outlined text-[12px] text-emerald-400">verified</span>
+                                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-wider text-emerald-400">
+                                    ≥{job.matchThreshold}%
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                            <span className="material-symbols-outlined text-white/20 group-hover:text-white/60 group-hover:translate-x-1 transition-all">arrow_forward</span>
+
+                            <div className="flex items-center gap-3">
+                              <span className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/30">
+                                View Details
+                              </span>
+                              <span className="material-symbols-outlined text-white/40 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all">
+                                arrow_forward
+                              </span>
+                            </div>
                           </div>
+
+                          {job.matchThreshold != null && (
+                            <div className="sm:hidden flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/20">
+                              <span className="material-symbols-outlined text-[12px] text-emerald-400">verified</span>
+                              <span className="text-[8px] font-black uppercase tracking-wider text-emerald-400">
+                                Match Threshold: ≥{job.matchThreshold}%
+                              </span>
+                            </div>
+                          )}
                         </button>
 
-                        <div className="shrink-0 px-4 pb-4 md:pb-0 md:pr-6 flex items-center gap-2">
+                        <div className="hidden md:block absolute top-4 right-4">
                           {isConfirming ? (
-                            <>
-                              <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-red-400/70 mr-2">Delete?</span>
-                              <button onClick={() => handleDeleteJob(job.id)} disabled={isDeleting} className="px-3 md:px-4 py-1.5 md:py-2 bg-red-500 text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest hover:bg-red-400 transition-colors disabled:opacity-50">
-                                {isDeleting ? '…' : 'Confirm'}
+                            <div className="flex items-center gap-2 bg-[#080808]/95 backdrop-blur-sm border border-red-500/30 px-3 py-2">
+                              <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-red-400/70">
+                                Delete?
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteJob(job.id);
+                                }}
+                                disabled={isDeleting}
+                                className="px-3 py-1.5 bg-red-500 text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest hover:bg-red-400 transition-colors disabled:opacity-50"
+                              >
+                                {isDeleting ? '…' : 'Yes'}
                               </button>
-                              <button onClick={() => setConfirmDeleteId(null)} className="px-3 md:px-4 py-1.5 md:py-2 border border-white/10 text-white/40 text-[7px] md:text-[8px] font-black uppercase tracking-widest hover:text-white hover:border-white/30 transition-colors">Cancel</button>
-                            </>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setConfirmDeleteId(null);
+                                }}
+                                className="px-3 py-1.5 border border-white/10 text-white/40 text-[7px] md:text-[8px] font-black uppercase tracking-widest hover:text-white hover:border-white/30 transition-colors"
+                              >
+                                No
+                              </button>
+                            </div>
                           ) : (
-                            <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(job.id); }} className="p-2 text-white/20 hover:text-red-400 transition-colors">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmDeleteId(job.id);
+                              }}
+                              className="p-2 text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                            >
                               <span className="material-symbols-outlined text-base">delete</span>
                             </button>
                           )}
                         </div>
+
+                        {isConfirming && (
+                          <div className="md:hidden absolute inset-0 bg-[#080808]/98 backdrop-blur-sm flex flex-col items-center justify-center gap-4 p-6 z-10">
+                            <div className="text-center space-y-2">
+                              <span className="material-symbols-outlined text-4xl text-red-400">delete_forever</span>
+                              <p className="text-sm font-black uppercase tracking-tight">Delete this job?</p>
+                              <p className="text-[9px] font-medium uppercase tracking-wider text-white/40">
+                                This action cannot be undone
+                              </p>
+                            </div>
+                            <div className="flex gap-3 w-full max-w-xs">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setConfirmDeleteId(null);
+                                }}
+                                className="flex-1 py-3 border border-white/20 text-[9px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:border-white/40 transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteJob(job.id);
+                                }}
+                                disabled={isDeleting}
+                                className="flex-1 py-3 bg-red-500 text-white text-[9px] font-black uppercase tracking-widest hover:bg-red-400 transition-colors disabled:opacity-50"
+                              >
+                                {isDeleting ? 'Deleting…' : 'Delete Job'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -943,13 +1173,19 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
             <>
               {/* DESKTOP */}
               <div className="hidden lg:flex flex-1 overflow-hidden">
-                {/* Left: list */}
-                <div className={`flex flex-col border-r border-white/5 shrink-0 transition-all duration-300 ${selectedApplicant ? 'w-[340px] lg:w-[380px]' : 'w-full max-w-2xl'}`}>
+                <div
+                  className={`flex flex-col border-r border-white/5 shrink-0 transition-all duration-300 ${selectedApplicant ? 'w-[340px] lg:w-[380px]' : 'w-full max-w-2xl'
+                    }`}
+                >
                   <div className="shrink-0 px-6 py-5 border-b border-white/5 space-y-4 bg-[#080808]">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 space-y-1">
-                        <h2 className="text-base font-black uppercase tracking-tight leading-tight truncate">{selectedJob.title}</h2>
-                        <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30">{resolveLocation(selectedJob.location)}</p>
+                        <h2 className="text-base font-black uppercase tracking-tight leading-tight truncate">
+                          {selectedJob.title}
+                        </h2>
+                        <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30">
+                          {resolveLocation(selectedJob.location)}
+                        </p>
                       </div>
                       <StatusPill status={selectedJob.status} />
                     </div>
@@ -961,7 +1197,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       </div>
                       <div className="px-4 py-3 border-r border-white/5">
                         <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Avg Score</p>
-                        <p className="text-xl font-black tabular-nums text-emerald-400">{avgScore > 0 ? `${avgScore}%` : '—'}</p>
+                        <p className="text-xl font-black tabular-nums text-emerald-400">
+                          {avgScore > 0 ? `${avgScore}%` : '—'}
+                        </p>
                       </div>
                       <div className="px-4 py-3">
                         <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Threshold</p>
@@ -983,7 +1221,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     )}
 
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-base">search</span>
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-base">
+                        search
+                      </span>
                       <input
                         type="text"
                         value={searchQuery}
@@ -1009,24 +1249,76 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       </div>
                     ) : (
                       filteredApplicants.map((app) => {
-                        const isAbove = selectedJob.matchThreshold != null && app.matchScore >= selectedJob.matchThreshold;
+                        const isAbove =
+                          selectedJob.matchThreshold != null && app.matchScore >= selectedJob.matchThreshold;
+                        const scoreColor =
+                          app.matchScore >= 80
+                            ? 'text-emerald-400'
+                            : app.matchScore >= 60
+                              ? 'text-amber-400'
+                              : app.matchScore > 0
+                                ? 'text-red-400'
+                                : 'text-white/20';
+
                         return (
                           <button
                             key={app.id}
-                            onClick={() => { setSelectedApplicant(app); setDetailTab('profile'); }}
-                            className={`w-full text-left px-5 py-4 border-b border-white/5 transition-all flex items-center gap-4 group ${selectedApplicant?.id === app.id ? 'bg-white/[0.06] border-l-2 border-l-emerald-500' : 'hover:bg-white/[0.03]'
+                            onClick={() => {
+                              setSelectedApplicant(app);
+                              setDetailTab('profile');
+                            }}
+                            className={`w-full text-left px-5 py-4 border-b border-white/5 transition-all flex items-center gap-4 group relative ${selectedApplicant?.id === app.id
+                              ? 'bg-white/[0.08] border-l-2 border-l-emerald-500'
+                              : 'hover:bg-white/[0.02]'
                               }`}
                           >
-                            <div className={`size-10 shrink-0 flex items-center justify-center text-[11px] font-black border ${isAbove ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'
-                              }`}>
+                            <div
+                              className={`size-12 shrink-0 flex items-center justify-center text-sm font-black border-2 transition-all ${isAbove
+                                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                                : 'bg-white/5 border-white/10 text-white/40'
+                                }`}
+                            >
                               {(app.candidateName?.trim() || '?')[0].toUpperCase()}
                             </div>
-                            <div className="flex-grow min-w-0 space-y-0.5">
-                              <p className="text-[11px] font-black uppercase tracking-tight truncate">{app.candidateName ?? 'Unknown'}</p>
-                              <p className="text-[8px] font-medium uppercase tracking-widest text-white/30 truncate">{app.candidateTitle ?? '—'}</p>
-                              {app.autoApplied && <span className="text-[6px] font-black uppercase tracking-[0.3em] text-emerald-400/70">◆ Auto-matched</span>}
+
+                            <div className="flex-grow min-w-0 space-y-1.5">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-black uppercase tracking-tight truncate">
+                                  {app.candidateName ?? 'Unknown Candidate'}
+                                </p>
+                                {app.autoApplied && (
+                                  <span className="flex items-center gap-1 px-2 py-0.5 text-[6px] font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/30 bg-emerald-500/5 shrink-0">
+                                    <span className="material-symbols-outlined text-[10px]">auto_awesome</span>
+                                    Auto
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[9px] font-medium uppercase tracking-widest text-white/40 truncate">
+                                {app.candidateTitle || 'Job Seeker'}
+                              </p>
+                              {selectedJob.matchThreshold != null && (
+                                <p className="text-[7px] font-black uppercase tracking-widest text-white/25">
+                                  {isAbove ? '✓ Above threshold' : '↓ Below threshold'}
+                                </p>
+                              )}
                             </div>
-                            <ScoreBadge score={app.matchScore} threshold={selectedJob.matchThreshold} />
+
+                            <div className="shrink-0 text-right flex flex-col items-end gap-1">
+                              <div className={`text-3xl font-black tabular-nums leading-none ${scoreColor}`}>
+                                {app.matchScore > 0 ? `${app.matchScore}%` : '—'}
+                              </div>
+                              <p className="text-[6px] font-black uppercase tracking-[0.3em] text-white/30">Match</p>
+                              {selectedJob.matchThreshold != null && app.matchScore > 0 && (
+                                <span
+                                  className={`text-[5px] font-black uppercase tracking-widest px-1.5 py-0.5 border ${isAbove
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                    : 'bg-red-500/10 border-red-500/20 text-red-400'
+                                    }`}
+                                >
+                                  {isAbove ? `≥${selectedJob.matchThreshold}%` : `<${selectedJob.matchThreshold}%`}
+                                </span>
+                              )}
+                            </div>
                           </button>
                         );
                       })
@@ -1034,7 +1326,6 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   </div>
                 </div>
 
-                {/* Right: detail */}
                 {selectedApplicant ? (
                   <div className="flex-1 flex flex-col overflow-hidden">
                     <CandidateDetailContent applicant={selectedApplicant} job={selectedJob} />
@@ -1044,7 +1335,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     <div className="size-20 border border-white/5 flex items-center justify-center">
                       <span className="material-symbols-outlined text-4xl text-white/10">person_search</span>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Select a candidate to review</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20">
+                      Select a candidate to review
+                    </p>
                   </div>
                 )}
               </div>
@@ -1055,8 +1348,12 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   <div className="shrink-0 px-4 py-4 border-b border-white/5 space-y-3 bg-[#080808]">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 space-y-1">
-                        <h2 className="text-sm font-black uppercase tracking-tight leading-tight truncate">{selectedJob.title}</h2>
-                        <p className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30">{resolveLocation(selectedJob.location)}</p>
+                        <h2 className="text-sm font-black uppercase tracking-tight leading-tight truncate">
+                          {selectedJob.title}
+                        </h2>
+                        <p className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30">
+                          {resolveLocation(selectedJob.location)}
+                        </p>
                       </div>
                       <StatusPill status={selectedJob.status} />
                     </div>
@@ -1068,16 +1365,22 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       </div>
                       <div className="px-3 py-2 border-r border-white/5">
                         <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Avg Score</p>
-                        <p className="text-lg font-black text-emerald-400">{avgScore > 0 ? `${avgScore}%` : '—'}</p>
+                        <p className="text-lg font-black text-emerald-400">
+                          {avgScore > 0 ? `${avgScore}%` : '—'}
+                        </p>
                       </div>
                       <div className="px-3 py-2">
                         <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Threshold</p>
-                        <p className="text-lg font-black text-emerald-400">{selectedJob.matchThreshold != null ? `${selectedJob.matchThreshold}%` : '—'}</p>
+                        <p className="text-lg font-black text-emerald-400">
+                          {selectedJob.matchThreshold != null ? `${selectedJob.matchThreshold}%` : '—'}
+                        </p>
                       </div>
                     </div>
 
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-base">search</span>
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-base">
+                        search
+                      </span>
                       <input
                         type="text"
                         value={searchQuery}
@@ -1103,23 +1406,44 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       </div>
                     ) : (
                       filteredApplicants.map((app) => {
-                        const isAbove = selectedJob.matchThreshold != null && app.matchScore >= selectedJob.matchThreshold;
+                        const isAbove =
+                          selectedJob.matchThreshold != null && app.matchScore >= selectedJob.matchThreshold;
+                        const scoreColor =
+                          app.matchScore >= 80
+                            ? 'text-emerald-400'
+                            : app.matchScore >= 60
+                              ? 'text-amber-400'
+                              : app.matchScore > 0
+                                ? 'text-red-400'
+                                : 'text-white/20';
+
                         return (
                           <button
                             key={app.id}
-                            onClick={() => { setSelectedApplicant(app); setDetailTab('profile'); }}
+                            onClick={() => {
+                              setSelectedApplicant(app);
+                              setDetailTab('profile');
+                            }}
                             className="w-full text-left px-4 py-3 border-b border-white/5 transition-all flex items-center gap-3 active:bg-white/[0.03]"
                           >
-                            <div className={`size-9 shrink-0 flex items-center justify-center text-[10px] font-black border ${isAbove ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'
-                              }`}>
+                            <div
+                              className={`size-9 shrink-0 flex items-center justify-center text-[10px] font-black border ${isAbove
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                : 'bg-white/5 border-white/10 text-white/40'
+                                }`}
+                            >
                               {(app.candidateName?.trim() || '?')[0].toUpperCase()}
                             </div>
                             <div className="flex-grow min-w-0">
-                              <p className="text-[10px] font-black uppercase tracking-tight truncate">{app.candidateName ?? 'Unknown'}</p>
-                              <p className="text-[7px] font-medium uppercase tracking-widest text-white/30 truncate">{app.candidateTitle ?? '—'}</p>
+                              <p className="text-[10px] font-black uppercase tracking-tight truncate">
+                                {app.candidateName ?? 'Unknown'}
+                              </p>
+                              <p className="text-[7px] font-medium uppercase tracking-widest text-white/30 truncate">
+                                {app.candidateTitle ?? '—'}
+                              </p>
                             </div>
                             <div className="text-right shrink-0">
-                              <p className={`text-xl font-black ${app.matchScore > 0 ? 'text-emerald-400' : 'text-white/20'}`}>
+                              <p className={`text-xl font-black ${scoreColor}`}>
                                 {app.matchScore > 0 ? `${app.matchScore}%` : '—'}
                               </p>
                               <p className="text-[5px] font-black uppercase text-white/20">Match</p>

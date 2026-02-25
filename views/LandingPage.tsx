@@ -26,7 +26,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 80;
+      const offset = 96; // Increased offset to account for header height (24 * 4 = 96px)
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
@@ -75,7 +75,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
   return (
     <div className="flex flex-col scroll-smooth bg-white dark:bg-background-dark text-black dark:text-white overflow-x-hidden">
       {/* Navigation */}
-      <header className="fixed top-0 w-full z-[120] glass-nav border-b border-black dark:border-white/10">
+      <header className="fixed top-0 w-full z-[130] glass-nav border-b border-black dark:border-white/10">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-6 md:px-10 h-20 md:h-24 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="size-9 md:size-12 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black hover:rotate-90 transition-transform duration-500 cursor-pointer">
@@ -108,7 +108,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
             </button>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden size-10 flex items-center justify-center border border-black/10 dark:border-white/10"
+              className="lg:hidden size-10 flex items-center justify-center border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all relative z-[140]"
             >
               <span className="material-symbols-outlined text-2xl">{isMobileMenuOpen ? 'close' : 'menu'}</span>
             </button>
@@ -116,8 +116,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         </div>
 
         {/* Mobile Nav Overlay */}
-        <div className={`fixed inset-0 z-[110] bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl lg:hidden transition-all duration-500 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-          <div className="flex flex-col p-8 sm:p-12 h-full justify-center gap-8 md:gap-12">
+        <div 
+          className={`mobile-menu-overlay fixed inset-0 z-[110] lg:hidden ${isMobileMenuOpen ? 'visible' : 'invisible'}`}
+          style={{ 
+            backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+            backdropFilter: 'none',
+            WebkitBackdropFilter: 'none'
+          }}
+        >
+          <div className={`flex flex-col p-8 sm:p-12 h-full justify-center gap-8 md:gap-12 pt-32 transition-all duration-500 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}>
             {['Features', 'Pricing', 'Process', 'Network'].map((item, idx) => (
               <button
                 key={item}
@@ -139,14 +146,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
       <main className="pt-20 md:pt-24">
         {/* Hero Section */}
-        <section className={`relative pt-12 sm:pt-20 md:pt-32 pb-20 sm:pb-32 md:pb-48 transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+        <section className={`relative pt-32 sm:pt-40 md:pt-48 pb-20 sm:pb-32 md:pb-48 transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
             <div className="inline-flex items-center gap-2 md:gap-3 border border-black/10 dark:border-white/10 px-4 md:px-6 py-2 text-[8px] md:text-[11px] font-black uppercase tracking-[0.4em] mb-8 md:mb-12">
               <span className="size-1.5 bg-black dark:bg-white animate-ping"></span>
               Neural Protocol Active
             </div>
 
-            <h1 className="text-[12vw] xs:text-[13vw] sm:text-[11vw] md:text-[10vw] font-black tracking-tighter leading-[0.85] mb-12 sm:mb-16 uppercase break-words">
+            <h1 className="text-[11vw] xs:text-[10vw] sm:text-[9vw] md:text-[8vw] lg:text-[7vw] font-black tracking-tighter leading-[1] mb-12 sm:mb-16 uppercase break-words">
               The <span className="text-black/5 dark:text-white/5 outline-text">Purest</span><br />
               Intelligence Match
             </h1>
@@ -488,6 +495,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         .no-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
+        }
+        .glass-nav {
+          background-color: rgba(255, 255, 255, 0.8) !important;
+          backdrop-filter: blur(10px);
+        }
+        .dark .glass-nav {
+          background-color: rgba(0, 0, 0, 0.8) !important;
+        }
+        /* Force mobile menu to be solid */
+        .mobile-menu-overlay {
+          background-color: #ffffff !important;
+          opacity: 1 !important;
+        }
+        .dark .mobile-menu-overlay {
+          background-color: #000000 !important;
         }
       `}</style>
     </div>

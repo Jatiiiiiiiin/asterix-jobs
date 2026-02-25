@@ -181,12 +181,6 @@ export async function calculateSemanticFidelityBackend(
   formData.append("auditSkills", JSON.stringify(auditSkills));
 
   // Diagnostic: log the exact payload sent and score received for each job.
-  // In DevTools you should see DIFFERENT candidateSkills for different accounts.
-  console.log(
-    `[Asterix Backend] Sending match request for "${job.title}"\n` +
-    `  candidateSkills (${candidateSkills.length}): ${candidateSkills.map(s => s.skill).join(", ") || "NONE — profile empty!"}\n` +
-    `  profileText length: ${profileText.length} chars`
-  );
 
   const res = await fetch(`${API_BASE}/match`, {
     method: "POST",
@@ -196,11 +190,7 @@ export async function calculateSemanticFidelityBackend(
   const text = await res.text();
   try {
     const result = JSON.parse(text);
-    console.log(
-      `[Asterix Backend] Response for "${job.title}":\n` +
-      `  fidelityScore: ${result.fidelityScore}%\n` +
-      `  breakdown: ${JSON.stringify(result.breakdown)}`
-    );
+    
     return result;
   } catch {
     throw new Error("Backend returned non-JSON response");

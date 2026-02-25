@@ -2,7 +2,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
-  signOut
+  signOut,
+  setPersistence,
+  browserLocalPersistence
 } from "firebase/auth";
 
 import { auth, googleProvider, linkedinProvider, db } from "./firebase";
@@ -15,7 +17,6 @@ export interface AuthUser {
   email: string | null;
   role: "candidate" | "recruiter";
   isOnboarded: boolean;
-  // ← NEW: Subscription/Plan fields
   isPremium?: boolean;
   isStudent?: boolean;
   photoURL?: string;
@@ -24,9 +25,6 @@ export interface AuthUser {
 
 /* ================= SESSION STORAGE KEY ================= */
 
-// sessionStorage is per-tab and per-window — unlike localStorage or Firebase's
-// auth.currentUser, it is NOT shared across browser tabs. Writing the uid here
-// at login time means each tab independently knows which account is active in it.
 const SESSION_UID_KEY   = "asterix_session_uid";
 const SESSION_EMAIL_KEY = "asterix_session_email";
 const SESSION_ROLE_KEY  = "asterix_session_role";
@@ -40,6 +38,12 @@ function writeSession(uid: string, email: string | null, role: string) {
 export function readSessionUid(): string | null {
   return sessionStorage.getItem(SESSION_UID_KEY);
 }
+
+/* ================= INITIALIZE PERSISTENCE ================= */
+// This ensures Firebase auth persists across page refreshes
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.error("Error setting persistence:", error);
+});
 
 /* ================= AUTH SERVICE ================= */
 
@@ -58,7 +62,6 @@ export const authService = {
       email: res.user.email,
       role,
       isOnboarded: false,
-      // ← NEW: Default subscription for new users
       subscription: {
         plan: "free",
         status: "active",
@@ -98,7 +101,6 @@ export const authService = {
         email: res.user.email,
         role: "candidate",
         isOnboarded: false,
-        // ← NEW: Default subscription for new users
         subscription: {
           plan: "free",
           status: "active",
@@ -120,7 +122,6 @@ export const authService = {
       email: res.user.email,
       role,
       isOnboarded: data?.isOnboarded || false,
-      // ← NEW: Extract subscription fields
       isPremium: data?.subscription?.isPremium || false,
       isStudent: data?.subscription?.isStudent || false,
       photoURL: res.user.photoURL || undefined,
@@ -145,7 +146,6 @@ export const authService = {
         email: res.user.email,
         role: role || "candidate",
         isOnboarded: false,
-        // ← NEW: Default subscription for new users
         subscription: {
           plan: "free",
           status: "active",
@@ -168,7 +168,6 @@ export const authService = {
       email: res.user.email,
       role: resolvedRole,
       isOnboarded: data?.isOnboarded || false,
-      // ← NEW: Extract subscription fields
       isPremium: data?.subscription?.isPremium || false,
       isStudent: data?.subscription?.isStudent || false,
       photoURL: res.user.photoURL || undefined,
@@ -177,13 +176,8 @@ export const authService = {
   },
 
   /* ========= GET CURRENT USER ========= */
-  // Reads from sessionStorage first (per-tab, set at login).
-  // Falls back to auth.currentUser only if sessionStorage is empty
-  // (e.g. on a hard refresh where the user was already logged in).
   async getCurrentUser(): Promise<AuthUser | null> {
     const sessionUid = readSessionUid();
-
-    // Determine which uid to use
     const firebaseUser = auth.currentUser;
     const uid = sessionUid || firebaseUser?.uid;
 
@@ -204,7 +198,6 @@ export const authService = {
       email: data.email ?? firebaseUser?.email ?? null,
       role: data.role,
       isOnboarded: data.isOnboarded || false,
-      // ← NEW: Extract subscription fields from Firestore
       isPremium: data.subscription?.isPremium || false,
       isStudent: data.subscription?.isStudent || false,
       photoURL: firebaseUser?.photoURL || data.photoURL || undefined,
@@ -220,7 +213,6 @@ export const authService = {
   },
 
   /* ========= UPDATE SUBSCRIPTION ========= */
-  // ← NEW: Helper function to update subscription/plan
   async updateSubscription(subscriptionData: {
     plan: "free" | "premium" | "student";
     status?: "active" | "canceled" | "expired";
@@ -234,7 +226,6 @@ export const authService = {
     const uid = readSessionUid() || auth.currentUser?.uid;
     if (!uid) throw new Error("No user session");
 
-    console.log("[💳 Auth] Updating subscription for user:", uid, subscriptionData);
 
     await setDoc(
       doc(db, "users", uid),
@@ -247,7 +238,6 @@ export const authService = {
       { merge: true }
     );
 
-    console.log("[✅ Auth] Subscription updated successfully");
   },
 
   /* ========= LOGOUT ========= */

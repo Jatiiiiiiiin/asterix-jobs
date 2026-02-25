@@ -20,9 +20,11 @@ import PostJobPage from "./views/PostJobPage";
 import TalentPipelinePage from "./views/TalentPipelinePage";
 import RecruiterReportsPage from "./views/RecruiterReportsPage";
 import ConfirmPaymentPage from "./views/ConfirmPaymentPage";
+import './App.css';
 
 /* Components */
 import AIChatOverlay from "./components/AIChatOverlay";
+import PublicRoute from "./views/PublicRoute";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const App: React.FC = () => {
@@ -57,6 +59,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async firebaseUser => {
+      
       if (!firebaseUser) {
         setUser(null);
         setIsLoading(false);
@@ -66,7 +69,8 @@ const App: React.FC = () => {
       try {
         const fullUser = await authService.getCurrentUser();
         setUser(fullUser);
-      } catch {
+      } catch (error) {
+        console.error('[❌ App] Error hydrating user:', error);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -146,7 +150,7 @@ const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center bg-white dark:bg-background-dark">
         <DotLottieReact
           src="https://lottie.host/7547a75b-5cbb-4088-8b15-8ba7276661b9/GS0Osb9TSY.lottie"
           loop
@@ -178,9 +182,24 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-white dark:bg-background-dark text-black dark:text-gray-100">
       <Routes>
 
-        {/* PUBLIC */}
-        <Route path="/" element={<LandingPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />} />
-        <Route path="/signup" element={<SignupPage onSignupSuccess={handlePostSignup} />} />
+        {/* PUBLIC - Redirect to dashboard if logged in */}
+        <Route 
+          path="/" 
+          element={
+            <PublicRoute user={user} isLoading={isLoading}>
+              <LandingPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+            </PublicRoute>
+          } 
+        />
+        
+        <Route 
+          path="/signup" 
+          element={
+            <PublicRoute user={user} isLoading={isLoading}>
+              <SignupPage onSignupSuccess={handlePostSignup} />
+            </PublicRoute>
+          } 
+        />
 
         {/* PAYMENT */}
         <Route

@@ -23,12 +23,10 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
   // Check if user came from "Buy Plan" flow
   useEffect(() => {
     const intent = localStorage.getItem('auth_intent');
-    console.log('[SignupPage] Mounted with intent:', intent);
     
     if (intent === 'buy_plan') {
       setBuyPlanIntent(true);
       setSelectedRole('candidate');
-      console.log('[SignupPage] Buy plan intent detected, forcing candidate role');
     }
   }, []);
 
@@ -115,31 +113,16 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
 
     try {
       const intentBefore = localStorage.getItem('auth_intent');
-      console.log('[SignupPage] Auth flow starting:', { 
-        isLogin, 
-        email,
-        intentBefore,
-        buyPlanIntent 
-      });
 
       let user: AuthUser;
 
       if (isLogin) {
-        console.log('[SignupPage] Attempting login with email:', email);
         user = await authService.loginWithEmail(email, password);
       } else {
-        console.log('[SignupPage] Attempting signup with email:', email, 'role:', selectedRole);
         user = await authService.signupWithEmail(email, password, selectedRole);
       }
 
       const intentAfter = localStorage.getItem('auth_intent');
-      console.log('[SignupPage] Auth successful:', { 
-        uid: user.uid,
-        role: user.role,
-        isOnboarded: user.isOnboarded,
-        intentAfter,
-        buyPlanIntentPreserved: intentBefore === intentAfter 
-      });
 
       setIsLoading(false);
       onSignupSuccess(user); // Route decision is made in App.tsx
