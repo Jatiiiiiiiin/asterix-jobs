@@ -22,6 +22,8 @@ import RecruiterReportsPage from "./views/RecruiterReportsPage";
 import ConfirmPaymentPage from "./views/ConfirmPaymentPage";
 import './App.css';
 
+
+
 /* Components */
 import AIChatOverlay from "./components/AIChatOverlay";
 import PublicRoute from "./views/PublicRoute";
