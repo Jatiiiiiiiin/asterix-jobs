@@ -22,12 +22,12 @@ import RecruiterReportsPage from "./views/RecruiterReportsPage";
 import ConfirmPaymentPage from "./views/ConfirmPaymentPage";
 import './App.css';
 
-
-
 /* Components */
 import AIChatOverlay from "./components/AIChatOverlay";
 import PublicRoute from "./views/PublicRoute";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+
+
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -36,7 +36,6 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  /* ───────────────── THEME ───────────────── */
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");
