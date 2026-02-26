@@ -66,6 +66,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   const [resumePreviewUrl, setResumePreviewUrl] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'score' | 'time'>('score');
 
   /* ── Plan ── */
   const { canManualApply, plan, isLoading: isPlanLoading } = usePlan();
@@ -545,8 +546,17 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     navigate(`/job/${job.id}`, { state: { job } });
   };
 
-  /* ── Sorted jobs by match score ── */
-  const sortedJobs = [...dynamicJobs].sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+  /* ── Sorted jobs ── */
+  const sortedJobs = [...dynamicJobs].sort((a, b) => {
+    if (sortBy === 'score') {
+      return (b.matchScore || 0) - (a.matchScore || 0);
+    } else {
+      // Sort by postedDate (recency)
+      const dateA = a.postedDate ? new Date(a.postedDate).getTime() : 0;
+      const dateB = b.postedDate ? new Date(b.postedDate).getTime() : 0;
+      return dateB - dateA;
+    }
+  });
   const canViewResume = !!resumeFileRef.current;
 
   /* ════════════════════════════════════════════════════════
@@ -712,7 +722,23 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             <div className="lg:col-span-8 space-y-6">
               <div className="flex justify-between items-center px-2">
                 <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter">Live Compatibility Feed</h3>
-                <span className="text-[8px] font-black uppercase tracking-widest opacity-30">Sort by Fidelity</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-30 hidden sm:inline">Sort Nodes:</span>
+                  <div className="flex border border-black/10 dark:border-white/10 p-1 bg-black/5 dark:bg-white/5">
+                    <button
+                      onClick={() => setSortBy('score')}
+                      className={`px-3 py-1 text-[8px] font-black uppercase tracking-tighter transition-all ${sortBy === 'score' ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg' : 'opacity-40 hover:opacity-100'}`}
+                    >
+                      Fidelity
+                    </button>
+                    <button
+                      onClick={() => setSortBy('time')}
+                      className={`px-3 py-1 text-[8px] font-black uppercase tracking-tighter transition-all ${sortBy === 'time' ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg' : 'opacity-40 hover:opacity-100'}`}
+                    >
+                      Recency
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {isLoadingJobs ? (

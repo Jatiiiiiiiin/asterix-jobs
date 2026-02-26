@@ -57,10 +57,10 @@ const EMPTY: FormState = {
 };
 
 const DEPARTMENTS = ['Engineering', 'Design', 'Product', 'Operations', 'Marketing', 'Sales', 'Finance', 'Legal'];
-const EMP_TYPES   = ['Full-Time', 'Part-Time', 'Contract', 'Freelance', 'Internship'];
-const CURRENCIES  = ['USD', 'EUR', 'GBP', 'AED', 'INR', 'SGD', 'AUD'];
+const EMP_TYPES = ['Full-Time', 'Part-Time', 'Contract', 'Freelance', 'Internship'];
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'AED', 'INR', 'SGD', 'AUD'];
 
-const splitLines  = (s: string) => s.split('\n').map(l => l.trim()).filter(Boolean);
+const splitLines = (s: string) => s.split('\n').map(l => l.trim()).filter(Boolean);
 const splitCommas = (s: string) => s.split(',').map(l => l.trim()).filter(Boolean);
 
 /* ================================================================
@@ -76,6 +76,24 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [activeSection, setActiveSection] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /* ── Load Recruiter Profile for pre-filling ───────────────── */
+  useEffect(() => {
+    const loadProfile = async () => {
+      const uid = readSessionUid();
+      if (!uid) return;
+
+      const { doc, getDoc } = await import('firebase/firestore');
+      const snap = await getDoc(doc(db, 'profiles', uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.company?.name) {
+          setForm(prev => ({ ...prev, companyName: data.company.name }));
+        }
+      }
+    };
+    loadProfile();
+  }, []);
 
   /* ── AI analysis on description change ─────────────────────── */
   useEffect(() => {
@@ -102,10 +120,10 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
 
   /* ── Validation ─────────────────────────────────────────────── */
   const validate = (): string | null => {
-    if (!form.title.trim())       return 'Job title is required.';
+    if (!form.title.trim()) return 'Job title is required.';
     if (!form.companyName.trim()) return 'Company name is required.';
-    if (!form.location.trim())    return 'Location is required.';
-    if (!form.jobSummary.trim())  return 'Job summary is required.';
+    if (!form.location.trim()) return 'Location is required.';
+    if (!form.jobSummary.trim()) return 'Job summary is required.';
     return null;
   };
 
@@ -134,10 +152,10 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
         recruiterId,
 
         // Core identity
-        title:           form.title.trim(),
-        department:      form.department,
-        employmentType:  form.employmentType,
-        status:          jobStatus,
+        title: form.title.trim(),
+        department: form.department,
+        employmentType: form.employmentType,
+        status: jobStatus,
 
         // Company
         company: {
@@ -146,36 +164,36 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
 
         // Location
         location: {
-          city:         form.location.trim(),
-          type:         form.remoteAllowed ? 'Remote' : 'On-site',
+          city: form.location.trim(),
+          type: form.remoteAllowed ? 'Remote' : 'On-site',
           remoteAllowed: form.remoteAllowed,
         },
 
         // Compensation
         salaryRange: {
-          min:      form.salaryMin ? parseInt(form.salaryMin, 10) : null,
-          max:      form.salaryMax ? parseInt(form.salaryMax, 10) : null,
+          min: form.salaryMin ? parseInt(form.salaryMin, 10) : null,
+          max: form.salaryMax ? parseInt(form.salaryMax, 10) : null,
           currency: form.currency,
         },
 
         // Job content
-        openings:           parseInt(form.openings, 10) || 1,
+        openings: parseInt(form.openings, 10) || 1,
         experienceRequired: form.experienceRequired.trim(),
-        jobSummary:         form.jobSummary.trim(),
-        responsibilities:   splitLines(form.responsibilities),
-        requiredSkills:     splitCommas(form.requiredSkills),
-        preferredSkills:    splitCommas(form.preferredSkills),
-        techStack:          splitCommas(form.techStack),
-        benefits:           splitLines(form.benefits),
+        jobSummary: form.jobSummary.trim(),
+        responsibilities: splitLines(form.responsibilities),
+        requiredSkills: splitCommas(form.requiredSkills),
+        preferredSkills: splitCommas(form.preferredSkills),
+        techStack: splitCommas(form.techStack),
+        benefits: splitLines(form.benefits),
 
         // Matching
-        matchThreshold:      form.matchThreshold,
+        matchThreshold: form.matchThreshold,
         applicationDeadline: form.applicationDeadline || null,
 
         // Timestamps
-        postedDate:  new Date().toISOString().split('T')[0],
-        createdAt:   serverTimestamp(),
-        updatedAt:   serverTimestamp(),
+        postedDate: new Date().toISOString().split('T')[0],
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
 
       await addDoc(collection(db, 'jobs'), payload);
@@ -340,11 +358,10 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
                 <button
                   type="button"
                   onClick={toggle('remoteAllowed')}
-                  className={`w-full px-5 py-4 text-[9px] font-black uppercase tracking-widest border transition-colors ${
-                    form.remoteAllowed
+                  className={`w-full px-5 py-4 text-[9px] font-black uppercase tracking-widest border transition-colors ${form.remoteAllowed
                       ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
                       : 'border-white/10 text-white/30 hover:border-white/20'
-                  }`}
+                    }`}
                 >
                   {form.remoteAllowed ? '✓ Remote OK' : 'On-site Only'}
                 </button>
@@ -504,11 +521,10 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
             <button
               onClick={activate}
               disabled={status === 'saving' || status === 'saved'}
-              className={`flex-1 py-5 text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-2 ${
-                status === 'saved'
+              className={`flex-1 py-5 text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-2 ${status === 'saved'
                   ? 'bg-emerald-500 text-white'
                   : 'bg-white text-black hover:bg-white/80'
-              }`}
+                }`}
             >
               {status === 'saving' ? (
                 <>
@@ -591,14 +607,12 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
               {sections.map((sec, i) => (
                 <div key={sec} className="flex items-center gap-3">
                   <div
-                    className={`size-1.5 rounded-full shrink-0 transition-colors ${
-                      filled[i] ? 'bg-emerald-500' : 'bg-white/10'
-                    }`}
+                    className={`size-1.5 rounded-full shrink-0 transition-colors ${filled[i] ? 'bg-emerald-500' : 'bg-white/10'
+                      }`}
                   />
                   <span
-                    className={`text-[8px] font-black uppercase tracking-widest transition-colors ${
-                      filled[i] ? 'text-white/60' : 'text-white/20'
-                    }`}
+                    className={`text-[8px] font-black uppercase tracking-widest transition-colors ${filled[i] ? 'text-white/60' : 'text-white/20'
+                      }`}
                   >
                     {sec}
                   </span>
@@ -658,9 +672,8 @@ const FormSection: React.FC<{
 }> = ({ index, label, active, onFocus, children }) => (
   <div
     onFocus={onFocus}
-    className={`border-t border-white/5 py-8 space-y-5 transition-opacity ${
-      active === index ? 'opacity-100' : 'opacity-60 hover:opacity-80'
-    }`}
+    className={`border-t border-white/5 py-8 space-y-5 transition-opacity ${active === index ? 'opacity-100' : 'opacity-60 hover:opacity-80'
+      }`}
   >
     <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/30">{label}</p>
     {children}

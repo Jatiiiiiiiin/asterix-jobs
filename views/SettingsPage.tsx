@@ -14,36 +14,70 @@ interface SettingsPageProps {
 const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, role, onLogout }) => {
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab]     = useState('ACCOUNT');
-  const [isSaving, setIsSaving]       = useState(false);
-  const [saveState, setSaveState]     = useState<'idle' | 'saving' | 'done'>('idle');
-  const [isMenuOpen, setIsMenuOpen]   = useState(false);
+  const [activeTab, setActiveTab] = useState('ACCOUNT');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'done'>('idle');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutPhase, setLogoutPhase] = useState(0);
-  const [glitchText, setGlitchText]   = useState('SIGN OUT');
+  const [glitchText, setGlitchText] = useState('SIGN OUT');
 
   /* ── Auth user (includes isPremium / isStudent) ── */
   const [user, setUser] = useState<AuthUser | null>(null);
   const [account, setAccount] = useState({ email: '', name: '', phone: '' });
+  const [company, setCompany] = useState({ name: '', website: '', bio: '', headCount: '' });
+
+  // Add import for Firestore
+  // import { doc, getDoc, setDoc } from 'firebase/firestore';
+  // import { db } from '../firebase';
 
   useEffect(() => {
     let mounted = true;
-    authService.getCurrentUser().then((u) => {
+    const loadSettings = async () => {
+      const u = await authService.getCurrentUser();
       if (!mounted || !u) return;
       setUser(u);
-      setAccount({
-        email: u.email || '',
-        name:  u.displayName || '',
-        phone: localStorage.getItem(`asterix_phone_${u.uid}`) || '',
-      });
-    });
+
+      // Try to load from Firestore 'profiles' collection first
+      const { doc, getDoc } = await import('firebase/firestore');
+      const { db } = await import('../firebase');
+      const snap = await getDoc(doc(db, 'profiles', u.uid));
+
+      if (snap.exists()) {
+        const data = snap.data();
+        setAccount({
+          email: u.email || '',
+          name: data.profile?.name || u.displayName || '',
+          phone: data.contact?.phone || '',
+        });
+        if (role === 'recruiter') {
+          setCompany({
+            name: data.company?.name || '',
+            website: data.company?.website || '',
+            bio: data.company?.bio || '',
+            headCount: data.company?.headCount || '',
+          });
+        }
+        if (data.preferences) {
+          setPreferences(prev => ({ ...prev, ...data.preferences }));
+        }
+      } else {
+        // Fallback to existing logic if no Firestore profile found
+        setAccount({
+          email: u.email || '',
+          name: u.displayName || '',
+          phone: localStorage.getItem(`asterix_phone_${u.uid}`) || '',
+        });
+      }
+    };
+    loadSettings();
     return () => { mounted = false; };
-  }, []);
+  }, [role]);
 
   /* ── Plan helpers ── */
-  const isPremium  = user?.isPremium  ?? false;
-  const isStudent  = user?.isStudent  ?? false;
-  const hasAccess  = isPremium || isStudent;
+  const isPremium = user?.isPremium ?? false;
+  const isStudent = user?.isStudent ?? false;
+  const hasAccess = isPremium || isStudent;
 
   /* ── Upgrade handler ── */
   const handleUpgrade = (plan: 'student' | 'recruiter') => {
@@ -54,9 +88,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
 
   /* ── Preferences ── */
   const [preferences, setPreferences] = useState({
-    publicProfile:      true,
-    aiAssistant:        true,
-    autoApply:          false,
+    publicProfile: true,
+    aiAssistant: true,
+    autoApply: false,
     emailNotifications: true,
   });
 
@@ -78,21 +112,51 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
     setAccount(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setCompany(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
   /* ── Save ── */
   const saveSettings = async () => {
-    if (isSaving) return;
+    if (isSaving || !user?.uid) return;
     setIsSaving(true);
     setSaveState('saving');
-    if (user?.uid) {
+
+    try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      const { db } = await import('../firebase');
+
+      const payload: any = {
+        profile: { name: account.name },
+        contact: { phone: account.phone },
+        preferences: preferences,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (role === 'recruiter') {
+        payload.company = company;
+      }
+
+      await setDoc(doc(db, 'profiles', user.uid), payload, { merge: true });
+
+      if (typeof (window as any).addNotification === 'function') {
+        (window as any).addNotification('Neural Link', 'Operation parameters synchronized.', 'success');
+      }
+
+      // Legacy support for other pages reading from localStorage
       localStorage.setItem(`asterix_phone_${user.uid}`, account.phone);
-      const session = JSON.parse(localStorage.getItem('asterix_auth_session') || '{}');
-      localStorage.setItem('asterix_auth_session', JSON.stringify({ ...session, displayName: account.name, email: account.email }));
+      localStorage.setItem(`asterix_settings_prefs_${user.uid}`, JSON.stringify(preferences));
+
+      setSaveState('done');
+    } catch (err) {
+      console.error("[Settings] Save failed:", err);
+      setSaveState('idle');
+    } finally {
+      await new Promise(r => setTimeout(r, 900));
+      setIsSaving(false);
+      await new Promise(r => setTimeout(r, 2000));
+      setSaveState('idle');
     }
-    await new Promise(r => setTimeout(r, 900));
-    setIsSaving(false);
-    setSaveState('done');
-    await new Promise(r => setTimeout(r, 2000));
-    setSaveState('idle');
   };
 
   /* ── Logout animation ── */
@@ -125,65 +189,87 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
     onLogout();
   };
 
-  /* ── Tabs ── */
-  const tabs = [
-    { id: 'ACCOUNT',       label: 'Account',  icon: 'person'         },
-    { id: 'BILLING',       label: 'Billing',  icon: 'credit_card'    },
-    { id: 'AI',            label: 'Neural',   icon: 'neurology'      },
-    { id: 'SECURITY',      label: 'Security', icon: 'lock'           },
-    { id: 'NOTIFICATIONS', label: 'Alerts',   icon: 'notifications'  },
-  ];
+  const tabs = role === 'candidate'
+    ? [
+      { id: 'ACCOUNT', label: 'Account', icon: 'person' },
+      { id: 'BILLING', label: 'Billing', icon: 'credit_card' },
+      { id: 'AI', label: 'Neural', icon: 'neurology' },
+      { id: 'SECURITY', label: 'Security', icon: 'lock' },
+      { id: 'NOTIFICATIONS', label: 'Alerts', icon: 'notifications' },
+    ]
+    : [
+      { id: 'ACCOUNT', label: 'Account', icon: 'person' },
+      { id: 'COMPANY', label: 'Company', icon: 'business' },
+      { id: 'BILLING', label: 'Billing', icon: 'credit_card' },
+      { id: 'AI', label: 'Neural', icon: 'neurology' },
+      { id: 'SECURITY', label: 'Security', icon: 'lock' },
+    ];
 
   const aiFeatures = role === 'candidate'
     ? [
-        { id: 'publicProfile',      label: 'Visible Profile',     desc: 'Allow recruiters to discover your node.'        },
-        { id: 'aiAssistant',        label: 'Career Chatbot',      desc: 'Enable AI-driven chat assistance.'              },
-        { id: 'autoApply',          label: 'Auto-Pilot',          desc: 'Auto-apply to 95%+ fidelity matches.'           },
-        { id: 'emailNotifications', label: 'Alert Pings',         desc: 'Receive match and status notifications.'        },
-      ]
+      { id: 'publicProfile', label: 'Visible Profile', desc: 'Allow recruiters to discover your node.' },
+      { id: 'aiAssistant', label: 'Career Chatbot', desc: 'Enable AI-driven chat assistance.' },
+      { id: 'autoApply', label: 'Auto-Pilot', desc: 'Auto-apply to 95%+ fidelity matches.' },
+      { id: 'emailNotifications', label: 'Alert Pings', desc: 'Receive match and status notifications.' },
+    ]
     : [
-        { id: 'publicProfile',      label: 'Enterprise Visibility', desc: 'Allow vetted candidates to see mandate context.' },
-        { id: 'aiAssistant',        label: 'Recruitment Copilot',   desc: 'Enable AI-driven sourcing and audits.'           },
-        { id: 'autoApply',          label: 'Neural Sourcing',       desc: 'Auto-shortlist leads with 95%+ fit scores.'      },
-        { id: 'emailNotifications', label: 'Pipeline Alerts',       desc: 'Receive real-time pipeline notifications.'       },
-      ];
+      { id: 'publicProfile', label: 'Enterprise Visibility', desc: 'Allow vetted candidates to see mandate context.' },
+      { id: 'aiAssistant', label: 'Recruitment Copilot', desc: 'Enable AI-driven sourcing and audits.' },
+      { id: 'autoApply', label: 'Neural Sourcing', desc: 'Auto-shortlist leads with 95%+ fit scores.' },
+      { id: 'emailNotifications', label: 'Pipeline Alerts', desc: 'Receive real-time pipeline notifications.' },
+    ];
 
   /* ── Plan config per role ── */
   const planConfig = role === 'candidate'
     ? {
-        freeName:     'Free Tier',
-        paidName:     isStudent ? 'Student Plan' : 'Premium',
-        freeDesc:     'Core neural features active. Auto-pilot available on all mandates.',
-        paidDesc:     isStudent
-          ? 'Student plan active — manual initialize and full pipeline access unlocked.'
-          : 'Premium active — unlimited auto-pilot, manual apply, and priority matching.',
-        upgradeLabel: 'Upgrade to Student Plan (₹99/mo)',
-        price:        '₹99 / month',
-        features: [
-          { label: 'Auto-Pilot Apply',        free: true  },
-          { label: 'AI Match Scoring',         free: true  },
-          { label: 'Manual Initialize',        free: false },
-          { label: 'Priority in Pipeline',     free: false },
-          { label: 'Resume Cloud Storage',     free: false },
-          { label: 'Unlimited Applications',   free: false },
-        ],
-      }
+      freeName: 'Free Tier',
+      paidName: isStudent ? 'Student Plan' : 'Premium',
+      freeDesc: 'Core neural features active. Auto-pilot available on all mandates.',
+      paidDesc: isStudent
+        ? 'Student plan active — manual initialize and full pipeline access unlocked.'
+        : 'Premium active — unlimited auto-pilot, manual apply, and priority matching.',
+      upgradeLabel: 'Upgrade to Student Plan (₹99/mo)',
+      price: '₹99 / month',
+      features: [
+        { label: 'Auto-Pilot Apply', free: true },
+        { label: 'AI Match Scoring', free: true },
+        { label: 'Manual Initialize', free: false },
+        { label: 'Priority in Pipeline', free: false },
+        { label: 'Resume Cloud Storage', free: false },
+        { label: 'Unlimited Applications', free: false },
+      ],
+    }
     : {
-        freeName:     'Starter',
-        paidName:     'Pro',
-        freeDesc:     'Post mandates and receive auto-matched candidates. Core sourcing tools active.',
-        paidDesc:     'Pro plan active — advanced analytics, bulk sourcing, and priority candidate access.',
-        upgradeLabel: 'Upgrade to Pro (₹1,999/mo)',
-        price:        '₹1,999 / month',
-        features: [
-          { label: 'Post Mandates',            free: true  },
-          { label: 'Auto-Match Candidates',    free: true  },
-          { label: 'Basic Analytics',          free: true  },
-          { label: 'Advanced Sourcing Intel',  free: false },
-          { label: 'Bulk Candidate Export',    free: false },
-          { label: 'Priority Support',         free: false },
-        ],
-      };
+      freeName: 'Starter',
+      paidName: 'Pro',
+      freeDesc: 'Post mandates and receive auto-matched candidates. Core sourcing tools active.',
+      paidDesc: 'Pro plan active — advanced analytics, bulk sourcing, and priority candidate access.',
+      upgradeLabel: 'Upgrade to Pro (₹1,999/mo)',
+      price: '₹1,999 / month',
+      features: [
+        { label: 'Post Mandates', free: true },
+        { label: 'Auto-Match Candidates', free: true },
+        { label: 'Basic Analytics', free: true },
+        { label: 'Advanced Sourcing Intel', free: false },
+        { label: 'Bulk Candidate Export', free: false },
+        { label: 'Priority Support', free: false },
+      ],
+    };
+
+  /* ── Security actions ── */
+  const handleSecurityAction = async (action: string) => {
+    if (action === 'Rotate Access Keys' && user?.email) {
+      try {
+        const { getAuth, sendPasswordResetEmail } = await import('firebase/auth');
+        await sendPasswordResetEmail(getAuth(), user.email);
+        alert(`Reset link transmitted to ${user.email}`);
+      } catch (err) {
+        console.error("Reset failed:", err);
+      }
+    } else {
+      alert(`${action} protocol initiated.`);
+    }
+  };
 
   /* ── Logout overlay ── */
   const logoutOverlay = isLoggingOut && logoutPhase >= 2 && (
@@ -202,10 +288,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
           </div>
         </div>
         <div className="font-mono text-left space-y-3 min-w-[280px]">
-          <TerminalLine text="SESSION_TOKEN.revoke()"  delay={0}   color="text-white/80" />
+          <TerminalLine text="SESSION_TOKEN.revoke()" delay={0} color="text-white/80" />
           <TerminalLine text="NEURAL_SYNC.terminate()" delay={220} color="text-white/50" />
-          <TerminalLine text="IDENTITY.wipe()"         delay={440} color="text-white/50" />
-          <TerminalLine text="ACCESS: DENIED"          delay={700} color="text-red-400" bold />
+          <TerminalLine text="IDENTITY.wipe()" delay={440} color="text-white/50" />
+          <TerminalLine text="ACCESS: DENIED" delay={700} color="text-red-400" bold />
         </div>
         <div className="w-64 space-y-2">
           <div className="h-px bg-white/10 relative overflow-hidden">
@@ -308,9 +394,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                               {role === 'candidate' ? (isStudent ? 'STUDENT' : 'PREMIUM') : 'PRO'}
                             </span>
                           )}
-                          {role === 'recruiter' && (
-                            <span className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border border-purple-400 text-purple-400">RECRUITER</span>
-                          )}
+                          <span className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border border-purple-400 text-purple-400">{role.toUpperCase()}</span>
                         </div>
                       </div>
                     </div>
@@ -319,8 +403,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                   <div className="grid gap-8">
                     {[
                       { label: 'Operational ID (Email)', name: 'email', type: 'email', value: account.email },
-                      { label: 'Display Name',           name: 'name',  type: 'text',  value: account.name  },
-                      { label: 'Contact Node (Phone)',   name: 'phone', type: 'tel',   value: account.phone },
+                      { label: 'Display Name', name: 'name', type: 'text', value: account.name },
+                      { label: 'Contact Node (Phone)', name: 'phone', type: 'tel', value: account.phone },
                     ].map(field => (
                       <div key={field.name} className="space-y-3">
                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{field.label}</label>
@@ -329,10 +413,48 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                           name={field.name}
                           value={field.value}
                           onChange={handleAccountChange}
+                          readOnly={field.name === 'email'}
+                          className={`w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-black dark:focus:border-white p-4 md:p-5 text-xs md:text-sm font-bold outline-none uppercase tracking-wide transition-colors ${field.name === 'email' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* ── COMPANY ── */}
+              {activeTab === 'COMPANY' && role === 'recruiter' && (
+                <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-400">
+                  <h3 className="text-lg md:text-xl font-black uppercase tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Enterprise Profile</h3>
+
+                  <div className="grid gap-8">
+                    {[
+                      { label: 'Organization Name', name: 'name', type: 'text', value: company.name },
+                      { label: 'Official Website', name: 'website', type: 'url', value: company.website },
+                      { label: 'Headcount / Size', name: 'headCount', type: 'text', value: company.headCount },
+                    ].map(field => (
+                      <div key={field.name} className="space-y-3">
+                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{field.label}</label>
+                        <input
+                          type={field.type}
+                          name={field.name}
+                          value={field.value}
+                          onChange={handleCompanyChange}
                           className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-black dark:focus:border-white p-4 md:p-5 text-xs md:text-sm font-bold outline-none uppercase tracking-wide transition-colors"
                         />
                       </div>
                     ))}
+
+                    <div className="space-y-3">
+                      <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Organization Manifesto (Bio)</label>
+                      <textarea
+                        name="bio"
+                        value={company.bio}
+                        onChange={handleCompanyChange}
+                        rows={4}
+                        className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-black dark:focus:border-white p-4 md:p-5 text-xs md:text-sm font-bold outline-none uppercase tracking-wide transition-colors resize-none"
+                      />
+                    </div>
                   </div>
                 </section>
               )}
@@ -446,12 +568,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                   <h3 className="text-lg md:text-xl font-black uppercase tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Access Control</h3>
                   <div className="space-y-4">
                     {[
-                      { label: 'Rotate Access Keys', icon: 'key',     desc: 'Generate a new password reset link.'      },
-                      { label: 'Active Sessions',    icon: 'devices', desc: 'View and revoke all logged-in devices.'   },
-                      { label: 'Two-Factor Auth',    icon: 'shield',  desc: 'Add an extra verification layer.'         },
+                      { label: 'Rotate Access Keys', icon: 'key', desc: 'Generate a new password reset link.' },
+                      { label: 'Active Sessions', icon: 'devices', desc: 'View and revoke all logged-in devices.' },
+                      { label: 'Two-Factor Auth', icon: 'shield', desc: 'Add an extra verification layer.' },
                     ].map(action => (
                       <button
                         key={action.label}
+                        onClick={() => handleSecurityAction(action.label)}
                         className="w-full flex items-center justify-between p-5 md:p-6 border border-black/10 dark:border-white/10 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all group text-left"
                       >
                         <div className="flex items-center gap-4">
@@ -474,8 +597,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                   <h3 className="text-lg md:text-xl font-black uppercase tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Alert Matrix</h3>
                   <div className="divide-y divide-black/5 dark:divide-white/5">
                     {[
-                      { id: 'emailNotifications', label: 'Email Pings',    desc: 'Match alerts and application updates.'           },
-                      { id: 'publicProfile',       label: 'Profile Views',  desc: 'Notify when a recruiter views your profile.'     },
+                      { id: 'emailNotifications', label: 'Email Pings', desc: 'Match alerts and application updates.' },
+                      { id: 'publicProfile', label: 'Profile Views', desc: 'Notify when a recruiter views your profile.' },
                     ].map(f => (
                       <div key={f.id} className="flex items-center justify-between py-8">
                         <div className="space-y-2 pr-8">
@@ -512,8 +635,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                   {saveState === 'saving'
                     ? <span className="material-symbols-outlined animate-spin">refresh</span>
                     : saveState === 'done'
-                    ? <><span className="material-symbols-outlined">check_circle</span> Done</>
-                    : 'Execute Sync'}
+                      ? <><span className="material-symbols-outlined">check_circle</span> Done</>
+                      : 'Execute Sync'}
                 </button>
               </div>
 
