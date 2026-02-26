@@ -597,12 +597,12 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         {/* ── HEADER ── */}
         <header className="px-6 md:px-12 py-8 md:py-12 border-b border-black/5 dark:border-white/5 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 sticky top-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl z-[100]">
           <div className="flex items-center gap-4 w-full md:w-auto">
-            <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2">
+            <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2 text-black dark:text-white">
               <span className="material-symbols-outlined">menu</span>
             </button>
-            <div>
-              <div className="text-[9px] font-black uppercase tracking-[0.5em] opacity-40 mb-1">Neural Control Center</div>
-              <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">My Dashboard</h1>
+            <div className="min-w-0">
+              <div className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.5em] opacity-40 mb-0.5 md:mb-1 truncate">Neural Control Center</div>
+              <h1 className="text-2xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter truncate">My Dashboard</h1>
             </div>
           </div>
 
@@ -627,25 +627,25 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             )}
 
             {/* Auto-pilot toggle */}
-            <div className={`flex items-center gap-4 px-4 md:px-6 py-3 md:py-4 border-2 transition-all
+            <div className={`flex items-center gap-3 md:gap-4 px-3 md:px-6 py-2.5 md:py-4 border-2 transition-all
               ${isAutoPilotOn
                 ? 'bg-emerald-500/5 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]'
                 : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10'}`}
             >
               <div className="flex flex-col text-right">
-                <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Autonomous Agent</span>
-                <span className={`text-[9px] font-black uppercase ${isAutoPilotOn ? 'text-emerald-500' : 'opacity-40'}`}>
+                <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest opacity-40">Agent</span>
+                <span className={`text-[8px] md:text-[9px] font-black uppercase ${isAutoPilotOn ? 'text-emerald-500' : 'opacity-40'}`}>
                   {isAutoPilotOn ? 'ACTIVE' : 'OFFLINE'}
                 </span>
               </div>
               <button
                 onClick={toggleAutoPilot}
-                className={`size-10 md:size-12 flex items-center justify-center border-2 transition-all
+                className={`size-8 md:size-12 flex items-center justify-center border-2 transition-all
                   ${isAutoPilotOn
                     ? 'bg-emerald-500 border-emerald-500 text-white shadow-[0_0_40px_rgba(16,185,129,0.4)]'
                     : 'border-black dark:border-white'}`}
               >
-                <span className={`material-symbols-outlined text-xl ${isAutoPilotOn ? 'animate-spin-slow' : ''}`}>
+                <span className={`material-symbols-outlined text-base md:text-xl ${isAutoPilotOn ? 'animate-spin-slow' : ''}`}>
                   {isAutoPilotOn ? 'auto_awesome' : 'power_settings_new'}
                 </span>
               </button>
@@ -689,7 +689,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
           </div>
         </header>
 
-        <div className="p-6 md:p-12 space-y-8 md:space-y-12 pb-64">
+        <div className="p-4 sm:p-6 md:p-12 space-y-8 md:space-y-12 pb-64">
 
           {/* Vectorizing progress bar */}
           {isVectorizing && (
@@ -699,7 +699,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
           )}
 
           {/* ── STATS ── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 border border-black dark:border-white/20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-black dark:border-white/20">
             {[
               { label: 'Network Mandates', val: isLoadingJobs ? '...' : dynamicJobs.length },
               { label: 'Applied Protocols', val: dynamicJobs.filter(j => j.applied).length },
@@ -708,10 +708,10 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             ].map((s, i) => (
               <div
                 key={i}
-                className="p-4 md:p-8 border-r last:border-0 border-b lg:border-b-0 border-black/5 dark:border-white/5 group hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+                className="p-4 md:p-8 border-r last:border-0 border-b lg:border-b-0 border-black/10 dark:border-white/10 group hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
               >
-                <p className="text-[8px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-60">{s.label}</p>
-                <p className="text-2xl md:text-4xl font-black uppercase tracking-tighter mt-1">{s.val}</p>
+                <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-60">{s.label}</p>
+                <p className="text-xl md:text-4xl font-black uppercase tracking-tighter mt-1">{s.val}</p>
               </div>
             ))}
           </div>
@@ -720,8 +720,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
             {/* ── JOB FEED ── */}
             <div className="lg:col-span-8 space-y-6">
-              <div className="flex justify-between items-center px-2">
-                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter">Live Compatibility Feed</h3>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2">
+                <h3 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Live Compatibility Feed</h3>
                 <div className="flex items-center gap-4">
                   <span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-30 hidden sm:inline">Sort Nodes:</span>
                   <div className="flex border border-black/10 dark:border-white/10 p-1 bg-black/5 dark:bg-white/5">
@@ -756,8 +756,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                   {sortedJobs.map((job) => (
                     <div
                       key={job.id}
-                      className={`group border-2 border-black dark:border-white/10 p-6 md:p-8 transition-all duration-500 relative overflow-hidden bg-white dark:bg-background-dark hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black
-                        ${job.applied && job.matchScore >= (job.matchThreshold ?? 65) ? 'border-l-[8px] border-l-emerald-500 shadow-lg' : ''}`}
+                      className={`group border-2 border-black dark:border-white/10 p-4 sm:p-6 md:p-8 transition-all duration-500 relative overflow-hidden bg-white dark:bg-background-dark hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black
+                        ${job.applied && job.matchScore >= (job.matchThreshold ?? 65) ? 'border-l-[6px] md:border-l-[8px] border-l-emerald-500 shadow-lg' : ''}`}
                     >
                       {/* Analyzing overlay */}
                       {job.analyzing && (
@@ -777,15 +777,15 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                         <div className="flex-grow space-y-4 min-w-0">
                           <div className="flex justify-between gap-4">
                             <div className="min-w-0">
-                              <h2 className="text-xl md:text-3xl font-black uppercase tracking-tighter break-words">{job.title}</h2>
-                              <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mt-1">
+                              <h2 className="text-lg md:text-3xl font-black uppercase tracking-tighter break-words leading-tight">{job.title}</h2>
+                              <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 mt-1.5">
                                 {(typeof job.company === 'string' ? job.company : job.company?.name) || 'Unknown'} •{' '}
                                 {(typeof job.location === 'string' ? job.location : job.location?.city) || 'Remote'}
                               </p>
                             </div>
                             <div className="text-right shrink-0">
-                              <div className="text-4xl md:text-6xl font-black text-emerald-500">{job.matchScore ?? 0}%</div>
-                              <div className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30">FIDELITY</div>
+                              <div className="text-3xl md:text-6xl font-black text-emerald-500 leading-none">{job.matchScore ?? 0}%</div>
+                              <div className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] opacity-30 mt-1">FIDELITY</div>
                             </div>
                           </div>
 

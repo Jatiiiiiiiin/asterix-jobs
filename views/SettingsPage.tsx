@@ -326,26 +326,26 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
           {/* Header */}
           <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div className="flex items-center gap-4">
-              <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2">
+              <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2 text-black dark:text-white">
                 <span className="material-symbols-outlined">menu</span>
               </button>
-              <div>
-                <div className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.5em] opacity-40 mb-1">Operational Parameters</div>
-                <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">System Settings</h1>
+              <div className="min-w-0">
+                <div className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.5em] opacity-40 mb-0.5 md:mb-1 truncate">Operational Parameters</div>
+                <h1 className="text-2xl md:text-6xl font-black uppercase tracking-tighter truncate">System Settings</h1>
               </div>
             </div>
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-2 md:gap-3 items-center w-full md:w-auto">
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className={`relative overflow-hidden px-6 py-3 border text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all
+                className={`flex-1 md:flex-none relative overflow-hidden px-4 md:px-6 py-2.5 md:py-3 border text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all
                   ${isLoggingOut ? 'border-red-500 text-red-500 bg-red-500/10 cursor-not-allowed' : 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white'}`}
               >
-                {isLoggingOut ? <span className="font-mono text-[9px]">{glitchText}</span> : 'Sign Out'}
+                {isLoggingOut ? <span className="font-mono text-[8px] md:text-[9px]">{glitchText}</span> : 'Sign Out'}
                 {isLoggingOut && <span className="absolute top-0 left-0 w-full h-px bg-red-500/80 animate-scan-line" />}
               </button>
-              <button onClick={onToggleTheme} className="p-3 md:p-4 border border-black dark:border-white hover:invert transition-all">
-                <span className="material-symbols-outlined text-xl">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+              <button onClick={onToggleTheme} className="p-2.5 md:p-4 border border-black dark:border-white hover:invert transition-all">
+                <span className="material-symbols-outlined text-lg md:text-xl">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
               </button>
             </div>
           </header>
@@ -353,20 +353,23 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16">
 
             {/* Tabs */}
-            <div className="lg:col-span-3 flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`whitespace-nowrap flex-shrink-0 flex items-center gap-3 text-left px-5 py-4 md:p-6 border text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all
-                    ${activeTab === tab.id
-                      ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white'
-                      : 'border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5'}`}
-                >
-                  <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
-                  {tab.label}
-                </button>
-              ))}
+            <div className="lg:col-span-3 relative">
+              <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 no-scrollbar pr-12 lg:pr-0">
+                {tabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`whitespace-nowrap flex-shrink-0 flex items-center gap-2.5 md:gap-3 text-left px-4 md:px-5 py-3 md:py-4 lg:p-6 border text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all
+                      ${activeTab === tab.id
+                        ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white'
+                        : 'border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5'}`}
+                  >
+                    <span className="material-symbols-outlined text-[14px] md:text-[16px]">{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white dark:from-background-dark to-transparent pointer-events-none lg:hidden" />
             </div>
 
             {/* Panel */}
@@ -623,19 +626,19 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
               {/* ── Save bar ── */}
               <div
                 onClick={saveSettings}
-                className={`bg-black text-white dark:bg-white dark:text-black p-8 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 cursor-pointer group transition-opacity ${saveState === 'saving' ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}
+                className={`bg-black text-white dark:bg-white dark:text-black p-6 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 cursor-pointer group transition-opacity ${saveState === 'saving' ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}
               >
-                <div className="space-y-2">
-                  <h4 className="text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none">
+                <div className="space-y-1.5 md:space-y-2">
+                  <h4 className="text-xl md:text-3xl font-black uppercase tracking-tighter leading-none">
                     {saveState === 'saving' ? 'Syncing...' : saveState === 'done' ? 'Synced ✓' : 'Sync Protocol'}
                   </h4>
-                  <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] opacity-40">Apply new operational parameters to network.</p>
+                  <p className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.4em] opacity-40">Apply new operational parameters to network.</p>
                 </div>
-                <button className="w-full md:w-auto bg-white text-black dark:bg-black dark:text-white px-8 md:px-12 py-4 md:py-5 text-[10px] font-black uppercase tracking-[0.4em] group-hover:invert transition-all flex items-center justify-center gap-3">
+                <button className="w-full md:w-auto bg-white text-black dark:bg-black dark:text-white px-6 md:px-12 py-3.5 md:py-5 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] group-hover:invert transition-all flex items-center justify-center gap-3">
                   {saveState === 'saving'
-                    ? <span className="material-symbols-outlined animate-spin">refresh</span>
+                    ? <span className="material-symbols-outlined animate-spin text-sm">refresh</span>
                     : saveState === 'done'
-                      ? <><span className="material-symbols-outlined">check_circle</span> Done</>
+                      ? <><span className="material-symbols-outlined text-sm">check_circle</span> Done</>
                       : 'Execute Sync'}
                 </button>
               </div>

@@ -167,10 +167,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
       const raw: Partial<StoredProfile> = snap.exists()
         ? (snap.data() as Partial<StoredProfile>)
         : (() => {
-            const cached = localStorage.getItem(getProfileStorageKey(authUser.uid));
-            if (!cached) return {};
-            try { return JSON.parse(cached) as Partial<StoredProfile>; } catch { return {}; }
-          })();
+          const cached = localStorage.getItem(getProfileStorageKey(authUser.uid));
+          if (!cached) return {};
+          try { return JSON.parse(cached) as Partial<StoredProfile>; } catch { return {}; }
+        })();
 
       setProfile(raw.profile ?? DEFAULT_PROFILE);
       setDeployments(raw.deployments ?? []);
@@ -184,21 +184,21 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
   }, [authUser]);
 
   // ── Refs — always hold latest state, no stale closure issues ─────────────
-  const profileRef     = useRef(profile);
+  const profileRef = useRef(profile);
   const deploymentsRef = useRef(deployments);
-  const skillsRef      = useRef(neuralVectors);
-  const contactRef     = useRef(contact);
-  const prefsRef       = useRef(preferences);
-  const educationRef   = useRef(education);
-  const authUserRef    = useRef(authUser);
+  const skillsRef = useRef(neuralVectors);
+  const contactRef = useRef(contact);
+  const prefsRef = useRef(preferences);
+  const educationRef = useRef(education);
+  const authUserRef = useRef(authUser);
 
-  useEffect(() => { profileRef.current     = profile;       }, [profile]);
-  useEffect(() => { deploymentsRef.current = deployments;   }, [deployments]);
-  useEffect(() => { skillsRef.current      = neuralVectors; }, [neuralVectors]);
-  useEffect(() => { contactRef.current     = contact;       }, [contact]);
-  useEffect(() => { prefsRef.current       = preferences;   }, [preferences]);
-  useEffect(() => { educationRef.current   = education;     }, [education]);
-  useEffect(() => { authUserRef.current    = authUser;      }, [authUser]);
+  useEffect(() => { profileRef.current = profile; }, [profile]);
+  useEffect(() => { deploymentsRef.current = deployments; }, [deployments]);
+  useEffect(() => { skillsRef.current = neuralVectors; }, [neuralVectors]);
+  useEffect(() => { contactRef.current = contact; }, [contact]);
+  useEffect(() => { prefsRef.current = preferences; }, [preferences]);
+  useEffect(() => { educationRef.current = education; }, [education]);
+  useEffect(() => { authUserRef.current = authUser; }, [authUser]);
 
   // ── Save — reads from refs so it never captures stale state ──────────────
   const handleSave = async () => {
@@ -209,12 +209,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
     }
 
     const payload: StoredProfile = {
-      profile:     profileRef.current,
+      profile: profileRef.current,
       deployments: deploymentsRef.current,
-      skills:      skillsRef.current,
-      contact:     contactRef.current,
+      skills: skillsRef.current,
+      contact: contactRef.current,
       preferences: prefsRef.current,
-      education:   educationRef.current,
+      education: educationRef.current,
     };
 
     setIsSaving(true);
@@ -288,23 +288,23 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
       <main className="flex-1 overflow-y-auto border-l border-black dark:border-white/10 p-4 md:p-8 lg:p-12 custom-scrollbar">
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 md:mb-12 border-b border-black dark:border-white/10 pb-6 md:pb-8">
-          <div className="flex flex-col sm:flex-row gap-6 md:gap-8 items-start w-full">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 md:mb-12 border-b border-black dark:border-white/10 pb-6 md:pb-10">
+          <div className="flex flex-col sm:flex-row gap-5 md:gap-8 items-start w-full">
 
             {/* Avatar */}
-            <div className="size-24 md:size-36 bg-black dark:bg-white shrink-0 group relative overflow-hidden border border-black dark:border-white">
-              <span className="material-symbols-outlined text-[48px] md:text-[80px] text-white dark:text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="size-20 md:size-36 bg-black dark:bg-white shrink-0 group relative overflow-hidden border border-black dark:border-white">
+              <span className="material-symbols-outlined text-[40px] md:text-[80px] text-white dark:text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                 fingerprint
               </span>
             </div>
 
             {/* Name / title */}
-            <div className="space-y-3 md:space-y-4 flex-grow">
+            <div className="space-y-2 md:space-y-4 flex-grow min-w-0">
               <div className="flex items-center gap-3">
-                <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2">
+                <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2 text-black dark:text-white">
                   <span className="material-symbols-outlined">menu</span>
                 </button>
-                <div className="text-[8px] font-black uppercase tracking-[0.5em] opacity-40">
+                <div className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] opacity-40">
                   Candidate Profile
                 </div>
               </div>
@@ -327,16 +327,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                   />
                 </div>
               ) : (
-                <div className="space-y-1">
-                  <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none break-words">
+                <div className="space-y-0.5 md:space-y-1">
+                  <h1 className="text-3xl md:text-6xl font-black uppercase tracking-tighter leading-tight break-words">
                     {profile.name || <span className="opacity-20">Your Name</span>}
                   </h1>
-                  <p className="text-lg font-black uppercase tracking-widest opacity-40">
+                  <p className="text-base md:text-lg font-black uppercase tracking-widest opacity-40">
                     {profile.title || <span>Add your title</span>}
                   </p>
-                  <div className="flex flex-wrap gap-3 pt-1 text-[8px] font-black uppercase tracking-[0.4em] opacity-40">
-                    <span>UID: {authUser?.uid}</span>
-                    <span>EMAIL: {authUser?.email}</span>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1.5 text-[7px] md:text-[8px] font-black uppercase tracking-[0.4em] opacity-40">
+                    <span className="truncate max-w-[120px] sm:max-w-none">UID: {authUser?.uid}</span>
+                    <span className="truncate max-w-[150px] sm:max-w-none">EMAIL: {authUser?.email}</span>
                   </div>
                 </div>
               )}
@@ -415,7 +415,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                 {deployments.map((exp) => (
                   <div
                     key={exp.id}
-                    className="group flex flex-col sm:flex-row gap-4 border-l-2 border-black/10 dark:border-white/10 pl-6 relative"
+                    className="group flex flex-col sm:flex-row gap-4 border-l-2 border-black/10 dark:border-white/10 pl-4 md:pl-6 relative"
                   >
                     {editingDepId === exp.id ? (
                       <div className="flex-grow space-y-3 bg-black/5 dark:bg-white/5 p-4 border border-black/20 dark:border-white/20">
@@ -697,20 +697,20 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
 
         {/* ── Floating Save Banner (visible when editing) ─────────────── */}
         {isEditing && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex gap-3 bg-black dark:bg-white text-white dark:text-black px-6 py-3 shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <span className="text-[9px] font-black uppercase tracking-widest my-auto">
+          <div className="fixed bottom-6 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-auto flex gap-3 bg-black dark:bg-white text-white dark:text-black px-4 md:px-6 py-3 shadow-2xl z-[1000] animate-in fade-in slide-in-from-bottom-4 duration-300 border border-white/20 dark:border-black/20">
+            <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest my-auto hidden sm:block">
               Unsaved changes
             </span>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-4 py-1.5 text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
+              className="flex-1 md:flex-none px-4 py-2 text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
             >
               {isSaving ? 'Saving...' : 'Save Now'}
             </button>
             <button
               onClick={() => setIsEditing(false)}
-              className="px-4 py-1.5 text-[9px] font-black uppercase tracking-widest border border-white/30 hover:border-white transition-colors"
+              className="flex-1 md:flex-none px-4 py-2 text-[8px] md:text-[9px] font-black uppercase tracking-widest border border-white/30 dark:border-black/20 hover:border-white transition-colors"
             >
               Discard
             </button>
