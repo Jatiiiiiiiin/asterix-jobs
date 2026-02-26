@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { subscribeToActiveJobs } from '../Jobservice';
 import Sidebar from '../components/Sidebar';
-import { calculateSemanticFidelityBackend, extractResumeText } from '../geminiService';
+import { calculateSemanticFidelityBackend, extractResumeText, sendAutoApplyEmail } from '../geminiService';
 import { authService, readSessionUid } from '../authService';
 import { Job } from '../types';
 import { saveApplication, buildApplicationPayload, hasApplied } from "../applicationService";
@@ -368,6 +368,23 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                 await saveApplication(payload);
                 autoAppliedCount++;
                 addNotification('Auto-Applied', `${job.title} (${score}%)`, 'success');
+                console.log(`[Asterix] Auto-Applied to ${job.id}. Triggering email...`);
+
+                // Trigger email notification
+                const currentUser = await authService.getCurrentUser();
+                console.log(`[Asterix] Current user:`, currentUser);
+                if (currentUser?.email) {
+                  console.log(`[Asterix] Sending email to ${currentUser.email}...`);
+                  const emailRes = await sendAutoApplyEmail({
+                    to_email: currentUser.email,
+                    job_title: job.title,
+                    company_name: typeof job.company === 'string' ? job.company : job.company?.name || 'Unknown',
+                    location: typeof job.location === 'string' ? job.location : job.location?.city || 'Remote',
+                  });
+                  console.log(`[Asterix] Email response:`, emailRes);
+                } else {
+                  console.warn(`[Asterix] No email found for user!`, currentUser);
+                }
               }
 
               // 🔥 CRITICAL: always mark applied in UI

@@ -14,9 +14,13 @@ import hmac
 import hashlib
 from functools import lru_cache
 from io import BytesIO
+import resend
 
 from dotenv import load_dotenv
-load_dotenv()
+import os
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path=env_path)
+print(f"[Startup] Loading .env from: {env_path}")
 
 # ================= APP =================
 
@@ -97,6 +101,16 @@ def initialize():
     embedder = FastEmbedder(dim=96)
     print("[Startup] Lightweight embedder initialized")
     print(f"[Startup] CORS Allowed Origins: {ALLOWED_ORIGINS}")
+
+# ================= EMAIL CONFIGURATION =================
+
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+print(f"[Startup] RESEND_API_KEY loaded: {bool(RESEND_API_KEY)}")
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
+    print("[Email] Resend client initialized")
+else:
+    print("[Email Warning] RESEND_API_KEY not found in environment")
 
 
 # ================= PDF EXTRACTION =================
@@ -600,6 +614,56 @@ async def chat(req: ChatRequest):
         answer = "For specific details about this position, please refer to the complete job description or reach out to the hiring team."
     
     return {"answer": answer}
+
+
+# ================= EMAIL ENDPOINT =================
+
+class EmailRequest(BaseModel):
+    to_email: str
+    job_title: str
+    company_name: str
+    location: str
+
+@app.post("/send-auto-apply-email")
+async def send_auto_apply_email(req: EmailRequest):
+    """Notify candidate about automatic application"""
+    print(f"\n[EMAIL REQUEST] To: {req.to_email}, Job: {req.job_title}")
+    
+    if not RESEND_API_KEY:
+        print("[Email Error] Cannot send email: RESEND_API_KEY missing")
+        return {"status": "error", "message": "Email service not configured"}
+
+    # ... (html_content same)
+    html_content = f"""
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;">
+        <h2 style="color: #10b981;">Asterix Auto-Pilot Applied For You!</h2>
+        <p>Great news! Our AI agent found a high-fidelity match and automatically applied to the following role on your behalf:</p>
+        <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">{req.job_title}</h3>
+            <p style="margin-bottom: 5px;"><strong>Company:</strong> {req.company_name}</p>
+            <p style="margin-top: 0;"><strong>Location:</strong> {req.location}</p>
+        </div>
+        <p>You can track this application in your dashboard.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #666;">This is an automated notification from your Asterix Neural Protocol.</p>
+    </div>
+    """
+
+    try:
+        print(f"[Email] Attempting to send via Resend...")
+        params = {
+            "from": "onboarding@resend.dev",
+            "to": [req.to_email],
+            "subject": f"Applied: {req.job_title} at {req.company_name}",
+            "html": html_content,
+        }
+
+        email = resend.Emails.send(params)
+        print(f"[Email Success] Response: {email}")
+        return {"status": "success", "id": email.get("id")}
+    except Exception as e:
+        print(f"[Email Error] Exception: {type(e).__name__}: {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 
 # ================= RUN =================

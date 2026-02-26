@@ -255,6 +255,27 @@ export async function calculateSemanticFidelityBackend(
   }
 }
 
+export async function sendAutoApplyEmail(payload: {
+  to_email: string;
+  job_title: string;
+  company_name: string;
+  location: string;
+}) {
+  try {
+    const res = await fetch(`${API_BASE}/send-auto-apply-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) throw new Error("Email service failed");
+    return await res.json();
+  } catch (err) {
+    console.error("[Asterix] Failed to send auto-apply email:", err);
+    return { status: "error", message: "Network error" };
+  }
+}
+
 /* ================= AI INSIGHTS ================= */
 
 export const getAIInsights = async (
