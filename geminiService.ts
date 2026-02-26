@@ -141,20 +141,65 @@ export async function getTechnicalMatch(
 
 /* ================= BACKEND MATCH ================= */
 
+export async function extractResumeText(resumeSource: File | string): Promise<string> {
+  const formData = new FormData();
+
+  if (typeof resumeSource === 'string') {
+    // Convert base64 Data URL to Blob
+    try {
+      const arr = resumeSource.split(',');
+      const mimeMatch = arr[0].match(/:(.*?);/);
+      if (!mimeMatch) throw new Error("Invalid base64 format");
+      const mime = mimeMatch[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) u8arr[n] = bstr.charCodeAt(n);
+      const blob = new Blob([u8arr], { type: mime });
+      formData.append("resume", blob, "resume.pdf");
+    } catch (e) {
+      console.error("[Asterix] Failed to parse base64 resume:", e);
+      throw new Error("Invalid resume data");
+    }
+  } else {
+    formData.append("resume", resumeSource);
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/extract`, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!res.ok) throw new Error("Extraction service failed");
+    const data = await res.json();
+
+    if (data.status === "error") throw new Error(data.message || "Extraction failed");
+    return data.text || "";
+  } catch (err: any) {
+    console.error("[Asterix] Resume extraction failed:", err);
+    throw err;
+  }
+}
+
 export async function calculateSemanticFidelityBackend(
-  file: File,
+  file: File | null,
   job: any,
   profileText: string,
   // Skills passed explicitly from the dashboard's buildProfilePayload().
-  // Previously this parameter didn't exist — the function was reading from
-  // localStorage.getItem("asterix_profile_skills"), a global unscoped key
-  // shared across all users. Every account sent the same skills, making
-  // the backend's skill overlap score identical regardless of who was logged in.
-  candidateSkills: Array<{ skill: string; weight: number }> = []
+  candidateSkills: Array<{ skill: string; weight: number }> = [],
+  resumeText?: string
 ) {
   const formData = new FormData();
 
-  formData.append("resume", file);
+  if (resumeText) {
+    formData.append("resumeText", resumeText);
+  } else if (file) {
+    formData.append("resume", file);
+  } else {
+    throw new Error("Missing resume file or text");
+  }
+
   formData.append("jobTitle", job.title);
 
   const safeSummary = job.jobSummary || job.description || "";

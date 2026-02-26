@@ -4,7 +4,7 @@ import { subscribeToActiveJobs } from '../Jobservice';
 import Sidebar from '../components/Sidebar';
 import { getAIInsights, getDetailedSkillAudit } from '../geminiService';
 import { useLocation } from 'react-router-dom';
-import { authService } from '../authService';
+import { authService, readSessionUid } from '../authService';
 import { saveApplication, buildApplicationPayload, hasApplied as checkAlreadyApplied } from '../applicationService';
 import { usePlan } from '../usePlan.ts';
 import UpgradeModal from '../components/UpgradeModal';
@@ -101,8 +101,10 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
     checkApplied();
   }, [job]);
 
-  const resumeName = localStorage.getItem('asterix_resume_name') || 'Guest';
-  const resumeContent = localStorage.getItem('asterix_resume_content') || '';
+  const uid = readSessionUid();
+
+  const resumeName = uid ? (localStorage.getItem(`asterix_resume_name_${uid}`) || localStorage.getItem('asterix_resume_name') || 'Guest') : (localStorage.getItem('asterix_resume_name') || 'Guest');
+  const resumeContent = uid ? (localStorage.getItem(`asterix_resume_content_${uid}`) || localStorage.getItem('asterix_resume_content') || '') : (localStorage.getItem('asterix_resume_content') || '');
 
   useEffect(() => {
     const fetchAuditData = async () => {

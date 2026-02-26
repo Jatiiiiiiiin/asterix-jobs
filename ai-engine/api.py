@@ -150,6 +150,22 @@ def extract_text_from_pdf(file: UploadFile) -> str:
         return ""
 
 
+def extract_content(file: UploadFile) -> str:
+    """Helper to extract text or fallback if needed"""
+    # If it's a PDF, use pdfplumber
+    if file.filename.lower().endswith(".pdf"):
+        return extract_text_from_pdf(file)
+    
+    # If it's a text file, read directly
+    try:
+        file.file.seek(0)
+        content = file.file.read()
+        return content.decode("utf-8", errors="ignore")
+    except Exception as e:
+        print(f"[EXTRACT ERROR] {file.filename}: {e}")
+        return ""
+
+
 # ================= TEXT PROCESSING =================
 
 def tokenize(text: str) -> Set[str]:
@@ -377,16 +393,34 @@ def health():
     return {
         "status": "operational",
         "mode": "lightweight",
-        "version": "2.0",
+        "version": "2.1",
         "environment": "render"
     }
+
+
+# ================= EXTRACTION ENDPOINT =================
+
+@app.post("/extract")
+async def extract_resume(resume: UploadFile = File(...)):
+    """Extract text from a resume once to avoid repeated uploads"""
+    print(f"\n[EXTRACT] Received: {resume.filename}")
+    
+    text = extract_content(resume)
+    
+    if not text or len(text) < 50:
+        print(f"[EXTRACT ERROR] Failed or too short: {len(text)} chars")
+        return {"status": "error", "text": "", "message": "Extraction failed - check file format"}
+        
+    print(f"[EXTRACT] Success: {len(text)} chars")
+    return {"status": "success", "text": text}
 
 
 # ================= MATCH ENDPOINT =================
 
 @app.post("/match")
 async def match_resume(
-    resume: UploadFile = File(...),
+    resume: UploadFile = File(None),
+    resumeText: str = Form(None),
     jobTitle: str = Form(...),
     jobDescription: str = Form(...),
     candidateSkills: str = Form(...),
@@ -395,18 +429,31 @@ async def match_resume(
 ):
     print(f"\n{'='*70}")
     print(f"[REQUEST] Job: {jobTitle}")
-    print(f"[REQUEST] Resume: {resume.filename}")
+    if resume:
+        print(f"[REQUEST] Resume: {resume.filename}")
+    else:
+        print(f"[REQUEST] Resume: Text-based ({len(resumeText or '')} chars)")
     print(f"{'='*70}")
     
-    # Extract resume text
-    resume_text = extract_text_from_pdf(resume)
+    # Extract/Assign resume text
+    if resumeText:
+        resume_text = resumeText
+    elif resume:
+        resume_text = extract_content(resume)
+    else:
+        return {
+            "fidelityScore": 0,
+            "skillAudit": [],
+            "matchHighlights": ["No resume provided"],
+            "breakdown": {"resume": 0, "profile": 0, "completeness": 0, "skills": 0}
+        }
     
     if len(resume_text) < 100:
         print(f"[ERROR] Resume text too short: {len(resume_text)} chars")
         return {
             "fidelityScore": 0,
             "skillAudit": [],
-            "matchHighlights": ["PDF extraction failed - check file format"],
+            "matchHighlights": ["Resume content missing or unreadable"],
             "breakdown": {"resume": 0, "profile": 0, "completeness": 0, "skills": 0}
         }
     

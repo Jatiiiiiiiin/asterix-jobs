@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { subscribeToActiveJobs } from '../Jobservice';
 import Sidebar from '../components/Sidebar';
-import { calculateSemanticFidelityBackend } from '../geminiService';
+import { calculateSemanticFidelityBackend, extractResumeText } from '../geminiService';
 import { authService, readSessionUid } from '../authService';
 import { Job } from '../types';
 import { saveApplication, buildApplicationPayload, hasApplied } from "../applicationService";
@@ -162,6 +162,49 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     return () => clearTimeout(t);
   }, [isVectorizing]);
 
+  /* ── Restore persistent extracted resume content ── */
+  useEffect(() => {
+    if (!userId) return;
+    const restored = localStorage.getItem(`asterix_resume_content_${userId}`);
+    if (restored && restored.length > 100) {
+      console.log("[Asterix] Restored resume text from persistent storage");
+      // We don't need a state for this if we just use localStorage directly in performSemanticSync,
+      // but let's ensure we have it for the auto-pilot checks.
+    }
+  }, [userId]);
+
+  /* ── Auto-recovery: If resumeUrl exists but content doesn't, extract it ── */
+  useEffect(() => {
+    const recoverResume = async () => {
+      if (!userId || !resumeUrl || resumeUrl.length < 1000) return;
+      const key = `asterix_resume_content_${userId}`;
+      const existing = localStorage.getItem(key);
+      if (existing && existing.length > 100) return;
+
+      try {
+        console.log("[Asterix] Auto-recovering resume text from vault...");
+        const text = await extractResumeText(resumeUrl);
+        localStorage.setItem(key, text);
+        addNotification('System', 'Recovered identity from vault', 'success');
+      } catch (err) {
+        console.error("[Asterix] Auto-recovery failed:", err);
+      }
+    };
+    recoverResume();
+  }, [resumeUrl, userId]);
+
+  /* ── Hybrid Offline: Catch-up on missed jobs when tab becomes visible ── */
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isAutoPilotOn) {
+        console.log("[Asterix] Welcome back! Checking for missed opportunities...");
+        triggerAutoSync();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isAutoPilotOn]);
+
   /* ════════════════════════════════════════════════════════
      NOTIFICATIONS
   ════════════════════════════════════════════════════════ */
@@ -240,17 +283,52 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
      SEMANTIC SYNC  — scores every job against resume
   ════════════════════════════════════════════════════════ */
   const performSemanticSync = async () => {
-    if (!resumeFileRef.current || vectorizingRef.current) return;
+    // Priority: Local File Ref > Persisted Text > Restore from Vault
+    const uid = mountedUidRef.current;
+    const persistentKey = uid ? `asterix_resume_content_${uid}` : null;
+    let extractedText = persistentKey ? (localStorage.getItem(persistentKey) || "") : "";
+
+    if (vectorizingRef.current) return;
+
+    // If no file and no extracted text, we can't sync
+    if (!resumeFileRef.current && !extractedText) {
+      // Last try: if we have resumeUrl (base64) but no extracted text, extract it now
+      if (resumeUrl && resumeUrl.length > 1000) {
+        addNotification('Neural Link', 'Restoring resume from vault...', 'info');
+        try {
+          extractedText = await extractResumeText(resumeUrl);
+          if (persistentKey) localStorage.setItem(persistentKey, extractedText);
+        } catch (err) {
+          addNotification('Sync Error', 'Could not restore resume. Please re-upload.', 'alert');
+          return;
+        }
+      } else {
+        return; // Truly nothing to match
+      }
+    }
 
     vectorizingRef.current = true;
     setIsVectorizing(true);
     addNotification('System Sync', 'Initializing high-fidelity neural scan...', 'info');
 
     let autoAppliedCount = 0;
-    const uid = mountedUidRef.current;
+    // uid is already defined above
     const { profileText, candidateSkills } = uid
       ? await fetchProfilePayload(uid)
       : { profileText: '', candidateSkills: [] };
+
+    // If we have a NEW file upload, re-extract even if we had persistent text
+    if (resumeFileRef.current) {
+      try {
+        extractedText = await extractResumeText(resumeFileRef.current);
+        if (uid) {
+          localStorage.setItem(`asterix_resume_content_${uid}`, extractedText);
+        }
+        addNotification('Neural Link', 'Identity re-mapped from local file', 'success');
+      } catch (err) {
+        console.warn('[Asterix] Ref-extraction failed, using existing text if available:', err);
+      }
+    }
 
     try {
       for (let index = 0; index < jobsRef.current.length; index++) {
@@ -266,10 +344,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
         try {
           const audit = await calculateSemanticFidelityBackend(
-            resumeFileRef.current!,
+            extractedText ? null : resumeFileRef.current,
             job,
             profileText,
-            candidateSkills
+            candidateSkills,
+            extractedText || undefined
           );
 
           if (typeof audit?.fidelityScore !== 'number') throw new Error('Invalid AI response');
@@ -336,9 +415,24 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
   /* ── Throttled auto-sync (min 5 min between syncs) ── */
   const triggerAutoSync = async () => {
-    if (!autoPilotRef.current || vectorizingRef.current || !resumeFileRef.current) return;
+    console.log("[Asterix] triggerAutoSync event received. AutoSync state:", { isAutoPilotOn: autoPilotRef.current, isVectorizing: vectorizingRef.current });
+    if (!autoPilotRef.current || vectorizingRef.current) return;
+
+    const uid = mountedUidRef.current;
+    const hasResume = resumeFileRef.current || (uid && localStorage.getItem(`asterix_resume_content_${uid}`)) || (resumeUrl && resumeUrl.length > 1000);
+
+    if (!hasResume) {
+      console.warn("[Asterix] AutoSync aborted: No resume source found (file, localCache, or vault)");
+      return;
+    }
+
     const now = Date.now();
-    if (lastSyncRef.current && now - lastSyncRef.current < 5 * 60_000) return;
+    if (lastSyncRef.current && now - lastSyncRef.current < 5 * 60_000) {
+      console.log("[Asterix] AutoSync throttled. Last sync was less than 5 mins ago.");
+      return;
+    }
+
+    console.log("[Asterix] AutoSync conditions met. Executing performSemanticSync...");
     lastSyncRef.current = now;
     await performSemanticSync();
   };
@@ -346,15 +440,19 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   /* ── Auto-pilot interval: every 15 min while tab is visible ── */
   useEffect(() => {
     if (!isAutoPilotOn) return;
+    console.log("[Asterix] Auto-Pilot loop engaged (15m interval)");
     const interval = setInterval(() => {
+      console.log("[Asterix] Heartbeat check...");
       if (
         document.visibilityState !== 'visible' ||
         !autoPilotRef.current ||
-        vectorizingRef.current ||
-        !resumeFileRef.current
-      ) return;
+        vectorizingRef.current
+      ) {
+        console.log("[Asterix] Heartbeat skipped: conditions not met (visibility, autopilot state, or busy)");
+        return;
+      }
       triggerAutoSync();
-    }, 15 * 60_000);
+    }, 15 * 60_000); // 15m for production
     return () => clearInterval(interval);
   }, [isAutoPilotOn]);
 
