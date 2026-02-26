@@ -4,7 +4,8 @@ import {
   signInWithPopup,
   signOut,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  sendEmailVerification
 } from "firebase/auth";
 
 import { auth, googleProvider, linkedinProvider, db } from "./firebase";
@@ -21,18 +22,19 @@ export interface AuthUser {
   isStudent?: boolean;
   photoURL?: string;
   displayName?: string;
+  emailVerified: boolean;
 }
 
 /* ================= SESSION STORAGE KEY ================= */
 
-const SESSION_UID_KEY   = "asterix_session_uid";
+const SESSION_UID_KEY = "asterix_session_uid";
 const SESSION_EMAIL_KEY = "asterix_session_email";
-const SESSION_ROLE_KEY  = "asterix_session_role";
+const SESSION_ROLE_KEY = "asterix_session_role";
 
 function writeSession(uid: string, email: string | null, role: string) {
-  sessionStorage.setItem(SESSION_UID_KEY,   uid);
+  sessionStorage.setItem(SESSION_UID_KEY, uid);
   sessionStorage.setItem(SESSION_EMAIL_KEY, email ?? "");
-  sessionStorage.setItem(SESSION_ROLE_KEY,  role);
+  sessionStorage.setItem(SESSION_ROLE_KEY, role);
 }
 
 export function readSessionUid(): string | null {
@@ -75,6 +77,9 @@ export const authService = {
 
     writeSession(res.user.uid, res.user.email, role);
 
+    // Send verification email
+    await sendEmailVerification(res.user);
+
     return {
       uid: res.user.uid,
       email: res.user.email,
@@ -82,6 +87,7 @@ export const authService = {
       isOnboarded: false,
       isPremium: false,
       isStudent: false,
+      emailVerified: res.user.emailVerified,
     };
   },
 
@@ -126,6 +132,7 @@ export const authService = {
       isStudent: data?.subscription?.isStudent || false,
       photoURL: res.user.photoURL || undefined,
       displayName: res.user.displayName || undefined,
+      emailVerified: res.user.emailVerified,
     };
   },
 
@@ -172,14 +179,15 @@ export const authService = {
       isStudent: data?.subscription?.isStudent || false,
       photoURL: res.user.photoURL || undefined,
       displayName: res.user.displayName || undefined,
+      emailVerified: res.user.emailVerified,
     };
   },
 
   /* ========= GET CURRENT USER ========= */
   async getCurrentUser(): Promise<AuthUser | null> {
-    const sessionUid = readSessionUid();
     const firebaseUser = auth.currentUser;
-    const uid = sessionUid || firebaseUser?.uid;
+    const sessionUid = readSessionUid();
+    const uid = firebaseUser?.uid || sessionUid;
 
     if (!uid) return null;
 
@@ -202,7 +210,22 @@ export const authService = {
       isStudent: data.subscription?.isStudent || false,
       photoURL: firebaseUser?.photoURL || data.photoURL || undefined,
       displayName: firebaseUser?.displayName || data.displayName || undefined,
+      emailVerified: firebaseUser?.emailVerified ?? false,
     };
+  },
+
+  /* ========= REFRESH USER STATUS ========= */
+  async refreshUserStatus(): Promise<void> {
+    if (auth.currentUser) {
+      await auth.currentUser.reload();
+    }
+  },
+
+  /* ========= RESEND VERIFICATION ========= */
+  async resendVerificationEmail() {
+    if (auth.currentUser) {
+      await sendEmailVerification(auth.currentUser);
+    }
   },
 
   /* ========= UPDATE USER ========= */

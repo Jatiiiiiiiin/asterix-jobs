@@ -20,6 +20,7 @@ import PostJobPage from "./views/PostJobPage";
 import TalentPipelinePage from "./views/TalentPipelinePage";
 import RecruiterReportsPage from "./views/RecruiterReportsPage";
 import ConfirmPaymentPage from "./views/ConfirmPaymentPage";
+import VerifyEmailPage from "./views/VerifyEmailPage";
 import './App.css';
 
 /* Components */
@@ -60,7 +61,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async firebaseUser => {
-      
+
       if (!firebaseUser) {
         setUser(null);
         setIsLoading(false);
@@ -139,6 +140,16 @@ const App: React.FC = () => {
     navigate("/candidate", { replace: true });
   };
 
+  /* ───────────────── POST VERIFICATION ───────────────── */
+
+  const handleVerificationSuccess = async () => {
+    const updatedUser = await authService.getCurrentUser();
+    setUser(updatedUser);
+    if (updatedUser) {
+      handlePostSignup(updatedUser);
+    }
+  };
+
   const handleLogout = async () => {
     await authService.logout();
     setUser(null);
@@ -164,18 +175,25 @@ const App: React.FC = () => {
 
   /* ───────────────── ROUTE GUARDS ───────────────── */
 
-  const RequireAuth = ({ children }: { children: ReactNode }) =>
-    user ? <>{children}</> : <Navigate to="/signup" replace />;
+  const RequireAuth = ({ children }: { children: ReactNode }) => {
+    if (!user) return <Navigate to="/signup" replace />;
+    if (!user.emailVerified) return <Navigate to="/verify-email" replace />;
+    return <>{children}</>;
+  };
 
-  const RequireCandidate = ({ children }: { children: ReactNode }) =>
-    user && user.role === "candidate"
-      ? <>{children}</>
-      : <Navigate to="/signup" replace />;
+  const RequireCandidate = ({ children }: { children: ReactNode }) => {
+    if (!user) return <Navigate to="/signup" replace />;
+    if (!user.emailVerified) return <Navigate to="/verify-email" replace />;
+    if (user.role !== "candidate") return <Navigate to="/signup" replace />;
+    return <>{children}</>;
+  };
 
-  const RequireRecruiter = ({ children }: { children: ReactNode }) =>
-    user && user.role === "recruiter"
-      ? <>{children}</>
-      : <Navigate to="/signup" replace />;
+  const RequireRecruiter = ({ children }: { children: ReactNode }) => {
+    if (!user) return <Navigate to="/signup" replace />;
+    if (!user.emailVerified) return <Navigate to="/verify-email" replace />;
+    if (user.role !== "recruiter") return <Navigate to="/signup" replace />;
+    return <>{children}</>;
+  };
 
   /* ───────────────── ROUTES ───────────────── */
 
@@ -184,23 +202,25 @@ const App: React.FC = () => {
       <Routes>
 
         {/* PUBLIC - Redirect to dashboard if logged in */}
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
             <PublicRoute user={user} isLoading={isLoading}>
               <LandingPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />
             </PublicRoute>
-          } 
+          }
         />
-        
-        <Route 
-          path="/signup" 
+
+        <Route
+          path="/signup"
           element={
             <PublicRoute user={user} isLoading={isLoading}>
               <SignupPage onSignupSuccess={handlePostSignup} />
             </PublicRoute>
-          } 
+          }
         />
+
+        <Route path="/verify-email" element={<VerifyEmailPage onVerified={handleVerificationSuccess} />} />
 
         {/* PAYMENT */}
         <Route
