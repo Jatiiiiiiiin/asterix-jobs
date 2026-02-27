@@ -30,3 +30,13 @@ services:
         fromService:
           type: env
           name: FRONTEND_URL
+      
+      - key: RESEND_API_KEY
+        fromService:
+          type: env
+          name: RESEND_API_KEY
+      
+      - key: RESEND_FROM_EMAIL
+        fromService:
+          type: env
+          name: RESEND_FROM_EMAIL

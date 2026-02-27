@@ -36,6 +36,8 @@ ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://asterix-jobs.vercel.app",
     "https://www.asterix-jobs.vercel.app",
+    "https://asterix-jobs.in",
+    "https://www.asterix-jobs.in",
 ]
 
 if FRONTEND_URL:
@@ -624,6 +626,9 @@ class EmailRequest(BaseModel):
     company_name: str
     location: str
 
+RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "onboarding@resend.dev")
+print(f"[Startup] RESEND_FROM_EMAIL: {RESEND_FROM_EMAIL}")
+
 @app.post("/send-auto-apply-email")
 async def send_auto_apply_email(req: EmailRequest):
     """Notify candidate about automatic application"""
@@ -650,19 +655,22 @@ async def send_auto_apply_email(req: EmailRequest):
     """
 
     try:
-        print(f"[Email] Attempting to send via Resend...")
+        print(f"[Email] Attempting to send from {RESEND_FROM_EMAIL} to {req.to_email}...")
         params = {
-            "from": "onboarding@resend.dev",
+            "from": RESEND_FROM_EMAIL,
             "to": [req.to_email],
             "subject": f"Applied: {req.job_title} at {req.company_name}",
             "html": html_content,
         }
 
         email = resend.Emails.send(params)
-        print(f"[Email Success] Response: {email}")
+        print(f"[Email Success] Response ID: {email.get('id')}")
         return {"status": "success", "id": email.get("id")}
     except Exception as e:
         print(f"[Email Error] Exception: {type(e).__name__}: {str(e)}")
+        # Check if it's the Resend onboarding email restriction
+        if "onboarding@resend.dev" in str(e) or "not verified" in str(e).lower():
+            print("[Email Tip] If using onboarding@resend.dev, you can only send to your own authenticated email.")
         return {"status": "error", "message": str(e)}
 
 
