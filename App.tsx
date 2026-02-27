@@ -262,11 +262,11 @@ const App: React.FC = () => {
         <Route path="/candidate/settings" element={<RequireCandidate><SettingsPage role="candidate" onToggleTheme={toggleTheme} isDarkMode={isDarkMode} onLogout={handleLogout} /></RequireCandidate>} />
 
         {/* RECRUITER */}
-        <Route path="/recruiter" element={<RequireRecruiter><RecruiterDashboard onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireRecruiter>} />
+        <Route path="/recruiter" element={<RequireRecruiter><RecruiterDashboard onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isPremium={user?.isPremium ?? false} /></RequireRecruiter>} />
         <Route path="/recruiter/talent" element={<RequireRecruiter><TalentPipelinePage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireRecruiter>} />
         <Route path="/recruiter/reports" element={<RequireRecruiter><RecruiterReportsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireRecruiter>} />
         <Route path="/recruiter/settings" element={<RequireRecruiter><SettingsPage role="recruiter" onToggleTheme={toggleTheme} isDarkMode={isDarkMode} onLogout={handleLogout} /></RequireRecruiter>} />
-        <Route path="/post-job" element={<RequireRecruiter><PostJobPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireRecruiter>} />
+        <Route path="/post-job" element={<RequireRecruiter><PostJobPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isPremium={user?.isPremium ?? false} /></RequireRecruiter>} />
 
         {/* SHARED */}
         <Route path="/job/:id" element={<JobDetailsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />} />
