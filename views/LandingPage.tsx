@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-
+import { db } from '../firebase';
+import { collection, getCountFromServer, getDocs } from 'firebase/firestore';
 
 interface LandingPageProps {
   onToggleTheme: () => void;
@@ -13,6 +14,34 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
   const [isVisible, setIsVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Live stats from Firestore
+  const [liveJobsMatched, setLiveJobsMatched] = useState<number | null>(null);
+  const [liveCompanies, setLiveCompanies] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Fetch real counts once on mount
+    const fetchStats = async () => {
+      try {
+        const [appsSnap, companiesSnap] = await Promise.all([
+          getCountFromServer(collection(db, 'applications')),
+          getDocs(collection(db, 'jobs')),
+        ]);
+        setLiveJobsMatched(appsSnap.data().count);
+        // Count distinct company names
+        const uniqueCompanies = new Set(
+          companiesSnap.docs.map(d => {
+            const data = d.data();
+            return (data.company?.name ?? data.companyName ?? '').toLowerCase().trim();
+          }).filter(Boolean)
+        );
+        setLiveCompanies(uniqueCompanies.size);
+      } catch {
+        // silently fall back to static values
+      }
+    };
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     setIsVisible(true);
@@ -395,7 +424,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
             <h2 className="text-3xl sm:text-5xl md:text-8xl font-black uppercase tracking-tighter mb-12 sm:mb-20 leading-[0.9]">Built for<br />Real Careers</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 mt-12 md:mt-20 border-t border-white/10 dark:border-black/10 pt-12 md:pt-20">
               <div className="space-y-2">
-                <p className="text-4xl sm:text-5xl md:text-7xl font-black leading-none">10M+</p>
+                <p className="text-4xl sm:text-5xl md:text-7xl font-black leading-none">
+                  {liveJobsMatched !== null ? `${liveJobsMatched.toLocaleString()}` : '10M+'}
+                </p>
                 <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-50">Jobs Matched</p>
               </div>
               <div className="space-y-2">
@@ -403,7 +434,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                 <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-50">Match Accuracy</p>
               </div>
               <div className="space-y-2">
-                <p className="text-4xl sm:text-5xl md:text-7xl font-black leading-none">45K+</p>
+                <p className="text-4xl sm:text-5xl md:text-7xl font-black leading-none">
+                  {liveCompanies !== null ? `${liveCompanies.toLocaleString()}` : '45K+'}
+                </p>
                 <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-50">Hiring Companies</p>
               </div>
               <div className="space-y-2">
