@@ -522,7 +522,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                         </button>
                       </div>
                       <p className="text-[8px] font-black uppercase tracking-widest opacity-30 text-center">
-                        Secure payment via Razorpay · Cancel anytime
+                        Secure payment via Cashfree PG · Cancel anytime
                       </p>
                     </div>
                   ) : (

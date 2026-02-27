@@ -14,12 +14,12 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
   const location = useLocation();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
 
-  const [user, setUser]               = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutPhase, setLogoutPhase] = useState(0);
-  const [glitchText, setGlitchText]   = useState('DE-AUTHORIZING');
+  const [glitchText, setGlitchText] = useState('DE-AUTHORIZING');
 
   /* ── Load auth user ── */
   useEffect(() => {
@@ -69,19 +69,19 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
   /* ── Nav items ── */
   const navItems = role === 'candidate'
     ? [
-        { name: 'Dashboard',       icon: 'dashboard',    path: '/candidate'              },
-        { name: 'Jobs',            icon: 'work',         path: '/candidate/jobs'         },
-        { name: 'Profile',         icon: 'person',       path: '/candidate/profile'      },
-        { name: 'My Applications', icon: 'work_history', path: '/candidate/applications' },
-        { name: 'Settings',        icon: 'settings',     path: '/candidate/settings'     },
-      ]
+      { name: 'Dashboard', icon: 'dashboard', path: '/candidate' },
+      { name: 'Jobs', icon: 'work', path: '/candidate/jobs' },
+      { name: 'Profile', icon: 'person', path: '/candidate/profile' },
+      { name: 'My Applications', icon: 'work_history', path: '/candidate/applications' },
+      { name: 'Settings', icon: 'settings', path: '/candidate/settings' },
+    ]
     : [
-        { name: 'Dashboard',       icon: 'dashboard', path: '/recruiter'              },
-        { name: 'Active Sourcing', icon: 'work',      path: '/recruiter/active-jobs'  },
-        { name: 'Talent Pipeline', icon: 'groups',    path: '/recruiter/talent'       },
-        { name: 'Intelligence',    icon: 'bar_chart', path: '/recruiter/reports'      },
-        { name: 'Settings',        icon: 'settings',  path: '/recruiter/settings'     },
-      ];
+      { name: 'Dashboard', icon: 'dashboard', path: '/recruiter' },
+      { name: 'Active Sourcing', icon: 'work', path: '/recruiter/active-jobs' },
+      { name: 'Talent Pipeline', icon: 'groups', path: '/recruiter/talent' },
+      { name: 'Intelligence', icon: 'bar_chart', path: '/recruiter/reports' },
+      { name: 'Settings', icon: 'settings', path: '/recruiter/settings' },
+    ];
 
   const isPremium = user?.isPremium ?? false;
   const isStudent = user?.isStudent ?? false;
@@ -203,11 +203,10 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
                 key={item.name}
                 to={item.path}
                 onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-3 transition-all ${
-                  isActive
+                className={`flex items-center gap-3 px-3 py-3 transition-all ${isActive
                     ? 'bg-black text-white dark:bg-white dark:text-black font-black'
                     : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
                 <span className="text-[10px] uppercase tracking-widest font-black">{item.name}</span>
@@ -253,36 +252,36 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
   /* ── Logout overlay ── */
   const logoutOverlay = isLoggingOut && logoutPhase >= 2
     ? createPortal(
-        <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center animate-overlay-in">
-          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.025) 2px, rgba(255,255,255,0.025) 4px)' }} />
-          <div className="absolute top-8 left-8 w-12 h-12 border-t-2 border-l-2 border-white/20" />
-          <div className="absolute top-8 right-8 w-12 h-12 border-t-2 border-r-2 border-white/20" />
-          <div className="absolute bottom-8 left-8 w-12 h-12 border-b-2 border-l-2 border-white/20" />
-          <div className="absolute bottom-8 right-8 w-12 h-12 border-b-2 border-r-2 border-white/20" />
-          <div className={`flex flex-col items-center gap-10 transition-all duration-500 ${logoutPhase >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <div className="relative flex items-center justify-center">
-              <div className="absolute size-24 border border-white/10 animate-ping-slow" />
-              <div className="absolute size-32 border border-white/5 animate-ping-slow" style={{ animationDelay: '0.4s' }} />
-              <div className="size-20 border-2 border-white flex items-center justify-center bg-black">
-                <span className="material-symbols-outlined text-4xl text-white">lock</span>
-              </div>
-            </div>
-            <div className="font-mono text-left space-y-3 min-w-[280px]">
-              <TerminalLine text="SESSION_TOKEN.revoke()"  delay={0}   color="text-white/80" />
-              <TerminalLine text="NEURAL_SYNC.terminate()" delay={220} color="text-white/50" />
-              <TerminalLine text="IDENTITY.wipe()"         delay={440} color="text-white/50" />
-              <TerminalLine text="ACCESS: DENIED"          delay={700} color="text-red-400" bold />
-            </div>
-            <div className="w-64 space-y-2">
-              <div className="h-px bg-white/10 relative overflow-hidden">
-                <div className="absolute inset-y-0 left-0 bg-white animate-logout-progress" />
-              </div>
-              <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/20 text-center animate-pulse">Redirecting to login</p>
+      <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center animate-overlay-in">
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.025) 2px, rgba(255,255,255,0.025) 4px)' }} />
+        <div className="absolute top-8 left-8 w-12 h-12 border-t-2 border-l-2 border-white/20" />
+        <div className="absolute top-8 right-8 w-12 h-12 border-t-2 border-r-2 border-white/20" />
+        <div className="absolute bottom-8 left-8 w-12 h-12 border-b-2 border-l-2 border-white/20" />
+        <div className="absolute bottom-8 right-8 w-12 h-12 border-b-2 border-r-2 border-white/20" />
+        <div className={`flex flex-col items-center gap-10 transition-all duration-500 ${logoutPhase >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+          <div className="relative flex items-center justify-center">
+            <div className="absolute size-24 border border-white/10 animate-ping-slow" />
+            <div className="absolute size-32 border border-white/5 animate-ping-slow" style={{ animationDelay: '0.4s' }} />
+            <div className="size-20 border-2 border-white flex items-center justify-center bg-black">
+              <span className="material-symbols-outlined text-4xl text-white">lock</span>
             </div>
           </div>
-        </div>,
-        document.body
-      )
+          <div className="font-mono text-left space-y-3 min-w-[280px]">
+            <TerminalLine text="SESSION_TOKEN.revoke()" delay={0} color="text-white/80" />
+            <TerminalLine text="NEURAL_SYNC.terminate()" delay={220} color="text-white/50" />
+            <TerminalLine text="IDENTITY.wipe()" delay={440} color="text-white/50" />
+            <TerminalLine text="ACCESS: DENIED" delay={700} color="text-red-400" bold />
+          </div>
+          <div className="w-64 space-y-2">
+            <div className="h-px bg-white/10 relative overflow-hidden">
+              <div className="absolute inset-y-0 left-0 bg-white animate-logout-progress" />
+            </div>
+            <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/20 text-center animate-pulse">Redirecting to login</p>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )
     : null;
 
   /* ── Render ── */
@@ -323,7 +322,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
 /* ── Terminal Line ── */
 interface TerminalLineProps { text: string; delay: number; color?: string; bold?: boolean; }
 const TerminalLine: React.FC<TerminalLineProps> = ({ text, delay, color = 'text-white', bold }) => {
-  const [visible, setVisible]     = useState(false);
+  const [visible, setVisible] = useState(false);
   const [displayed, setDisplayed] = useState('');
   useEffect(() => {
     const t = setTimeout(() => {

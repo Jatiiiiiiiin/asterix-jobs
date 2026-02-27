@@ -13,7 +13,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
   const [isVisible, setIsVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     setIsVisible(true);
     if (isMobileMenuOpen) {
@@ -85,7 +85,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
           </div>
 
           <nav className="hidden lg:flex items-center gap-10 xl:gap-12">
-            {['Features','Process' ,'Pricing', 'Network'].map(item => (
+            {['Features', 'Process', 'Pricing', 'Network'].map(item => (
               <button
                 key={item}
                 onClick={() => scrollToSection(item.toLowerCase())}
@@ -100,7 +100,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
             <button onClick={onToggleTheme} className="p-2 md:p-3 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
               <span className="material-symbols-outlined text-[18px] md:text-[24px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
             </button>
-            <button 
+            <button
               onClick={handleFreeSignup}
               className="bg-black dark:bg-white text-white dark:text-black px-5 md:px-10 py-2.5 md:py-4 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl"
             >
@@ -116,9 +116,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         </div>
 
         {/* Mobile Nav Overlay */}
-        <div 
+        <div
           className={`mobile-menu-overlay fixed inset-0 z-[110] lg:hidden ${isMobileMenuOpen ? 'visible' : 'invisible'}`}
-          style={{ 
+          style={{
             backgroundColor: isDarkMode ? '#000000' : '#ffffff',
             backdropFilter: 'none',
             WebkitBackdropFilter: 'none'
@@ -163,13 +163,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                 Stop wasting hours on job boards that never reply. Asterix matches you to the right roles based on your actual skills — and applies on your behalf.
               </p>
               <div className="flex flex-col sm:flex-row items-stretch gap-4 md:gap-6 w-full lg:w-auto">
-                <button 
+                <button
                   onClick={handleFreeSignup}
                   className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black px-10 md:px-16 py-5 md:py-6 text-xs md:text-sm font-black uppercase tracking-[0.25em] hover:invert transition-all text-center cursor-pointer"
                 >
                   Find a Job
                 </button>
-                <button 
+                <button
                   onClick={handleFreeSignup}
                   className="flex-1 sm:flex-none border-2 border-black dark:border-white px-10 md:px-16 py-5 md:py-6 text-xs md:text-sm font-black uppercase tracking-[0.25em] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center cursor-pointer"
                 >

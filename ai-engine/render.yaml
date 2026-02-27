@@ -14,16 +14,19 @@ services:
       - key: PORT
         value: 8000
       
-      # Razorpay (add your actual keys in Render dashboard)
-      - key: RAZORPAY_KEY_ID
+      # Cashfree Payment Gateway (set actual keys in Render dashboard)
+      - key: CASHFREE_APP_ID
         fromService:
           type: env
-          name: RAZORPAY_KEY_ID
+          name: CASHFREE_APP_ID
       
-      - key: RAZORPAY_KEY_SECRET
+      - key: CASHFREE_SECRET_KEY
         fromService:
           type: env
-          name: RAZORPAY_KEY_SECRET
+          name: CASHFREE_SECRET_KEY
+      
+      - key: CASHFREE_ENV
+        value: production
       
       # Frontend URL for CORS
       - key: FRONTEND_URL
@@ -35,7 +38,7 @@ services:
         fromService:
           type: env
           name: RESEND_API_KEY
-      
+
       - key: RESEND_FROM_EMAIL
         fromService:
           type: env

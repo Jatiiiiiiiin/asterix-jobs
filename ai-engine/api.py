@@ -1,6 +1,12 @@
 # ================= IMPORTS =================
+import os
+import builtins
+import pydantic
+# Hack to fix broken Cashfree SDK v4.1.2 which forgets to import StrictBytes
+if not hasattr(builtins, "StrictBytes"):
+    builtins.StrictBytes = getattr(pydantic, "StrictBytes", str) # Fallback to str if missing
 
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Set
@@ -15,6 +21,10 @@ import hashlib
 from functools import lru_cache
 from io import BytesIO
 import resend
+from cashfree_pg.models.create_order_request import CreateOrderRequest
+from cashfree_pg.api_client import Cashfree
+from cashfree_pg.models.customer_details import CustomerDetails
+from cashfree_pg.models.order_meta import OrderMeta
 
 from dotenv import load_dotenv
 import os
@@ -113,6 +123,25 @@ if RESEND_API_KEY:
     print("[Email] Resend client initialized")
 else:
     print("[Email Warning] RESEND_API_KEY not found in environment")
+
+
+# ================= CASHFREE CONFIGURATION =================
+
+CASHFREE_APP_ID = os.getenv("CASHFREE_APP_ID")
+CASHFREE_SECRET_KEY = os.getenv("CASHFREE_SECRET_KEY")
+
+if CASHFREE_APP_ID and CASHFREE_SECRET_KEY:
+    Cashfree.XClientId = CASHFREE_APP_ID
+    Cashfree.XClientSecret = CASHFREE_SECRET_KEY
+    cf_env = os.getenv("CASHFREE_ENV", "sandbox").lower()
+    if cf_env == "production":
+        Cashfree.XEnvironment = Cashfree.PRODUCTION
+        print("[Cashfree] Client initialized (Production mode)")
+    else:
+        Cashfree.XEnvironment = Cashfree.SANDBOX
+        print("[Cashfree] Client initialized (Sandbox mode)")
+else:
+    print("[Cashfree Warning] CASHFREE_APP_ID or CASHFREE_SECRET_KEY not found")
 
 
 # ================= PDF EXTRACTION =================
@@ -671,6 +700,112 @@ async def send_auto_apply_email(req: EmailRequest):
         # Check if it's the Resend onboarding email restriction
         if "onboarding@resend.dev" in str(e) or "not verified" in str(e).lower():
             print("[Email Tip] If using onboarding@resend.dev, you can only send to your own authenticated email.")
+        return {"status": "error", "message": str(e)}
+
+
+# ================= PAYMENT ENDPOINTS =================
+
+class OrderRequest(BaseModel):
+    amount: float
+    customer_id: str
+    customer_email: str
+    customer_phone: str
+    customer_name: str = "Customer"
+
+@app.post("/payments/create-order")
+async def create_payment_order(req: OrderRequest):
+    """Create a Cashfree order and return session ID"""
+    print(f"\n[PAYMENT] Creating order for {req.customer_email}, amount: {req.amount}")
+    
+    try:
+        customer_details = CustomerDetails(
+            customer_id=req.customer_id,
+            customer_email=req.customer_email,
+            customer_phone=req.customer_phone
+        )
+        
+        # Determine success URL based on origin or default
+        # Cashfree PRODUCTION strictly requires HTTPS
+        print(f"[PAYMENT] Checking origins for HTTPS: {ALLOWED_ORIGINS}")
+        success_url = None
+        for origin in ALLOWED_ORIGINS:
+            if origin.startswith("https://"):
+                success_url = f"{origin}/confirm-payment?order_id={{order_id}}"
+                break
+        
+        # Fallback to main domain if no HTTPS origin found but in Production
+        if not success_url:
+            success_url = "https://asterix-jobs.in/confirm-payment?order_id={order_id}"
+        
+        print(f"[PAYMENT] Final return_url: {success_url}")
+        
+        order_meta = OrderMeta(
+            return_url=success_url
+        )
+
+        create_order_request = CreateOrderRequest(
+            order_amount=req.amount,
+            order_currency="INR",
+            customer_details=customer_details,
+            order_meta=order_meta
+        )
+
+        response = Cashfree().PGCreateOrder("2023-08-01", create_order_request)
+        
+        print(f"[PAYMENT] Raw response type: {type(response)}")
+        print(f"[PAYMENT] Raw response.data type: {type(response.data) if response else 'None'}")
+        print(f"[PAYMENT] Raw response.data: {response.data if response else 'None'}")
+        
+        if response and response.data:
+            data = response.data
+            # SDK may return object or dict — handle both
+            if isinstance(data, dict):
+                session_id = data.get("payment_session_id")
+                order_id = data.get("order_id")
+            else:
+                session_id = getattr(data, "payment_session_id", None)
+                order_id = getattr(data, "order_id", None)
+            
+            print(f"[PAYMENT Success] Order ID: {order_id}, Session ID: {session_id}")
+            
+            if not session_id:
+                return {"status": "error", "message": "Order created but no payment_session_id returned. Check Cashfree dashboard."}
+            
+            return {
+                "status": "success",
+                "payment_session_id": session_id,
+                "order_id": order_id
+            }
+        else:
+            print("[PAYMENT Error] Failed to create order")
+            return {"status": "error", "message": "Failed to create order"}
+
+    except Exception as e:
+        print(f"[PAYMENT Error] {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+@app.get("/payments/status/{order_id}")
+async def get_payment_status(order_id: str):
+    """Verify payment status with Cashfree"""
+    print(f"\n[PAYMENT] Checking status for order: {order_id}")
+    
+    try:
+        response = Cashfree().PGOrderFetchPayments("2023-08-01", order_id)
+        
+        if response and response.data:
+            # Check the status of the first payment (simplified)
+            if len(response.data) > 0:
+                payment = response.data[0]
+                return {
+                    "status": "success",
+                    "payment_status": payment.payment_status,
+                    "order_id": order_id
+                }
+            
+        return {"status": "pending", "order_id": order_id}
+
+    except Exception as e:
+        print(f"[PAYMENT Status Error] {str(e)}")
         return {"status": "error", "message": str(e)}
 
 

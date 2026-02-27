@@ -54,11 +54,11 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
           {/* Feature comparison */}
           <div className="space-y-2 border-t border-black/10 dark:border-white/10 pt-6">
             {[
-              { label: 'Neural Auto-Pilot matching',  free: true,  premium: true  },
-              { label: 'View all live mandates',      free: true,  premium: true  },
-              { label: 'Manual Initialize (apply)',   free: false, premium: true  },
-              { label: 'Full job detail access',      free: false, premium: true  },
-              { label: 'Priority recruiter visibility',free: false, premium: true },
+              { label: 'Neural Auto-Pilot matching', free: true, premium: true },
+              { label: 'View all live mandates', free: true, premium: true },
+              { label: 'Manual Initialize (apply)', free: false, premium: true },
+              { label: 'Full job detail access', free: false, premium: true },
+              { label: 'Priority recruiter visibility', free: false, premium: true },
             ].map(({ label, free, premium }) => (
               <div key={label} className="flex items-center justify-between py-2 border-b border-black/5 dark:border-white/5">
                 <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{label}</span>

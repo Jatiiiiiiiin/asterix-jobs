@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cashfreepayments/cashfree-js": "^1.0.6",
     "@lottiefiles/dotlottie-react": "^0.17.15",
     "buffer": "6.0.3",
     "crypto": "^1.0.1",

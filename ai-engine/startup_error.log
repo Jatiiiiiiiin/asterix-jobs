@@ -1,0 +1,136 @@
+﻿python : Traceback 
+(most recent call 
+last):
+At line:1 char:1
++ python api.py 2>&1 
+| Out-File -FilePath 
+startup_error.log 
+-Encoding u ...
++ ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (Traceback    
+ (most recent call    
+ last)::String) [    
+], RemoteExceptio    n
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+  File "C:\Users\jatin
+\Downloads\asterix-job
+-main\asterix-job-main
+\ai-engine\api.py", 
+line 18, in <module>
+    from cashfree_pg.m
+odels.create_order_req
+uest import 
+CreateOrderRequest
+  File "C:\Users\jatin
+\AppData\Local\Program
+s\Python\Python310\lib
+\site-packages\cashfre
+e_pg\__init__.py", 
+line 23, in <module>
+    from cashfree_pg.a
+pi_client import 
+ApiClient
+  File "C:\Users\jatin
+\AppData\Local\Program
+s\Python\Python310\lib
+\site-packages\cashfre
+e_pg\api_client.py", 
+line 258, in <module>
+    class Cashfree:
+  File "C:\Users\jatin
+\AppData\Local\Program
+s\Python\Python310\lib
+\site-packages\cashfre
+e_pg\api_client.py", 
+line 2080, in Cashfree
+    def PGesUploadVend
+orsDocs(self, 
+x_api_version : 
+Annotated[StrictStr, 
+Field(..., 
+description="API 
+version to be used. 
+Format is in 
+YYYY-MM-DD")] = None, 
+vendor_id : 
+Annotated[StrictStr, 
+Field(..., 
+description="The id 
+which uniquely 
+identifies your 
+vendor.")] = None, 
+x_request_id : Annotat
+ed[Optional[StrictStr]
+, Field(description="R
+equest id for the API 
+call. Can be used to 
+resolve tech issues. 
+Communicate this in 
+your tech related 
+queries to 
+cashfree")] = None, 
+x_idempotency_key : An
+notated[Optional[Stric
+tStr], 
+Field(description="An 
+idempotency key is a 
+unique identifier you 
+include with your API 
+call. If the request 
+fails or times out, 
+you can safely retry 
+it using the same key 
+to avoid duplicate 
+actions.  ")] = None, 
+doc_type : Annotated[O
+ptional[StrictStr], Fi
+eld(description="Menti
+on the type of the 
+document you are 
+uploading. Possible 
+values: UIDAI_FRONT, 
+UIDAI_BACK, 
+UIDAI_NUMBER, DL, 
+DL_NUMBER, 
+PASSPORT_FRONT, 
+PASSPORT_BACK, 
+PASSPORT_NUMBER, 
+VOTER_ID, 
+VOTER_ID_NUMBER, PAN, 
+PAN_NUMBER, GST, 
+GSTIN_NUMBER, CIN, 
+CIN_NUMBER, 
+NBFC_CERTIFICATE. If 
+the doc type ends 
+with a number you 
+should add the doc 
+value else upload the 
+doc file.")] = None, 
+doc_value : Annotated[
+Optional[StrictStr], F
+ield(description="Ente
+r the display name of 
+the uploaded file.")] 
+= None, file : Annotat
+ed[Optional[Union[Stri
+ctBytes, StrictStr]], 
+Field(description="Sel
+ect the document that 
+should be uploaded or 
+provide the path of 
+that file. You cannot 
+upload a file that is 
+more than 2MB in 
+size.")] = None, 
+**kwargs) -> 
+ApiResponse:  # noqa: 
+E501
+NameError: name 
+'StrictBytes' is not 
+defined. Did you 
+mean: 'StrictBool'?

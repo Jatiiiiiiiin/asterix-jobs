@@ -1,54 +1,19 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
+const PaymentButton: React.FC = () => {
+  const navigate = useNavigate();
 
-const PaymentButton = () => {
-  const startPayment = async () => {
-    const res = await fetch("http://localhost:8000/payments/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: 499 }),
-    });
-
-    const order = await res.json();
-
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount: order.amount,
-      currency: "INR",
-      name: "Asterix Find",
-      description: "Premium Access",
-      order_id: order.id,
-
-      handler: async (response: any) => {
-        await fetch("http://localhost:8000/payments/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(response),
-        });
-
-        alert("Payment successful 🚀");
-      },
-    };
-
-    new window.Razorpay(options).open();
+  const handleUpgrade = () => {
+    localStorage.setItem("auth_intent", "buy_plan");
+    localStorage.setItem("selected_plan", "student"); // Default for this button
+    navigate("/confirm-payment");
   };
 
   return (
     <button
-      onClick={startPayment}
-      style={{
-        padding: "12px 20px",
-        background: "#000",
-        color: "#fff",
-        borderRadius: "8px",
-        border: "none",
-        cursor: "pointer",
-      }}
+      onClick={handleUpgrade}
+      className="px-6 py-3 bg-black text-white hover:bg-gray-800 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
     >
       Upgrade to Premium
     </button>

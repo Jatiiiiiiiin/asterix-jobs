@@ -52,7 +52,7 @@ export function usePlan(): PlanState {
     fetchPlan();
   }, []);
 
-  const isPremium      = plan !== 'free';
+  const isPremium = plan !== 'free';
   const canManualApply = plan === 'premium_student' || plan === 'premium' || plan === 'enterprise';
 
   return { plan, isLoading, isPremium, canManualApply };
