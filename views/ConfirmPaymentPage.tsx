@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { load } from "@cashfreepayments/cashfree-js";
 import { authService } from "../authService";
+import { db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 interface PlanConfig {
     name: string;
@@ -116,6 +118,21 @@ const ConfirmPaymentPage: React.FC = () => {
             const user = await authService.getCurrentUser();
             if (!user) throw new Error("Please log in again.");
 
+            // Fetch phone from Firestore profile
+            let customerPhone = "9999999999"; // fallback
+            try {
+                const profileSnap = await getDoc(doc(db, "profiles", user.uid));
+                if (profileSnap.exists()) {
+                    const contactPhone = profileSnap.data()?.contact?.phone;
+                    if (contactPhone && contactPhone.trim()) {
+                        // Strip non-numeric except leading +
+                        customerPhone = contactPhone.replace(/[^\d+]/g, "");
+                    }
+                }
+            } catch (profileErr) {
+                console.warn("[Payment] Could not fetch phone from profile, using fallback.");
+            }
+
             const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/create-order`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -123,7 +140,7 @@ const ConfirmPaymentPage: React.FC = () => {
                     amount: plan.amount,
                     customer_id: user.uid,
                     customer_email: user.email || "test@example.com",
-                    customer_phone: "9999999999", // Should be fetched from profile
+                    customer_phone: customerPhone,
                     customer_name: user.displayName || "Customer",
                 }),
             });

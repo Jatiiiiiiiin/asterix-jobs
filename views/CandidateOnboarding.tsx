@@ -6,17 +6,17 @@ import '../App.css';
 
 
 const STEPS = [
-  { id: 'identity',   label: 'Identity Matrix' },
-  { id: 'stack',      label: 'Neural Stack'    },
-  { id: 'experience', label: 'History'         },
-  { id: 'directives', label: 'Directives'      },
-  { id: 'review',     label: 'Review'          },
+  { id: 'identity', label: 'Identity Matrix' },
+  { id: 'stack', label: 'Neural Stack' },
+  { id: 'experience', label: 'History' },
+  { id: 'directives', label: 'Directives' },
+  { id: 'review', label: 'Review' },
 ];
 
 const SKILLS = [
-  'React.js','TypeScript','Node.js','Python','AI/ML','Docker',
-  'AWS','Firebase','Next.js','Go','Kubernetes','Tailwind','SQL','NoSQL',
-  'GraphQL','Redis','PostgreSQL','MongoDB','FastAPI','Flutter',
+  'React.js', 'TypeScript', 'Node.js', 'Python', 'AI/ML', 'Docker',
+  'AWS', 'Firebase', 'Next.js', 'Go', 'Kubernetes', 'Tailwind', 'SQL', 'NoSQL',
+  'GraphQL', 'Redis', 'PostgreSQL', 'MongoDB', 'FastAPI', 'Flutter',
 ];
 
 interface FormState {
@@ -43,10 +43,10 @@ export default function CandidateOnboarding({
   onToggleTheme,
   isDarkMode,
 }: CandidateOnboardingProps) {
-  const [step, setStep]         = useState(0);
-  const [form, setForm]         = useState<FormState>(EMPTY);
-  const [saving, setSaving]     = useState(false);
-  const [error, setError]       = useState('');
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState<FormState>(EMPTY);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -64,7 +64,7 @@ export default function CandidateOnboarding({
      ══════════════════════════════════════════════════════════════════ */
 
   const finalizeOnboarding = async () => {
-    
+
     const uid = readSessionUid();
 
     if (!uid) {
@@ -80,22 +80,22 @@ export default function CandidateOnboarding({
       // 1. Write full profile to profiles/{uid}
       await setDoc(doc(db, 'profiles', uid), {
         profile: {
-          name:         form.name,
-          title:        form.title,
-          manifesto:    form.experience,
+          name: form.name,
+          title: form.title,
+          manifesto: form.experience,
           availability: form.jobType,
-          coordinates:  form.location,
-          accessLevel:  'CANDIDATE',
+          coordinates: form.location,
+          accessLevel: 'CANDIDATE',
         },
         deployments: form.experience.trim() ? [{
-          id:   Date.now(),
+          id: Date.now(),
           date: 'RECENT',
           role: form.title,
-          co:   'Self Reported',
+          co: 'Self Reported',
           desc: form.experience,
         }] : [],
-        skills:   form.skills.map((s, i) => ({ id: i + 1, s, l: 80 })),
-        contact:  { phone: form.phone, github: form.github, linkedin: form.linkedin },
+        skills: form.skills.map((s, i) => ({ id: i + 1, s, l: 80 })),
+        contact: { phone: form.phone, github: form.github, linkedin: form.linkedin },
         preferences: { minSalary: form.minSalary, remotePreference: form.remotePreference },
         education: form.education,
         createdAt: new Date(),
@@ -177,12 +177,12 @@ export default function CandidateOnboarding({
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {[
-                    { name: 'name',     label: 'Professional Name',      placeholder: 'FULL NAME'            },
-                    { name: 'title',    label: 'Primary Role',            placeholder: 'E.G. SOFTWARE ENGINEER'},
-                    { name: 'phone',    label: 'Phone Number',            placeholder: '+1 XXX XXX XXXX'      },
-                    { name: 'location', label: 'Location (City, Country)', placeholder: 'E.G. NEW YORK, USA'  },
-                    { name: 'github',   label: 'GitHub URL',              placeholder: 'GITHUB.COM/USER'      },
-                    { name: 'linkedin', label: 'LinkedIn URL',            placeholder: 'LINKEDIN.COM/IN/USER' },
+                    { name: 'name', label: 'Professional Name', placeholder: 'FULL NAME' },
+                    { name: 'title', label: 'Primary Role', placeholder: 'E.G. SOFTWARE ENGINEER' },
+                    { name: 'phone', label: 'Phone Number', placeholder: '+1 XXX XXX XXXX' },
+                    { name: 'location', label: 'Location (City, Country)', placeholder: 'E.G. NEW YORK, USA' },
+                    { name: 'github', label: 'GitHub URL', placeholder: 'GITHUB.COM/USER' },
+                    { name: 'linkedin', label: 'LinkedIn URL', placeholder: 'LINKEDIN.COM/IN/USER' },
                   ].map(f => (
                     <div key={f.name} className="space-y-3">
                       <label className="text-[10px] font-black uppercase tracking-widest opacity-60">{f.label}</label>
@@ -206,11 +206,10 @@ export default function CandidateOnboarding({
                       key={skill}
                       type="button"
                       onClick={() => toggleSkill(skill)}
-                      className={`px-6 py-3 border-2 text-[10px] font-black uppercase tracking-widest transition-all ${
-                        form.skills.includes(skill)
+                      className={`px-6 py-3 border-2 text-[10px] font-black uppercase tracking-widest transition-all ${form.skills.includes(skill)
                           ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-xl'
                           : 'border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
-                      }`}
+                        }`}
                     >
                       {skill}
                     </button>
@@ -282,11 +281,11 @@ export default function CandidateOnboarding({
                 <div className="border-2 border-emerald-500/30 p-8 bg-black/5 dark:bg-white/5 space-y-6">
                   <div className="grid grid-cols-2 gap-6 text-sm">
                     {[
-                      ['Name',     form.name],
-                      ['Title',    form.title],
+                      ['Name', form.name],
+                      ['Title', form.title],
                       ['Location', form.location],
-                      ['Phone',    form.phone],
-                      ['Salary',   form.minSalary],
+                      ['Phone', form.phone],
+                      ['Salary', form.minSalary],
                       ['Job Type', form.jobType],
                     ].map(([label, val]) => (
                       <div key={label}>
@@ -335,7 +334,17 @@ export default function CandidateOnboarding({
               ) : (
                 <button
                   type="button"
-                  onClick={() => setStep(s => s + 1)}
+                  onClick={() => {
+                    // Mandatory phone validation on Step 0
+                    if (step === 0) {
+                      if (!form.name.trim()) { setError('Name is required.'); return; }
+                      if (!form.phone.trim()) { setError('Phone number is required for payment processing.'); return; }
+                      const phoneRegex = /^[+]?[\d\s\-()]{7,15}$/;
+                      if (!phoneRegex.test(form.phone.trim())) { setError('Enter a valid phone number (e.g. +91 9999999999).'); return; }
+                    }
+                    setError('');
+                    setStep(s => s + 1);
+                  }}
                   className="bg-black dark:bg-white text-white dark:text-black px-12 py-5 text-[10px] font-black uppercase tracking-widest hover:invert transition-all flex items-center gap-2"
                 >
                   Proceed <span className="material-symbols-outlined text-base">arrow_right_alt</span>
