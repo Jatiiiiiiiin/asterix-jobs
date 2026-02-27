@@ -1195,7 +1195,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                 {/* DESKTOP */}
                 <div className="hidden lg:flex flex-1 overflow-hidden">
                   <div
-                    className={`flex flex-col border-r border-white/5 shrink-0 transition-all duration-300 ${selectedApplicant ? 'w-[340px] lg:w-[380px]' : 'w-full max-w-2xl'
+                    className={`flex flex-col border-r border-white/5 shrink-0 overflow-hidden transition-all duration-300 ${selectedApplicant ? 'w-[340px] lg:w-[380px]' : 'w-full max-w-2xl'
                       }`}
                   >
                     {/* Header + list scroll together in one container */}
@@ -1336,19 +1336,26 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                 </div>
 
                                 <div className="shrink-0 text-right flex flex-col items-end gap-1">
-                                  <div className={`text-3xl font-black tabular-nums leading-none ${isPremium ? scoreColor : 'text-white/20'}`}>
-                                    {isPremium && app.matchScore > 0 ? `${app.matchScore}%` : '—'}
-                                  </div>
-                                  <p className="text-[6px] font-black uppercase tracking-[0.3em] text-white/30">Match</p>
-                                  {isPremium && selectedJob.matchThreshold != null && app.matchScore > 0 && (
-                                    <span
-                                      className={`text-[5px] font-black uppercase tracking-widest px-1.5 py-0.5 border ${isAbove
-                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                        : 'bg-red-500/10 border-red-500/20 text-red-400'
-                                        }`}
-                                    >
-                                      {isAbove ? `≥${selectedJob.matchThreshold}%` : `<${selectedJob.matchThreshold}%`}
-                                    </span>
+                                  {isPremium ? (
+                                    <>
+                                      <div className={`text-3xl font-black tabular-nums leading-none ${scoreColor}`}>
+                                        {app.matchScore > 0 ? `${app.matchScore}%` : '—'}
+                                      </div>
+                                      <p className="text-[6px] font-black uppercase tracking-[0.3em] text-white/30">Match</p>
+                                      {selectedJob.matchThreshold != null && app.matchScore > 0 && (
+                                        <span className={`text-[5px] font-black uppercase tracking-widest px-1.5 py-0.5 border ${isAbove
+                                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                            : 'bg-red-500/10 border-red-500/20 text-red-400'
+                                          }`}>
+                                          {isAbove ? `≥${selectedJob.matchThreshold}%` : `<${selectedJob.matchThreshold}%`}
+                                        </span>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <div className="flex flex-col items-center gap-0.5 opacity-30">
+                                      <span className="material-symbols-outlined text-lg">lock</span>
+                                      <p className="text-[6px] font-black uppercase tracking-[0.3em]">Score</p>
+                                    </div>
                                   )}
                                 </div>
                               </button>
