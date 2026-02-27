@@ -120,7 +120,7 @@ export default function CandidateOnboarding({
      RENDER
      ══════════════════════════════════════════════════════════════════ */
 
-  const INPUT = 'w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 font-black uppercase tracking-tight outline-none focus:border-black dark:focus:border-white transition-colors';
+  const INPUT = 'w-full bg-black/5 dark:bg-[#111111] border border-black/10 dark:border-white/10 p-4 font-black uppercase tracking-tight outline-none focus:border-black dark:focus:border-white transition-colors text-black dark:text-white [color-scheme:light] dark:[color-scheme:dark]';
   const TEXTAREA = INPUT + ' font-medium resize-y';
 
   return (
@@ -207,8 +207,8 @@ export default function CandidateOnboarding({
                       type="button"
                       onClick={() => toggleSkill(skill)}
                       className={`px-6 py-3 border-2 text-[10px] font-black uppercase tracking-widest transition-all ${form.skills.includes(skill)
-                          ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-xl'
-                          : 'border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
+                        ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-xl'
+                        : 'border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
                         }`}
                     >
                       {skill}

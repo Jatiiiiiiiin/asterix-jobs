@@ -359,8 +359,8 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
                   type="button"
                   onClick={toggle('remoteAllowed')}
                   className={`w-full px-5 py-4 text-[9px] font-black uppercase tracking-widest border transition-colors ${form.remoteAllowed
-                      ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
-                      : 'border-white/10 text-white/30 hover:border-white/20'
+                    ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
+                    : 'border-white/10 text-white/30 hover:border-white/20'
                     }`}
                 >
                   {form.remoteAllowed ? '✓ Remote OK' : 'On-site Only'}
@@ -522,8 +522,8 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
               onClick={activate}
               disabled={status === 'saving' || status === 'saved'}
               className={`flex-1 py-5 text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-2 ${status === 'saved'
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white text-black hover:bg-white/80'
+                ? 'bg-emerald-500 text-white'
+                : 'bg-white text-black hover:bg-white/80'
                 }`}
             >
               {status === 'saving' ? (
@@ -651,7 +651,7 @@ const INPUT_CLS =
   'w-full bg-white/[0.03] border border-white/10 px-4 py-3.5 text-[10px] font-black uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors text-white';
 
 const SELECT_CLS =
-  'w-full bg-white/[0.03] border border-white/10 px-4 py-3.5 text-[10px] font-black uppercase tracking-widest outline-none focus:border-white/30 transition-colors text-white appearance-none';
+  'w-full bg-[#111111] border border-white/10 px-4 py-3.5 text-[10px] font-black uppercase tracking-widest outline-none focus:border-white/30 transition-colors text-white appearance-none [color-scheme:dark]';
 
 const TEXTAREA_CLS =
   'w-full bg-white/[0.03] border border-white/10 px-4 py-3.5 text-[10px] font-medium uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors text-white resize-y';

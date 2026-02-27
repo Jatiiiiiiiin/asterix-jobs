@@ -12,6 +12,7 @@ import {
   getDoc,
   deleteDoc,
   setDoc,
+  getCountFromServer,
   Timestamp,
 } from 'firebase/firestore';
 
@@ -147,8 +148,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
         const withCounts = await Promise.all(
           jobs.map(async (job) => {
-            const countSnap = await getDoc(doc(db, 'jobApplicationCounts', job.id)).catch(() => null);
-            return { ...job, applicationCount: (countSnap?.data()?.count as number) ?? 0 };
+            const appQuery = query(collection(db, 'applications'), where('jobId', '==', job.id));
+            const countSnap = await getCountFromServer(appQuery).catch(() => null);
+            return { ...job, applicationCount: countSnap?.data().count ?? 0 };
           })
         );
 
