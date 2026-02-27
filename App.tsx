@@ -177,20 +177,17 @@ const App: React.FC = () => {
 
   const RequireAuth = ({ children }: { children: ReactNode }) => {
     if (!user) return <Navigate to="/signup" replace />;
-    if (!user.emailVerified) return <Navigate to="/verify-email" replace />;
     return <>{children}</>;
   };
 
   const RequireCandidate = ({ children }: { children: ReactNode }) => {
     if (!user) return <Navigate to="/signup" replace />;
-    if (!user.emailVerified) return <Navigate to="/verify-email" replace />;
     if (user.role !== "candidate") return <Navigate to="/signup" replace />;
     return <>{children}</>;
   };
 
   const RequireRecruiter = ({ children }: { children: ReactNode }) => {
     if (!user) return <Navigate to="/signup" replace />;
-    if (!user.emailVerified) return <Navigate to="/verify-email" replace />;
     if (user.role !== "recruiter") return <Navigate to="/signup" replace />;
     return <>{children}</>;
   };
