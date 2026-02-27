@@ -717,6 +717,10 @@ async def create_payment_order(req: OrderRequest):
     """Create a Cashfree order and return session ID"""
     print(f"\n[PAYMENT] Creating order for {req.customer_email}, amount: {req.amount}")
     
+    if not CASHFREE_APP_ID or not CASHFREE_SECRET_KEY:
+        print("[PAYMENT Error] Cashfree credentials not configured on this server.")
+        return {"status": "error", "message": "Payment gateway not configured. Please contact support."}
+    
     try:
         customer_details = CustomerDetails(
             customer_id=req.customer_id,
