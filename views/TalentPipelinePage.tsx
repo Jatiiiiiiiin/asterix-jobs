@@ -9,6 +9,7 @@ import {
   onSnapshot,
   doc,
   getDoc,
+  getDocs,
   setDoc,
   Timestamp,
 } from 'firebase/firestore';
@@ -17,6 +18,7 @@ import {
 
 interface PipelineCandidate {
   applicationId: string;
+  realApplicationId?: string | null;   // actual Firestore applications doc ID
   jobId: string;
   jobTitle: string;
   candidateUid: string;
@@ -101,12 +103,13 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
       where('recruiterId', '==', recruiterId)
     );
 
-    const unsub = onSnapshot(q, (snap) => {
+    const unsub = onSnapshot(q, async (snap) => {
       const rows: PipelineCandidate[] = snap.docs.map(d => {
         const data = d.data() as any;
 
         return {
           applicationId: d.id,
+          realApplicationId: data.applicationId ?? null,   // ← real app doc ID
           jobId: data.jobId,
           jobTitle: data.jobTitle ?? 'Unknown Role',
 
@@ -118,7 +121,6 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
           shortlistedAt: data.addedAt ?? null,
           pipelineStage: data.pipelineStage ?? 'shortlisted',
 
-          // 👇 snapshot fields (NO profile fetch)
           name: data.candidateName ?? 'Candidate',
           title: data.candidateTitle ?? '',
           email: data.candidateEmail ?? '',
@@ -131,8 +133,28 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
         };
       });
 
-      rows.sort((a, b) => b.matchScore - a.matchScore);
-      setCandidates(rows);
+      // ── Verify each pipeline entry has a real application doc ──
+      const verified = await Promise.all(
+        rows.map(async (row) => {
+          // If we have a stored real applicationId, check that doc directly
+          if (row.realApplicationId) {
+            const appSnap = await getDoc(doc(db, 'applications', row.realApplicationId)).catch(() => null);
+            return appSnap?.exists() ? row : null;
+          }
+          // Fallback: query by candidateUid + jobId
+          const q2 = query(
+            collection(db, 'applications'),
+            where('candidateUid', '==', row.candidateUid),
+            where('jobId', '==', row.jobId)
+          );
+          const snap2 = await getDocs(q2).catch(() => null);
+          return snap2 && !snap2.empty ? row : null;
+        })
+      );
+
+      const valid = verified.filter(Boolean) as PipelineCandidate[];
+      valid.sort((a, b) => b.matchScore - a.matchScore);
+      setCandidates(valid);
       setLoading(false);
     });
 
@@ -162,17 +184,23 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
         const appFields = stageFieldMap[stage];
 
-        // 1️⃣ Update Applications (used by RecruiterDashboard)
-        await setDoc(
-          doc(db, 'applications', appId),
-          {
-            pipelineStage: stage,
-            stage: appFields.stage,
-            status: appFields.status,
-            updatedAt: Timestamp.now(),
-          },
-          { merge: true }
-        );
+        // Find the real application doc ID for this pipeline entry
+        const pipelineCandidate = candidates.find(c => c.applicationId === appId);
+        const realAppId = pipelineCandidate?.realApplicationId ?? null;
+
+        // 1️⃣ Update the real Applications doc (if we know its ID)
+        if (realAppId) {
+          await setDoc(
+            doc(db, 'applications', realAppId),
+            {
+              pipelineStage: stage,
+              stage: appFields.stage,
+              status: appFields.status,
+              updatedAt: Timestamp.now(),
+            },
+            { merge: true }
+          );
+        }
 
         // 2️⃣ Update Talent Pipeline (used by PipelinePage)
         await setDoc(
@@ -205,7 +233,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
         setMovingId(null);
       }
     },
-    [selectedCandidate]
+    [selectedCandidate, candidates]
   );
 
   /* ── Drag and drop ──────────────────────────── */

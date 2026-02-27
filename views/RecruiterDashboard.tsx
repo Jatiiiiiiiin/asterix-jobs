@@ -333,6 +333,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
         jobId: selectedJob!.id,
         jobTitle: selectedJob!.title,
         candidateUid: app.candidateUid,
+        applicationId: app.id,           // ← real Firestore application doc ID
         candidateName: app.candidateName,
         candidateTitle: app.candidateTitle,
         candidateEmail: app.candidateEmail,
