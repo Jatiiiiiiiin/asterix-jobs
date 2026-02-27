@@ -1200,7 +1200,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   >
                     {/* Header + list scroll together in one container */}
                     <div className="flex-1 overflow-y-auto flex flex-col">
-                      <div className="shrink-0 px-6 py-5 border-b border-white/5 space-y-4 bg-[#080808] sticky top-0 z-10">
+                      <div className="shrink-0 px-6 py-5 border-b border-white/5 space-y-4 bg-[#080808]">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 space-y-1">
                             <h2 className="text-base font-black uppercase tracking-tight leading-tight truncate">
@@ -1344,8 +1344,8 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                       <p className="text-[6px] font-black uppercase tracking-[0.3em] text-white/30">Match</p>
                                       {selectedJob.matchThreshold != null && app.matchScore > 0 && (
                                         <span className={`text-[5px] font-black uppercase tracking-widest px-1.5 py-0.5 border ${isAbove
-                                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                            : 'bg-red-500/10 border-red-500/20 text-red-400'
+                                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                          : 'bg-red-500/10 border-red-500/20 text-red-400'
                                           }`}>
                                           {isAbove ? `≥${selectedJob.matchThreshold}%` : `<${selectedJob.matchThreshold}%`}
                                         </span>
