@@ -12,15 +12,12 @@ export interface ContactMessage {
 
 export const contactService = {
     async submitContactMessage(data: ContactMessage) {
-        try {
-            // 1. Save to Firestore
-            const contactRef = collection(db, "contact_messages");
-            await addDoc(contactRef, {
-                ...data,
-                createdAt: serverTimestamp(),
-            });
+        let emailSent = false;
+        let firestoreSaved = false;
+        let lastError: any = null;
 
-            // 2. Send email via backend
+        // 1. Send email via backend (Primary, as it notifies the admin)
+        try {
             const response = await fetch(`${API_BASE}/contact`, {
                 method: "POST",
                 headers: {
@@ -29,14 +26,34 @@ export const contactService = {
                 body: JSON.stringify(data),
             });
 
-            if (!response.ok) {
-                console.warn("[contactService] Email notification failed, but Firestore entry was created.");
+            if (response.ok) {
+                emailSent = true;
+            } else {
+                const errData = await response.json().catch(() => ({}));
+                console.error("[contactService] Backend email failed:", errData);
             }
-
-            return { success: true };
         } catch (error) {
-            console.error("[contactService] Error submitting contact message:", error);
-            throw error;
+            console.error("[contactService] Error calling backend:", error);
+            lastError = error;
+        }
+
+        // 2. Save to Firestore (Secondary, for record keeping)
+        try {
+            const contactRef = collection(db, "contact_messages");
+            await addDoc(contactRef, {
+                ...data,
+                createdAt: serverTimestamp(),
+            });
+            firestoreSaved = true;
+        } catch (error: any) {
+            console.warn("[contactService] Firestore write failed (likely permissions):", error.message);
+            // If email was sent, we don't throw, we just log the warning
+        }
+
+        if (emailSent) {
+            return { success: true, firestoreSaved };
+        } else {
+            throw lastError || new Error("Failed to send message. Please try again later.");
         }
     },
 };
