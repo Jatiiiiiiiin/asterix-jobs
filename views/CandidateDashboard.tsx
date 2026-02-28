@@ -744,13 +744,13 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                   <div className="flex border border-black/10 dark:border-white/10 p-1 bg-black/5 dark:bg-white/5">
                     <button
                       onClick={() => setSortBy('score')}
-                      className={`px-4 py-2 text-xs font-black uppercase tracking-tighter transition-all ${sortBy === 'score' ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg' : 'opacity-40 hover:opacity-100'}`}
+                      className={`px-4 py-1 text-xs font-black uppercase tracking-tighter transition-all ${sortBy === 'score' ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg' : 'opacity-40 hover:opacity-100'}`}
                     >
                       Score
                     </button>
                     <button
                       onClick={() => setSortBy('time')}
-                      className={`px-4 py-2 text-xs font-black uppercase tracking-tighter transition-all ${sortBy === 'time' ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg' : 'opacity-40 hover:opacity-100'}`}
+                      className={`px-4 py-1 text-xs font-black uppercase tracking-tighter transition-all ${sortBy === 'time' ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg' : 'opacity-40 hover:opacity-100'}`}
                     >
                       Recent
                     </button>
