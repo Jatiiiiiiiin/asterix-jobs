@@ -449,47 +449,131 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-black dark:border-white/10 py-20 sm:py-24 md:py-32 px-5 sm:px-8 md:px-10 bg-white dark:bg-background-dark">
-        <div className="max-w-[1440px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-16 gap-y-16 md:gap-y-32 mb-20 md:mb-32">
-            <div className="col-span-1 lg:col-span-2 space-y-8 md:space-y-10">
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className="size-8 md:size-10 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
-                  <span className="material-symbols-outlined font-black">auto_awesome</span>
+      <footer className="border-t border-black dark:border-white/10 bg-white dark:bg-background-dark">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
+
+          {/* Main grid */}
+          <div className="py-16 md:py-24 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-8 gap-y-12">
+
+            {/* Brand col — spans 2 on lg */}
+            <div className="col-span-2 md:col-span-3 lg:col-span-2 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="size-9 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
+                  <span className="material-symbols-outlined text-xl">auto_awesome</span>
                 </div>
-                <h4 className="text-2xl md:text-4xl font-black uppercase tracking-tighter leading-none">Asterix</h4>
+                <span className="text-xl font-black uppercase tracking-tighter">Asterix</span>
               </div>
-              <p className="max-w-md text-base sm:text-lg md:text-xl font-bold uppercase tracking-widest text-black/40 dark:text-white/40 leading-relaxed">
-                We're building a smarter, faster way to connect great people with great companies. No keyword tricks. No spam. Just better matches.
+              <p className="text-sm text-black/50 dark:text-white/50 leading-relaxed max-w-xs">
+                AI-powered job matching and auto-application platform. We match you to the right roles — and apply on your behalf.
               </p>
+              {/* Social links */}
+              <div className="flex items-center gap-3">
+                {[
+                  { icon: 'link', label: 'LinkedIn', href: 'https://linkedin.com/company/asterix-jobs' },
+                  { icon: 'code', label: 'GitHub', href: 'https://github.com/asterix-jobs' },
+                  { icon: 'alternate_email', label: 'Twitter', href: 'https://x.com/asterixjobs' },
+                  { icon: 'camera_alt', label: 'Instagram', href: 'https://instagram.com/asterixjobs' },
+                ].map(s => (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={s.label}
+                    className="size-8 border border-black/15 dark:border-white/15 flex items-center justify-center text-black/40 dark:text-white/40 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-all"
+                  >
+                    <span className="material-symbols-outlined text-sm">{s.icon}</span>
+                  </a>
+                ))}
+              </div>
+              {/* Contact shortcut */}
+              <a href="mailto:hello@asterix-jobs.in" className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white transition-colors">
+                <span className="material-symbols-outlined text-sm">mail</span>
+                hello@asterix-jobs.in
+              </a>
             </div>
-            <div className="space-y-6 md:space-y-10">
-              <h5 className="text-[9px] sm:text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em]">Explore</h5>
-              <div className="flex flex-col gap-4 md:gap-5 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-black/60 dark:text-white/60">
-                <button onClick={() => scrollToSection('features')} className="hover:text-black dark:hover:text-white transition-colors text-left">Features</button>
-                <button onClick={() => scrollToSection('process')} className="hover:text-black dark:hover:text-white transition-colors text-left">How It Works</button>
-                <button onClick={() => scrollToSection('pricing')} className="hover:text-black dark:hover:text-white transition-colors text-left">Pricing</button>
+
+            {/* Product */}
+            <div className="space-y-5">
+              <h5 className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 dark:text-white/40">Product</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-black uppercase tracking-widest">
+                <button onClick={() => scrollToSection('features')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Features</button>
+                <button onClick={() => scrollToSection('process')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">How It Works</button>
+                <button onClick={() => scrollToSection('pricing')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Pricing</button>
+                <button onClick={() => scrollToSection('network')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Network</button>
               </div>
             </div>
-            <div className="space-y-6 md:space-y-10">
-              <h5 className="text-[9px] sm:text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em]">Follow Us</h5>
-              <div className="flex flex-col gap-4 md:gap-5 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-black/60 dark:text-white/60">
-                <a href="#" className="hover:text-black dark:hover:text-white transition-colors">Twitter (X)</a>
-                <a href="#" className="hover:text-black dark:hover:text-white transition-colors">GitHub</a>
-                <a href="#" className="hover:text-black dark:hover:text-white transition-colors">Developer Docs</a>
+
+            {/* Job Seekers */}
+            <div className="space-y-5">
+              <h5 className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 dark:text-white/40">Job Seekers</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-black uppercase tracking-widest">
+                <Link to="/signup" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Create Account</Link>
+                <Link to="/signup" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Upload Resume</Link>
+                <Link to="/candidate/jobs" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Browse Jobs</Link>
+                <Link to="/candidate" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Dashboard</Link>
+                <Link to="/candidate/applications" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">My Applications</Link>
+              </div>
+            </div>
+
+            {/* Recruiters */}
+            <div className="space-y-5">
+              <h5 className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 dark:text-white/40">Recruiters</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-black uppercase tracking-widest">
+                <Link to="/signup" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Post a Job</Link>
+                <Link to="/recruiter" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Recruiter Portal</Link>
+                <Link to="/recruiter/talent" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Talent Pipeline</Link>
+                <Link to="/recruiter/reports" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Analytics</Link>
+                <button onClick={() => handleUpgradePlan('recruiter')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Upgrade to Pro</button>
+              </div>
+            </div>
+
+            {/* Company */}
+            <div className="space-y-5">
+              <h5 className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 dark:text-white/40">Company</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-black uppercase tracking-widest">
+                <Link to="/about" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">About Us</Link>
+                <Link to="/contact" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Contact</Link>
+                <a href="mailto:careers@asterix-jobs.in" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Careers</a>
+                <a href="mailto:press@asterix-jobs.in" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Press / Media</a>
+                <a href="mailto:partnerships@asterix-jobs.in" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Partnerships</a>
               </div>
             </div>
           </div>
-          <div className="flex flex-col lg:flex-row justify-between items-center border-t border-black/5 dark:border-white/5 pt-12 gap-8 text-[7px] sm:text-[8px] md:text-[9px] font-black uppercase tracking-[0.5em] text-black/30 dark:text-white/30 text-center lg:text-left">
-            <p>© 2024 Asterix. All rights reserved.</p>
-            <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
-              <a href="#" className="hover:text-black dark:hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="hover:text-black dark:hover:text-white transition-colors">Terms</a>
-              <a href="#" className="hover:text-black dark:hover:text-white transition-colors">Security</a>
+
+          {/* Trust badges */}
+          <div className="py-6 border-t border-black/5 dark:border-white/5 flex flex-wrap items-center gap-6">
+            {[
+              { icon: 'lock', text: 'Payments Secured by Cashfree' },
+              { icon: 'verified_user', text: 'Firebase Auth' },
+              { icon: 'privacy_tip', text: 'GDPR Compliant' },
+              { icon: 'https', text: 'SSL Encrypted' },
+            ].map(b => (
+              <div key={b.text} className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-black/30 dark:text-white/30">
+                <span className="material-symbols-outlined text-xs">{b.icon}</span>
+                {b.text}
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom bar */}
+          <div className="py-6 border-t border-black/5 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-[8px] font-black uppercase tracking-[0.4em] text-black/30 dark:text-white/30">
+              © {new Date().getFullYear()} Asterix Technologies. All rights reserved.
+            </p>
+            <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black uppercase tracking-[0.3em] text-black/30 dark:text-white/30">
+              <Link to="/privacy" className="hover:text-black dark:hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-black dark:hover:text-white transition-colors">Terms of Service</Link>
+              <a href="mailto:hello@asterix-jobs.in" className="hover:text-black dark:hover:text-white transition-colors">Contact</a>
+              <Link to="/about" className="hover:text-black dark:hover:text-white transition-colors">About</Link>
             </div>
           </div>
+
         </div>
       </footer>
+
+
+
 
       <style>{`
         @keyframes marquee {
@@ -545,7 +629,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
           background-color: #000000 !important;
         }
       `}</style>
-    </div>
+    </div >
   );
 };
 

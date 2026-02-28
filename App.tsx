@@ -23,6 +23,10 @@ import TalentPipelinePage from "./views/TalentPipelinePage";
 import RecruiterReportsPage from "./views/RecruiterReportsPage";
 import ConfirmPaymentPage from "./views/ConfirmPaymentPage";
 import VerifyEmailPage from "./views/VerifyEmailPage";
+import AboutPage from "./views/AboutPage";
+import ContactPage from "./views/ContactPage";
+import PrivacyPage from "./views/PrivacyPage";
+import TermsPage from "./views/TermsPage";
 import './App.css';
 
 /* Components */
@@ -278,6 +282,12 @@ const App: React.FC = () => {
 
         {/* SHARED */}
         <Route path="/job/:id" element={<JobDetailsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />} />
+
+        {/* PUBLIC STATIC */}
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
 
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
