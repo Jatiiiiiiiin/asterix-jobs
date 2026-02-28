@@ -88,7 +88,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
   /* ════════════════════════════════════════════════════════════════ */
 
   const FeatureCard = ({ icon, title, desc }: { icon: string, title: string, desc: string }) => (
-    <div className="group border border-black dark:border-white/20 p-6 sm:p-8 md:p-10 hover:bg-black dark:hover:bg-white transition-all duration-500 flex flex-col gap-5 md:gap-6">
+    <div className="group border border-black dark:border-white/20 p-6 sm:p-8 md:p-10 hover:bg-black dark:hover:bg-white transition-all duration-500 flex flex-col gap-5 md:gap-6 h-full">
       <div className="size-10 md:size-12 border border-black dark:border-white flex items-center justify-center group-hover:bg-white dark:group-hover:bg-black group-hover:text-black dark:group-hover:text-white transition-colors duration-500">
         <span className="material-symbols-outlined text-xl md:text-2xl">{icon}</span>
       </div>
@@ -230,22 +230,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                 Not a Regular job site that just search for keywords in your resume. Asterix actually understands what you're good at — and finds companies where you'll genuinely thrive.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 border-t md:border-l border-black/5 dark:border-white/10">
-              <div className="border-r border-b border-black/5 dark:border-white/10">
+            <div className="grid grid-cols-1 md:grid-cols-3 border-t md:border-l border-black/5 dark:border-white/10 items-stretch">
+              <div className="border-r border-b border-black/5 dark:border-white/10 flex">
                 <FeatureCard
                   icon="bolt"
                   title="Smart Matching"
                   desc="We score every match across 40+ factors — not just your job title, but your actual skills, work style, and what each company really needs."
                 />
               </div>
-              <div className="border-r border-b border-black/5 dark:border-white/10">
+              <div className="border-r border-b border-black/5 dark:border-white/10 flex">
                 <FeatureCard
                   icon="psychology"
                   title="Reads Between the Lines"
                   desc="Our AI knows that the same job title means very different things at different companies. It matches you to roles where your experience will actually count."
                 />
               </div>
-              <div className="border-r border-b border-black/5 dark:border-white/10">
+              <div className="border-r border-b border-black/5 dark:border-white/10 flex">
                 <FeatureCard
                   icon="rocket_launch"
                   title="Applies for You"
