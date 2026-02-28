@@ -1,17 +1,29 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { contactService } from '../contactService';
 
 const ContactPage: React.FC = () => {
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const topics = ['General Inquiry', 'Candidate Support', 'Recruiter / Business', 'Bug Report', 'Partnership', 'Press / Media'];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In production, wire to a form backend (e.g. Formspree, EmailJS)
-        setSubmitted(true);
+        setLoading(true);
+        setError(null);
+        try {
+            await contactService.submitContactMessage(form);
+            setSubmitted(true);
+            setForm({ name: '', email: '', subject: '', message: '' });
+        } catch (err: any) {
+            setError(err.message || 'Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const field = 'w-full bg-black/5 dark:bg-white/10 text-black dark:text-white border border-black/10 dark:border-white/10 px-4 py-3 text-sm font-medium focus:outline-none focus:border-black dark:focus:border-white transition-colors placeholder:text-black/30 dark:placeholder:text-white/30';
@@ -122,8 +134,26 @@ const ContactPage: React.FC = () => {
                                     <label className="text-[8px] font-black tracking-widest opacity-50">Message</label>
                                     <textarea required rows={6} className={field} placeholder="Tell us what's on your mind..." value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
                                 </div>
-                                <button type="submit" className="w-full py-4 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black tracking-widest hover:opacity-80 transition-opacity">
-                                    Send Message
+
+                                {error && (
+                                    <div className="p-4 border border-red-500/30 bg-red-500/5 text-red-500 text-[10px] font-black tracking-widest uppercase">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className={`w-full py-4 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black tracking-widest hover:opacity-80 transition-opacity flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="animate-spin size-3 border-2 border-current border-t-transparent rounded-full" />
+                                            Sending...
+                                        </>
+                                    ) : (
+                                        'Send Message'
+                                    )}
                                 </button>
                             </form>
                         )}

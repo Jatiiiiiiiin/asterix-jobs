@@ -44,6 +44,7 @@ export interface Job {
 
   postedDate?: string;
   applicationDeadline?: string;
+  matchThreshold?: number;
 
   matchScore?: number;
   applied?: boolean;

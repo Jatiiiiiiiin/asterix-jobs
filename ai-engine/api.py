@@ -813,6 +813,55 @@ async def get_payment_status(order_id: str):
         return {"status": "error", "message": str(e)}
 
 
+# ================= CONTACT ENDPOINT =================
+
+class ContactRequest(BaseModel):
+    name: str
+    email: str
+    subject: str
+    message: str
+
+@app.post("/contact")
+async def contact(req: ContactRequest):
+    """Handle contact form submissions and send email notification"""
+    print(f"\n[CONTACT] From: {req.email}, Subject: {req.subject}")
+
+    if not RESEND_API_KEY:
+        print("[Contact Error] Cannot send email: RESEND_API_KEY missing")
+        return {"status": "error", "message": "Email service not configured"}
+
+    html_content = f"""
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;">
+        <h2 style="color: #000;">New Contact Message from Asterix</h2>
+        <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Name:</strong> {req.name}</p>
+            <p><strong>Email:</strong> {req.email}</p>
+            <p><strong>Subject:</strong> {req.subject}</p>
+            <p style="margin-top: 15px;"><strong>Message:</strong></p>
+            <p style="white-space: pre-wrap;">{req.message}</p>
+        </div>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #666;">This message was sent via the Asterix Contact Form.</p>
+    </div>
+    """
+
+    try:
+        # Send to jatinthakurr2003@gmail.com
+        params = {
+            "from": RESEND_FROM_EMAIL,
+            "to": ["jatinthakurr2003@gmail.com"],
+            "subject": f"Contact: {req.subject} (from {req.name})",
+            "html": html_content,
+        }
+
+        email = resend.Emails.send(params)
+        print(f"[Contact Success] Notification sent to Jatin. ID: {email.get('id')}")
+        return {"status": "success", "id": email.get("id")}
+    except Exception as e:
+        print(f"[Contact Error] {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+
 # ================= RUN =================
 
 if __name__ == "__main__":

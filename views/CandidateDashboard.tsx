@@ -298,7 +298,13 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
   const closeResumeViewer = () => {
     setIsResumeViewOpen(false);
-    if (resumePreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(resumePreviewUrl);
+    if (resumePreviewUrl?.startsWith('blob:')) {
+      try {
+        URL.revokeObjectURL(resumePreviewUrl);
+      } catch (e) {
+        console.warn("[Asterix] Revoke failed:", e);
+      }
+    }
     setResumePreviewUrl(null);
   };
 
@@ -338,120 +344,116 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     setIsVectorizing(true);
     addNotification('System Sync', 'Initializing high-fidelity neural scan...', 'info');
 
-    let autoAppliedCount = 0;
     // uid is already defined above
     const { profileText, candidateSkills } = uid
       ? await fetchProfilePayload(uid)
       : { profileText: '', candidateSkills: [] };
 
-    // If we have a NEW file upload, re-extract even if we had persistent text
+    // 1. Ensure we have extracted text for matching
     if (resumeFileRef.current) {
       try {
+        addNotification('Neural Link', 'Extracting identity from local file...', 'info');
         extractedText = await extractResumeText(resumeFileRef.current);
-        if (uid) {
-          localStorage.setItem(`asterix_resume_content_${uid}`, extractedText);
-        }
-        addNotification('Neural Link', 'Identity re-mapped from local file', 'success');
+        if (uid) localStorage.setItem(`asterix_resume_content_${uid}`, extractedText);
+        addNotification('Neural Link', 'Identity re-mapped', 'success');
       } catch (err) {
-        console.warn('[Asterix] Ref-extraction failed, using existing text if available:', err);
+        console.warn('[Asterix] Direct extraction failed, falling back to existing text:', err);
       }
     }
 
-    try {
-      for (let index = 0; index < jobsRef.current.length; index++) {
-        const job = jobsRef.current[index];
+    if (!extractedText || extractedText.length < 50) {
+      addNotification('Sync Failed', 'Resume content incomplete. Please re-upload.', 'alert');
+      setIsVectorizing(false);
+      vectorizingRef.current = false;
+      return;
+    }
+
+    let autoAppliedCount = 0;
+    const CONCURRENCY_LIMIT = 3;
+    const jobPool = [...jobsRef.current];
+
+    // Mark all jobs as analyzing immediately
+    setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: true })));
+
+    const processJob = async (job: Job, index: number) => {
+      try {
+        const audit = await calculateSemanticFidelityBackend(
+          null,
+          job,
+          profileText,
+          candidateSkills,
+          extractedText
+        );
+
+        if (typeof audit?.fidelityScore !== 'number') throw new Error('Invalid AI response');
+
+        const score = audit.fidelityScore;
+        let shouldAutoApply = false;
+
+        if (autoPilotRef.current && score >= (job.matchThreshold ?? 65) && uid) {
+          const alreadyApplied = await hasApplied(uid, job.id);
+          if (!alreadyApplied) {
+            const payload = buildApplicationPayload(uid, job, score, true, resumeUrl || undefined);
+            await saveApplication(payload);
+            autoAppliedCount++;
+            addNotification('Auto-Applied', `${job.title} (${score}%)`, 'success');
+
+            const currentUser = await authService.getCurrentUser();
+            if (currentUser?.email) {
+              await sendAutoApplyEmail({
+                to_email: currentUser.email,
+                job_title: job.title,
+                company_name: typeof job.company === 'string' ? job.company : job.company?.name || 'Unknown',
+                location: typeof job.location === 'string' ? job.location : job.location?.city || 'Remote',
+              });
+            }
+          }
+          shouldAutoApply = true;
+        }
 
         setDynamicJobs(prev => {
           const updated = [...prev];
-          if (!updated[index].analyzing) {
-            updated[index] = { ...updated[index], analyzing: true };
+          const jobIndex = updated.findIndex(j => j.id === job.id);
+          if (jobIndex !== -1) {
+            updated[jobIndex] = {
+              ...updated[jobIndex],
+              matchScore: score,
+              matchHighlights: audit.matchHighlights,
+              breakdown: audit.breakdown,
+              applied: shouldAutoApply ? true : updated[jobIndex].applied,
+              analyzing: false,
+            };
           }
           return updated;
         });
 
-        try {
-          const audit = await calculateSemanticFidelityBackend(
-            extractedText ? null : resumeFileRef.current,
-            job,
-            profileText,
-            candidateSkills,
-            extractedText || undefined
-          );
-
-          if (typeof audit?.fidelityScore !== 'number') throw new Error('Invalid AI response');
-
-          const score = audit.fidelityScore;
-          let shouldAutoApply = false;
-
-          if (autoPilotRef.current) {
-            const threshold = job.matchThreshold ?? 65;
-
-            if (score >= threshold && uid) {
-              const alreadyApplied = await hasApplied(uid, job.id);
-
-              if (!alreadyApplied) {
-                const payload = buildApplicationPayload(uid, job, score, true, resumeUrl || undefined);
-                await saveApplication(payload);
-                autoAppliedCount++;
-                addNotification('Auto-Applied', `${job.title} (${score}%)`, 'success');
-                console.log(`[Asterix] Auto-Applied to ${job.id}. Triggering email...`);
-
-                // Trigger email notification
-                const currentUser = await authService.getCurrentUser();
-                console.log(`[Asterix] Current user:`, currentUser);
-                if (currentUser?.email) {
-                  console.log(`[Asterix] Sending email to ${currentUser.email}...`);
-                  const emailRes = await sendAutoApplyEmail({
-                    to_email: currentUser.email,
-                    job_title: job.title,
-                    company_name: typeof job.company === 'string' ? job.company : job.company?.name || 'Unknown',
-                    location: typeof job.location === 'string' ? job.location : job.location?.city || 'Remote',
-                  });
-                  console.log(`[Asterix] Email response:`, emailRes);
-                } else {
-                  console.warn(`[Asterix] No email found for user!`, currentUser);
-                }
-              }
-
-              // 🔥 CRITICAL: always mark applied in UI
-              shouldAutoApply = true;
-            }
+      } catch (err) {
+        console.error('[Asterix] AI scoring failed for job:', job.id, err);
+        setDynamicJobs(prev => {
+          const updated = [...prev];
+          const jobIndex = updated.findIndex(j => j.id === job.id);
+          if (jobIndex !== -1) {
+            updated[jobIndex] = { ...updated[jobIndex], analyzing: false, matchScore: 0 };
           }
+          return updated;
+        });
+      }
+    };
 
-          setDynamicJobs(prev => {
-            const updated = [...prev];
-            updated[index] = {
-              ...updated[index],
-              matchScore: score,
-              matchHighlights: audit.matchHighlights,
-              breakdown: audit.breakdown,
-              applied: shouldAutoApply ? true : updated[index].applied,
-              analyzing: false,
-            };
-            return updated;
-          });
-
-        } catch (err) {
-          console.error('[Asterix] AI scoring failed for job:', job.id, err);
-          setDynamicJobs(prev => {
-            const updated = [...prev];
-            updated[index] = { ...updated[index], analyzing: false };
-            return updated;
-          });
-        }
+    try {
+      // Parallel execution with batches
+      for (let i = 0; i < jobPool.length; i += CONCURRENCY_LIMIT) {
+        const batch = jobPool.slice(i, i + CONCURRENCY_LIMIT).map((job, idx) => processJob(job, i + idx));
+        await Promise.all(batch);
       }
     } catch (err) {
       console.error('[Asterix] Global sync failure:', err);
     } finally {
       vectorizingRef.current = false;
       setIsVectorizing(false);
-      // Wait a moment before clearing analyzing states to prevent flicker
-      setTimeout(() => {
-        setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: false })));
-      }, 500);
       addNotification(
         'Neural Sync Complete',
-        autoAppliedCount ? `${autoAppliedCount} mandates executed` : 'No new compatible mandates',
+        autoAppliedCount ? `${autoAppliedCount} mandates executed` : 'Zero mandates detected',
         autoAppliedCount ? 'success' : 'info'
       );
     }
