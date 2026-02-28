@@ -206,10 +206,25 @@ export async function calculateSemanticFidelityBackend(
   const safeResponsibilities = Array.isArray(job.responsibilities)
     ? job.responsibilities.join("\n")
     : "";
+  const safeRequiredSkills = Array.isArray(job.requiredSkills)
+    ? "Required Skills: " + job.requiredSkills.join(", ")
+    : "";
+  const safePreferredSkills = Array.isArray(job.preferredSkills)
+    ? "Preferred Skills: " + job.preferredSkills.join(", ")
+    : "";
+  const safeTechStack = Array.isArray(job.techStack)
+    ? "Tech Stack: " + job.techStack.join(", ")
+    : "";
 
   formData.append(
     "jobDescription",
-    safeSummary + "\n" + safeResponsibilities
+    [
+      safeSummary,
+      safeResponsibilities,
+      safeRequiredSkills,
+      safePreferredSkills,
+      safeTechStack
+    ].filter(Boolean).join("\n\n")
   );
 
   // FIX: use the candidateSkills argument instead of the global localStorage key.

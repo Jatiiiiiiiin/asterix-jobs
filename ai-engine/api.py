@@ -271,8 +271,8 @@ def compute_semantic_score(text: str, job_text: str) -> float:
     
     # Step 2: Embedding similarity
     try:
-        text_vec = embedder.encode(text[:1000], normalize=True)
-        job_vec = embedder.encode(job_text[:1000], normalize=True)
+        text_vec = embedder.encode(text[:2000], normalize=True)
+        job_vec = embedder.encode(job_text[:2000], normalize=True)
         
         cosine = cosine_similarity(text_vec, job_vec)
         print(f"[Score] Cosine similarity: {cosine:.3f}")
@@ -503,8 +503,8 @@ async def match_resume(
         }
     
     # Prepare inputs
-    job_text = f"Role: {jobTitle}\n\n{jobDescription[:700]}".strip()
-    profile_text = profileText[:800]
+    job_text = f"Role: {jobTitle}\n\n{jobDescription[:2000]}".strip()
+    profile_text = profileText[:1500]
     
     print(f"\n[INPUT] Resume: {len(resume_text)} chars")
     print(f"[INPUT] Job: {len(job_text)} chars")
