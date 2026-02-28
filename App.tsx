@@ -84,10 +84,16 @@ const App: React.FC = () => {
 
   /* ───────────────── POST SIGNUP ───────────────── */
 
-  const handlePostSignup = (authUser: AuthUser) => {
+  const handlePostSignup = (authUser: AuthUser, isNewSignup = false) => {
     setUser(authUser);
 
     const intent = localStorage.getItem("auth_intent");
+
+    // Only redirect to email verification for brand-new registrations
+    if (isNewSignup && !authUser.emailVerified) {
+      navigate("/verify-email", { replace: true });
+      return;
+    }
 
     if (authUser.role === "recruiter") {
       localStorage.removeItem("auth_intent");

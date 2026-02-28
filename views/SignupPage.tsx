@@ -5,7 +5,7 @@ import { authService, AuthUser } from '../authService';
 
 
 interface SignupPageProps {
-  onSignupSuccess: (authUser: AuthUser) => void;  // ✅ CORRECT
+  onSignupSuccess: (authUser: AuthUser, isNewSignup?: boolean) => void;
 }
 
 
@@ -23,7 +23,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
   // Check if user came from "Buy Plan" flow
   useEffect(() => {
     const intent = localStorage.getItem('auth_intent');
-    
+
     if (intent === 'buy_plan') {
       setBuyPlanIntent(true);
       setSelectedRole('candidate');
@@ -83,7 +83,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Reset error state
     setErrorMessage('');
 
@@ -122,14 +122,12 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
         user = await authService.signupWithEmail(email, password, selectedRole);
       }
 
-      const intentAfter = localStorage.getItem('auth_intent');
-
       setIsLoading(false);
-      onSignupSuccess(user); // Route decision is made in App.tsx
+      onSignupSuccess(user, !isLogin); // Pass true only for new signups
 
     } catch (err) {
       console.error('[SignupPage] Email Auth Failure:', err);
-      
+
       const userFriendlyError = getErrorMessage(err);
       setErrorMessage(userFriendlyError);
       setIsLoading(false);
@@ -148,15 +146,16 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
       });
 
       const user = await authService.loginWithSocial(provider, selectedRole);
-      
-      console.log('[SignupPage] Social auth successful:', { 
+
+      console.log('[SignupPage] Social auth successful:', {
         uid: user.uid,
         role: user.role,
         intent: localStorage.getItem('auth_intent')
       });
 
       setIsLoading(false);
-      onSignupSuccess(user);
+      // Social logins are treated as login (not new email signup), no verification needed
+      onSignupSuccess(user, false);
 
     } catch (err) {
       console.error(`[SignupPage] ${provider} Auth Failure:`, err);
@@ -208,10 +207,10 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
                 {isLogin ? 'Welcome Back' : 'Join Network'}
               </h1>
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 leading-relaxed">
-                {buyPlanIntent 
-                  ? 'Unlock premium access with AI-powered job matching.' 
-                  : isLogin 
-                    ? 'Resume your neural matching session.' 
+                {buyPlanIntent
+                  ? 'Unlock premium access with AI-powered job matching.'
+                  : isLogin
+                    ? 'Resume your neural matching session.'
                     : 'Select your operational role to begin.'}
               </p>
             </div>
@@ -287,7 +286,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
                 </div>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 disabled={isLoading}
                 className="w-full bg-black dark:bg-white text-white dark:text-black py-6 font-black uppercase tracking-[0.4em] text-[10px] hover:invert transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-4"
