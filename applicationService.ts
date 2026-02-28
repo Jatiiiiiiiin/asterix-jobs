@@ -160,7 +160,8 @@ export async function saveApplication(
     tx.set(countRef, { count: increment(1) }, { merge: true });
 
     // Increment public global counter (readable without auth by landing page)
-    const statsRef = doc(db, "stats", "global");
+    // Using jobApplicationCounts/global as it has 'allow read, write: if true' in rules
+    const statsRef = doc(db, "jobApplicationCounts", "global");
     tx.set(statsRef, { applicationCount: increment(1) }, { merge: true });
   });
 

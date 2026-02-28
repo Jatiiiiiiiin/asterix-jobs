@@ -9,7 +9,7 @@ import {
 } from "firebase/auth";
 
 import { auth, googleProvider, linkedinProvider, db } from "./firebase";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, increment, runTransaction } from "firebase/firestore";
 
 /* ================= TYPES ================= */
 
@@ -60,19 +60,25 @@ export const authService = {
     const res = await createUserWithEmailAndPassword(auth, email, password);
 
     // Initialize user document with default subscription (free plan)
-    await setDoc(doc(db, "users", res.user.uid), {
-      email: res.user.email,
-      role,
-      isOnboarded: false,
-      subscription: {
-        plan: "free",
-        status: "active",
-        isPremium: false,
-        isStudent: false,
-        startDate: new Date(),
-        endDate: null,
-      },
-      createdAt: new Date()
+    const userRef = doc(db, "users", res.user.uid);
+    const globalStatsRef = doc(db, "jobApplicationCounts", "global");
+
+    await runTransaction(db, async (transaction) => {
+      transaction.set(userRef, {
+        email: res.user.email,
+        role,
+        isOnboarded: false,
+        subscription: {
+          plan: "free",
+          status: "active",
+          isPremium: false,
+          isStudent: false,
+          startDate: new Date(),
+          endDate: null,
+        },
+        createdAt: new Date()
+      });
+      transaction.set(globalStatsRef, { memberCount: increment(1) }, { merge: true });
     });
 
     writeSession(res.user.uid, res.user.email, role);
@@ -149,19 +155,24 @@ export const authService = {
 
     if (!snap.exists()) {
       // Create user document if doesn't exist
-      await setDoc(userRef, {
-        email: res.user.email,
-        role: role || "candidate",
-        isOnboarded: false,
-        subscription: {
-          plan: "free",
-          status: "active",
-          isPremium: false,
-          isStudent: false,
-          startDate: new Date(),
-          endDate: null,
-        },
-        createdAt: new Date()
+      const globalStatsRef = doc(db, "jobApplicationCounts", "global");
+
+      await runTransaction(db, async (transaction) => {
+        transaction.set(userRef, {
+          email: res.user.email,
+          role: role || "candidate",
+          isOnboarded: false,
+          subscription: {
+            plan: "free",
+            status: "active",
+            isPremium: false,
+            isStudent: false,
+            startDate: new Date(),
+            endDate: null,
+          },
+          createdAt: new Date()
+        });
+        transaction.set(globalStatsRef, { memberCount: increment(1) }, { merge: true });
       });
     }
 

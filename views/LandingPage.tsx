@@ -17,15 +17,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
   // Live stats from Firestore
   const [liveJobsMatched, setLiveJobsMatched] = useState<number | null>(null);
+  const [liveMembers, setLiveMembers] = useState<number | null>(null);
   const [liveCompanies, setLiveCompanies] = useState<number | null>(null);
 
   useEffect(() => {
-    // Real-time listener: read from global stats doc (publicly readable)
+    // Real-time listener: read from global stats doc (using path with public read rule)
     const unsubStats = onSnapshot(
-      doc(db, 'stats', 'global'),
+      doc(db, 'jobApplicationCounts', 'global'),
       (snap) => {
         const data = snap.data() as any;
-        if (data && data.applicationCount !== undefined) setLiveJobsMatched(data.applicationCount);
+        if (data) {
+          if (data.applicationCount !== undefined) setLiveJobsMatched(data.applicationCount);
+          if (data.memberCount !== undefined) setLiveMembers(data.memberCount);
+        }
       },
       () => { /* fall back to static */ }
     );
@@ -427,25 +431,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         <section id="network" className="py-20 sm:py-32 md:py-40 bg-black text-white dark:bg-white dark:text-black">
           <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10 text-center">
             <h2 className="text-3xl sm:text-5xl md:text-8xl font-black uppercase tracking-tighter mb-12 sm:mb-20 leading-[0.9]">Built for<br />Real Careers</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 lg:gap-16 mt-12 md:mt-20 border-t border-white/10 dark:border-black/10 pt-12 md:pt-20">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 md:gap-12 lg:gap-16 mt-12 md:mt-20 border-t border-white/10 dark:border-black/10 pt-12 md:pt-20">
               <div className="space-y-2">
-                <p className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none truncate">
-                  {liveJobsMatched !== null ? `${liveJobsMatched.toLocaleString()}${liveJobsMatched < 100 ? '' : '+'}` : '10M+'}
+                <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none whitespace-nowrap">
+                  {liveMembers !== null ? `${liveMembers.toLocaleString()}` : '20+'}
                 </p>
-                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Jobs Matched</p>
+                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Talents Registered</p>
               </div>
               <div className="space-y-2">
-                <p className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none">98.2%</p>
+                <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none whitespace-nowrap">
+                  98.2%
+                </p>
                 <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Match Accuracy</p>
               </div>
               <div className="space-y-2">
-                <p className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none truncate">
-                  {liveCompanies !== null ? `${liveCompanies.toLocaleString()}${liveCompanies < 100 ? '' : '+'}` : '45K+'}
+                <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none whitespace-nowrap">
+                  {liveCompanies !== null ? `${liveCompanies.toLocaleString()}` : '1+'}
                 </p>
                 <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Hiring Companies</p>
               </div>
               <div className="space-y-2">
-                <p className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none">2ms</p>
+                <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none">2ms</p>
                 <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Match Speed</p>
               </div>
             </div>
