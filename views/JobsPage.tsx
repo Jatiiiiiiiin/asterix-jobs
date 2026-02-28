@@ -152,6 +152,11 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
     });
   }, [dynamicJobs, searchQuery, selectedTypes, matchThreshold]);
 
+  // Universe Feed: Show all jobs
+  const universeJobs = useMemo(() => {
+    return filteredJobs;
+  }, [filteredJobs]);
+
   const bestFitJobs = useMemo(() => {
     return filteredJobs
       .filter(j => (j.matchScore ?? 0) > 45)

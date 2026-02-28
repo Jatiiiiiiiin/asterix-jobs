@@ -190,6 +190,9 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
         matchThreshold: form.matchThreshold,
         applicationDeadline: form.applicationDeadline || null,
 
+        // Metadata
+        isAdminPosted: false,
+
         // Timestamps
         postedDate: new Date().toISOString().split('T')[0],
         createdAt: serverTimestamp(),
