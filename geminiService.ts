@@ -346,3 +346,122 @@ export async function queryJobContext(
     return "AI service temporarily unavailable.";
   }
 }
+
+/* ================= INTERVIEW TIPS ================= */
+
+export interface InterviewTips {
+  strengths: string[];
+  gapAreas: string[];
+  powerTips: string[];
+}
+
+/* Simple tokeniser — reuse same logic as backend */
+function tokenize(text: string): Set<string> {
+  const STOP = new Set([
+    "the", "and", "for", "with", "this", "that", "are", "was", "you", "will", "have",
+    "from", "your", "not", "can", "but", "work", "role", "team", "job", "been",
+    "what", "which", "also", "more", "their", "into", "about", "other", "our",
+    "all", "use", "used", "using", "able", "based", "good", "new", "key", "must",
+    "well", "via", "per", "inc", "llc", "etc", "co", "ltd"
+  ]);
+  return new Set(
+    (text.toLowerCase().match(/\b[a-z][a-z0-9+#.\-]{1,}\b/g) || [])
+      .filter(w => w.length >= 2 && !STOP.has(w))
+  );
+}
+
+function toTitle(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/* Derive structured tips from keyword overlap */
+function buildTips(resumeText: string, jobTitle: string, jobDescription: string): InterviewTips {
+  const rTokens = tokenize(resumeText);
+  const jTokens = tokenize(jobDescription);
+
+  // Skills present in BOTH resume and JD → strengths
+  const matched = [...jTokens].filter(t => rTokens.has(t) && t.length > 3);
+  // Skills in JD but NOT in resume → gaps
+  const missing = [...jTokens].filter(t => !rTokens.has(t) && t.length > 3);
+
+  /* ── STRENGTHS ── */
+  const strengths: string[] = [];
+  if (matched.length > 0) {
+    strengths.push(`Showcase your hands-on experience with ${matched.slice(0, 3).map(toTitle).join(', ')} — these directly match the JD`);
+  }
+  if (matched.length > 3) {
+    strengths.push(`Demonstrate depth in ${matched.slice(3, 5).map(toTitle).join(' and ')} through specific project examples`);
+  } else {
+    strengths.push(`Quantify past achievements with metrics (e.g. "reduced load time by 40%") to stand out`);
+  }
+  if (matched.length > 5) {
+    strengths.push(`You share strong overlap in ${matched.slice(5, 7).map(toTitle).join(', ')} — lead with these in technical rounds`);
+  } else {
+    strengths.push(`Prepare a concise 2-minute narrative linking your background directly to the ${jobTitle} role`);
+  }
+
+  /* ── GAP AREAS ── */
+  const gapAreas: string[] = [];
+  if (missing.length > 0) {
+    gapAreas.push(`Brush up on ${missing.slice(0, 2).map(toTitle).join(' and ')} — mentioned in the JD but not evident in your resume`);
+  } else {
+    gapAreas.push(`Research the company's tech stack and current product challenges before the interview`);
+  }
+  if (missing.length > 2) {
+    gapAreas.push(`Prepare at least one example or talking point around ${missing.slice(2, 4).map(toTitle).join(', ')}`);
+  } else {
+    gapAreas.push(`Prepare examples of how you've quickly learned new technologies in past roles`);
+  }
+  gapAreas.push(`Study system design concepts relevant to the ${jobTitle} level — typically asked in technical rounds`);
+
+  /* ── POWER TIPS ── */
+  const powerTips: string[] = [
+    `Use the STAR method (Situation → Task → Action → Result) for every behavioural question`,
+    `Ask the interviewer: "What does success look like in the first 90 days?" — shows initiative`,
+    `Research the company's recent product launches or engineering blog posts to ask informed questions`,
+  ];
+
+  return {
+    strengths: strengths.slice(0, 3),
+    gapAreas: gapAreas.slice(0, 3),
+    powerTips: powerTips.slice(0, 3),
+  };
+}
+
+export async function getInterviewTips(
+  resumeText: string,
+  jobTitle: string,
+  jobDescription: string
+): Promise<InterviewTips> {
+  // Always build deterministic tips first — instant & always structured
+  const tips = buildTips(resumeText, jobTitle, jobDescription);
+
+  // Optionally enrich powerTips[0] with a HF-generated role-specific tip
+  try {
+    const hfKey = import.meta.env.VITE_HF_KEY;
+    if (hfKey) {
+      const res = await fetch(
+        "https://api-inference.huggingface.co/models/google/flan-t5-base",
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${hfKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            inputs: `What is one unique interview tip for a ${jobTitle} candidate? Answer in one sentence.`,
+            parameters: { max_new_tokens: 80, temperature: 0.4 },
+          }),
+        }
+      );
+      const data = await res.json();
+      const hfTip = (data?.[0]?.generated_text || "").trim();
+      // Only use if HF returned something meaningful (> 20 chars, looks like a sentence)
+      if (hfTip.length > 20 && hfTip.split(" ").length > 4) {
+        tips.powerTips[0] = toTitle(hfTip.replace(/^["']|["']$/g, ""));
+      }
+    }
+  } catch {
+    // Silent — fallback tips already set
+  }
+
+  return tips;
+}
+

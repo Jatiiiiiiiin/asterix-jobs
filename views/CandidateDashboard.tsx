@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { subscribeToActiveJobs } from '../Jobservice';
 import Sidebar from '../components/Sidebar';
-import { calculateSemanticFidelityBackend, extractResumeText, sendAutoApplyEmail } from '../geminiService';
+import { calculateSemanticFidelityBackend, extractResumeText, sendAutoApplyEmail, getInterviewTips, InterviewTips } from '../geminiService';
+import InterviewTipsModal from '../components/InterviewTipsModal';
 import { authService, readSessionUid } from '../authService';
 import { Job } from '../types';
 import { saveApplication, buildApplicationPayload, hasApplied } from "../applicationService";
@@ -67,6 +68,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'score' | 'time'>('score');
+
+  /* ── Interview Tips ── */
+  const [interviewTipsJob, setInterviewTipsJob] = useState<Job | null>(null);
+  const [interviewTips, setInterviewTips] = useState<InterviewTips | null>(null);
+  const [isLoadingTips, setIsLoadingTips] = useState(false);
 
   /* ── Plan ── */
   const { canManualApply, plan, isLoading: isPlanLoading } = usePlan();
@@ -563,6 +569,35 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     navigate(`/job/${job.id}`, { state: { job } });
   };
 
+  /* ════════════════════════════════════════════════════════
+     ACE INTERVIEW  — GenAI tips via HuggingFace
+  ════════════════════════════════════════════════════════ */
+  const handleAceInterview = async (job: Job) => {
+    const uid = mountedUidRef.current;
+    const resumeText = uid ? (localStorage.getItem(`asterix_resume_content_${uid}`) || '') : '';
+
+    if (!resumeText) {
+      addNotification('Resume Required', 'Upload your resume first to get interview tips.', 'alert');
+      return;
+    }
+
+    const jd = [job.jobSummary || '', ...(Array.isArray(job.responsibilities) ? job.responsibilities : [])].join(' ');
+
+    setInterviewTipsJob(job);
+    setInterviewTips(null);
+    setIsLoadingTips(true);
+
+    try {
+      const tips = await getInterviewTips(resumeText, job.title, jd);
+      setInterviewTips(tips);
+    } catch (err) {
+      addNotification('AI Error', 'Could not generate tips. Try again.', 'alert');
+      setInterviewTipsJob(null);
+    } finally {
+      setIsLoadingTips(false);
+    }
+  };
+
   /* ── Sorted jobs ── */
   const sortedJobs = [...dynamicJobs].sort((a, b) => {
     if (sortBy === 'score') {
@@ -612,101 +647,88 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         </div>
 
         {/* ── HEADER ── */}
-        <header className="px-6 md:px-12 py-8 md:py-12 border-b border-black/5 dark:border-white/5 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 sticky top-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl z-[100]">
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2 text-black dark:text-white">
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-            <div className="min-w-0">
-              <div className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.5em] opacity-40 mb-0.5 md:mb-1 truncate">Neural Control Center</div>
-              <h1 className="text-2xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter truncate">My Dashboard</h1>
+        <header className="px-6 md:px-10 border-b border-black/10 dark:border-white/10 sticky top-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl z-[100]">
+          {/* Row 1 — Title + Page info */}
+          <div className="flex items-center justify-between py-3 border-b border-black/5 dark:border-white/5">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-1.5 text-black dark:text-white">
+                <span className="material-symbols-outlined text-xl">menu</span>
+              </button>
+              <div>
+                <div className="text-[7px] font-black uppercase tracking-[0.5em] opacity-30">Neural Control Center</div>
+                <h1 className="text-xl md:text-2xl font-black uppercase tracking-tight leading-none">My Dashboard</h1>
+              </div>
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-4 items-center w-full md:w-auto">
-
-            {/* Plan badge */}
+            {/* Plan badge inline */}
             {!isPlanLoading && (
               canManualApply ? (
-                <div className="flex items-center gap-2 px-4 py-2 border-2 border-emerald-500/40 bg-emerald-500/5">
-                  <span className="material-symbols-outlined text-sm text-emerald-500">verified</span>
-                  <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500">Student Plan</span>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 border border-emerald-500/40 bg-emerald-500/5">
+                  <span className="material-symbols-outlined text-xs text-emerald-500">verified</span>
+                  <span className="text-[7px] font-black uppercase tracking-widest text-emerald-500">Student Plan</span>
                 </div>
               ) : (
-                <button
-                  onClick={() => setShowUpgradeModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 border-2 border-black/10 dark:border-white/10 hover:border-emerald-500 transition-all group"
-                >
-                  <span className="material-symbols-outlined text-sm opacity-30 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">lock</span>
-                  <span className="text-[8px] font-black uppercase tracking-widest opacity-30 group-hover:opacity-100 group-hover:text-emerald-500 transition-all">Free Plan</span>
+                <button onClick={() => setShowUpgradeModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-black/10 dark:border-white/10 hover:border-emerald-500 transition-all group">
+                  <span className="material-symbols-outlined text-xs opacity-30 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">lock</span>
+                  <span className="text-[7px] font-black uppercase tracking-widest opacity-30 group-hover:opacity-100 group-hover:text-emerald-500 transition-all">Free Plan</span>
                 </button>
               )
             )}
+          </div>
 
-            {/* Auto-pilot toggle */}
-            <div className={`flex items-center gap-3 md:gap-4 px-3 md:px-6 py-2.5 md:py-4 border-2 transition-all
-              ${isAutoPilotOn
-                ? 'bg-emerald-500/5 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]'
-                : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10'}`}
-            >
-              <div className="flex flex-col text-right">
-                <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest opacity-40">Agent</span>
-                <span className={`text-[8px] md:text-[9px] font-black uppercase ${isAutoPilotOn ? 'text-emerald-500' : 'opacity-40'}`}>
-                  {isAutoPilotOn ? 'ACTIVE' : 'OFFLINE'}
-                </span>
-              </div>
-              <button
-                onClick={toggleAutoPilot}
-                className={`size-8 md:size-12 flex items-center justify-center border-2 transition-all
-                  ${isAutoPilotOn
-                    ? 'bg-emerald-500 border-emerald-500 text-white shadow-[0_0_40px_rgba(16,185,129,0.4)]'
-                    : 'border-black dark:border-white'}`}
-              >
-                <span className={`material-symbols-outlined text-base md:text-xl ${isAutoPilotOn ? 'animate-spin-slow' : ''}`}>
+          {/* Row 2 — Controls toolbar */}
+          <div className="flex items-center gap-2 py-2.5 overflow-x-auto">
+
+            {/* Auto-pilot */}
+            <div className={`flex items-center gap-2 px-3 py-1.5 border shrink-0 transition-all
+              ${isAutoPilotOn ? 'border-emerald-500 bg-emerald-500/5' : 'border-black/10 dark:border-white/10'}`}>
+              <span className={`text-[8px] font-black uppercase tracking-widest ${isAutoPilotOn ? 'text-emerald-500' : 'opacity-40'}`}>
+                Agent {isAutoPilotOn ? 'Active' : 'Offline'}
+              </span>
+              <button onClick={toggleAutoPilot}
+                className={`w-7 h-7 flex items-center justify-center border transition-all
+                  ${isAutoPilotOn ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-black/30 dark:border-white/30'}`}>
+                <span className={`material-symbols-outlined text-sm ${isAutoPilotOn ? 'animate-spin-slow' : ''}`}>
                   {isAutoPilotOn ? 'auto_awesome' : 'power_settings_new'}
                 </span>
               </button>
             </div>
 
-            <button onClick={onToggleTheme} className="p-3 md:p-4 border border-black dark:border-white hover:invert transition-all">
-              <span className="material-symbols-outlined text-lg">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
-            </button>
+            <div className="h-5 w-px bg-black/10 dark:bg-white/10 shrink-0" />
 
-            <button
-              onClick={() => fileInputRef.current?.click()}
+            {/* Sync Identity */}
+            <button onClick={() => fileInputRef.current?.click()}
               disabled={isUploading || isVectorizing}
-              className={`flex-grow md:flex-grow-0 bg-black dark:bg-white text-white dark:text-black px-6 md:px-10 py-3 md:py-4 text-[10px] font-black uppercase tracking-widest hover:invert transition-all flex items-center justify-center gap-3
-                ${(isUploading || isVectorizing) ? 'opacity-80 cursor-wait' : ''}`}
-            >
+              className={`flex items-center gap-2 px-4 py-1.5 text-[8px] font-black uppercase tracking-widest shrink-0 transition-all
+                ${isUploading || isVectorizing
+                  ? 'bg-black/50 text-white cursor-wait'
+                  : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'}`}>
               {(isUploading || isVectorizing) && (
-                <span className="material-symbols-outlined text-sm animate-circular-spin">progress_activity</span>
+                <span className="material-symbols-outlined text-xs animate-circular-spin">progress_activity</span>
               )}
-              {isUploading ? 'ARCHIVING...' : isVectorizing ? 'SCANNING...' : 'Sync Identity'}
+              {isUploading ? 'Archiving...' : isVectorizing ? 'Scanning...' : 'Sync Identity'}
             </button>
 
+            {/* Resume preview */}
             {canViewResume && (
-              <button
-                onClick={openResumeViewer}
-                className="px-4 md:px-6 py-3 md:py-4 border-2 border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all"
-              >
-                <span className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm">description</span>
-                  <span className="hidden sm:inline">Resume</span>
-                </span>
+              <button onClick={openResumeViewer}
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-emerald-500/50 text-emerald-600 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest shrink-0 hover:bg-emerald-500 hover:text-white transition-all">
+                <span className="material-symbols-outlined text-xs">description</span>
+                Resume
               </button>
             )}
 
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleFileUpload}
-              accept=".txt,.pdf,.doc,.docx"
-            />
+            <div className="ml-auto shrink-0">
+              <button onClick={onToggleTheme} className="p-1.5 border border-black/20 dark:border-white/20 hover:invert transition-all">
+                <span className="material-symbols-outlined text-base">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+              </button>
+            </div>
+
+            <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} accept=".txt,.pdf,.doc,.docx" />
           </div>
         </header>
 
-        <div className="p-4 sm:p-6 md:p-12 space-y-8 md:space-y-12 pb-64">
+        <div className="p-4 sm:p-6 md:p-10 space-y-8 md:space-y-10 pb-64">
 
           {/* Vectorizing progress bar */}
           {isVectorizing && (
@@ -770,87 +792,129 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                 </div>
               ) : (
                 <div className="grid gap-4">
-                  {sortedJobs.map((job) => (
-                    <div
-                      key={job.id}
-                      className={`group border-2 border-black dark:border-white/10 p-4 sm:p-6 md:p-8 transition-all duration-500 relative overflow-hidden bg-white dark:bg-background-dark hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black
-                        ${job.applied && job.matchScore >= (job.matchThreshold ?? 65) ? 'border-l-[6px] md:border-l-[8px] border-l-emerald-500 shadow-lg' : ''}`}
-                    >
-                      {/* Analyzing overlay */}
-                      {job.analyzing && (
-                        <div className="absolute inset-0 z-20 bg-black/40 dark:bg-white/40 backdrop-blur-sm flex items-center justify-center">
-                          <div className="flex flex-col items-center gap-4">
-                            <span className="material-symbols-outlined animate-circular-spin text-5xl text-white dark:text-black">neurology</span>
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white dark:text-black animate-pulse">Analyzing Nodes...</span>
-                          </div>
-                        </div>
-                      )}
+                  {sortedJobs.map((job) => {
+                    const company = typeof job.company === 'string' ? job.company : job.company?.name || 'Unknown';
+                    const city = typeof job.location === 'string' ? job.location : job.location?.city || 'Remote';
+                    const score = job.matchScore ?? 0;
+                    const isApplied = job.applied;
 
-                      <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
-                        <div className="size-20 md:size-24 bg-black dark:bg-white flex items-center justify-center shrink-0">
-                          <span className="material-symbols-outlined text-4xl text-white dark:text-black group-hover:text-black dark:group-hover:text-white">corporate_fare</span>
-                        </div>
-
-                        <div className="flex-grow space-y-4 min-w-0">
-                          <div className="flex justify-between gap-4">
-                            <div className="min-w-0">
-                              <h2 className="text-lg md:text-3xl font-black uppercase tracking-tighter break-words leading-tight">{job.title}</h2>
-                              <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 mt-1.5">
-                                {(typeof job.company === 'string' ? job.company : job.company?.name) || 'Unknown'} •{' '}
-                                {(typeof job.location === 'string' ? job.location : job.location?.city) || 'Remote'}
-                              </p>
-                            </div>
-                            <div className="text-right shrink-0">
-                              <div className="text-3xl md:text-6xl font-black text-emerald-500 leading-none">{job.matchScore ?? 0}%</div>
-                              <div className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] opacity-30 mt-1">FIDELITY</div>
+                    return (
+                      <div
+                        key={job.id}
+                        className={`relative border dark:border-white/10 transition-all duration-300 overflow-hidden
+                          bg-white dark:bg-background-dark
+                          ${isApplied ? 'border-emerald-500/60 border-l-4 border-l-emerald-500' : 'border-black/15'}`}
+                      >
+                        {/* Analyzing overlay */}
+                        {job.analyzing && (
+                          <div className="absolute inset-0 z-20 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                            <div className="flex items-center gap-3">
+                              <span className="material-symbols-outlined animate-circular-spin text-2xl text-white">neurology</span>
+                              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white">Analysing…</span>
                             </div>
                           </div>
+                        )}
 
-                          <div className="flex flex-wrap gap-2">
+                        {/* ── MAIN ROW ── */}
+                        <div className="flex items-center gap-4 p-4">
+
+                          {/* Company logo box */}
+                          <div className="w-11 h-11 bg-black dark:bg-white flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-lg text-white dark:text-black">corporate_fare</span>
+                          </div>
+
+                          {/* Job info */}
+                          <div className="flex-1 min-w-0">
+                            <h2 className="text-sm font-black uppercase tracking-tight truncate">{job.title}</h2>
+                            <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mt-0.5">
+                              {company} · {city}
+                            </p>
+                          </div>
+
+                          {/* Score badge */}
+                          <div className="shrink-0 text-right">
+                            <div className={`text-2xl font-black leading-none tabular-nums ${score >= 70 ? 'text-emerald-500' : score >= 40 ? 'text-amber-500' : 'text-black/40 dark:text-white/30'
+                              }`}>{score}%</div>
+                            <div className="text-[7px] font-black uppercase tracking-[0.3em] opacity-30 mt-0.5">Match</div>
+                          </div>
+                        </div>
+
+                        {/* ── SKILLS + META ROW ── */}
+                        <div className="flex items-center gap-3 px-4 pb-3 border-t border-black/5 dark:border-white/5 pt-2.5">
+                          {/* Skills */}
+                          <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
                             {(job.requiredSkills ?? []).slice(0, 4).map(skill => (
-                              <span key={skill} className="px-3 py-1.5 border-2 border-black/10 dark:border-white/10 text-[9px] font-black uppercase tracking-widest opacity-60">
+                              <span key={skill}
+                                className="px-2 py-0.5 border border-black/10 dark:border-white/10 text-[8px] font-black uppercase tracking-wider opacity-60">
                                 {skill}
                               </span>
                             ))}
                           </div>
+                          {/* Salary + type pills */}
+                          <div className="flex items-center gap-2 shrink-0">
+                            {job.salaryRange && (
+                              <span className="text-[8px] font-black uppercase tracking-widest opacity-40 whitespace-nowrap">
+                                {job.salaryRange.currency} {job.salaryRange.min}–{job.salaryRange.max}L
+                              </span>
+                            )}
+                            <span className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border border-black/10 dark:border-white/10 opacity-50 whitespace-nowrap">
+                              {job.employmentType}
+                            </span>
+                          </div>
+                        </div>
 
-                          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-4 border-t-2 border-black/5 dark:border-white/5">
-                            <div className="flex gap-6 text-xs font-black uppercase">
-                              <span>{job.salaryRange ? `${job.salaryRange.currency} ${job.salaryRange.min}–${job.salaryRange.max}` : 'Salary NA'}</span>
-                              <span>{job.employmentType}</span>
-                            </div>
+                        {/* ── SCORE BAR ── */}
+                        <div className="h-0.5 w-full bg-black/5 dark:bg-white/5">
+                          <div
+                            className={`h-full transition-all duration-700 ${score >= 70 ? 'bg-emerald-500' : score >= 40 ? 'bg-amber-500' : 'bg-black/20'
+                              }`}
+                            style={{ width: `${score}%` }}
+                          />
+                        </div>
 
-                            {job.applied ? (
-                              <div className="px-6 py-3 text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white flex items-center gap-2">
-                                <span className="material-symbols-outlined text-sm">check_circle</span>
-                                PROTOCOL SYNCED
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => handleInitialize(job)}
-                                className={`relative px-8 py-3 text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2
-                                  ${canManualApply
-                                    ? 'bg-black dark:bg-white text-white dark:text-black hover:invert'
-                                    : 'bg-black/5 dark:bg-white/5 text-black/30 dark:text-white/30 border-2 border-black/10 dark:border-white/10 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-400'
-                                  }`}
-                              >
-                                {!canManualApply && <span className="material-symbols-outlined text-sm">lock</span>}
-                                Initialize
-                                {!canManualApply && (
-                                  <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[6px] font-black px-1.5 py-0.5">PRO</span>
-                                )}
+                        {/* ── ACTION ROW ── */}
+                        <div className="flex items-center justify-between px-4 py-2.5 border-t border-black/5 dark:border-white/5">
+                          {/* Ace Interview */}
+                          <div>
+                            {score > 0 && (
+                              <button onClick={() => handleAceInterview(job)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest border border-emerald-500/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+                                <span className="material-symbols-outlined text-xs">emoji_objects</span>
+                                Ace Interview
                               </button>
                             )}
                           </div>
+
+                          {/* Apply / Applied */}
+                          {isApplied ? (
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-[8px] font-black uppercase tracking-widest">
+                              <span className="material-symbols-outlined text-xs">check_circle</span>
+                              Applied
+                            </div>
+                          ) : (
+                            <button onClick={() => handleInitialize(job)}
+                              className={`relative flex items-center gap-1.5 px-4 py-1.5 text-[8px] font-black uppercase tracking-widest transition-all
+                                ${canManualApply
+                                  ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
+                                  : 'border border-black/20 dark:border-white/20 opacity-50 hover:border-emerald-500 hover:text-emerald-500 hover:opacity-100'}`}>
+                              {!canManualApply && <span className="material-symbols-outlined text-xs">lock</span>}
+                              Apply
+                              {!canManualApply && (
+                                <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[6px] font-black px-1 py-0.5">PRO</span>
+                              )}
+                            </button>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
+
                 </div>
               )}
             </div>
 
             {/* ── RIGHT SIDEBAR ── */}
+
             <div className="lg:col-span-4 space-y-6 md:space-y-8">
 
               {/* Auto-pilot info card */}
@@ -938,40 +1002,50 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
       </main>
 
       {/* ── RESUME VIEWER MODAL ── */}
-      {isResumeViewOpen && resumePreviewUrl && (
-        <div className="fixed inset-0 z-[1000] bg-black/40 backdrop-blur-sm lg:bg-transparent lg:inset-auto lg:right-0 lg:top-0 lg:h-screen lg:w-0">
-          {/* Mobile */}
-          <div className="lg:hidden w-full h-full flex flex-col bg-white dark:bg-background-dark">
-            <div className="flex items-center justify-between p-4 border-b border-black/5 sticky top-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl z-10">
-              <h3 className="text-lg font-black uppercase tracking-tight">Your Resume</h3>
-              <button onClick={closeResumeViewer} className="p-2">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="flex-1 overflow-auto">
-              <iframe src={`${resumePreviewUrl}#toolbar=0`} className="w-full h-full border-0" title="Resume Preview" />
-            </div>
-          </div>
-
-          {/* Desktop slide-in panel */}
-          <div className="hidden lg:flex lg:absolute lg:right-0 lg:top-0 lg:h-screen lg:w-[600px] xl:w-[700px] lg:flex-col lg:bg-white dark:lg:bg-background-dark lg:shadow-2xl">
-            <div className="flex items-center justify-between p-8 border-b border-black/5 sticky top-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl z-10 shrink-0">
-              <div>
-                <h3 className="text-2xl font-black uppercase tracking-tight">Your Resume</h3>
-                <p className="text-xs opacity-40 uppercase tracking-widest mt-1">{resumeName}</p>
+      {
+        isResumeViewOpen && resumePreviewUrl && (
+          <div className="fixed inset-0 z-[1000] bg-black/40 backdrop-blur-sm lg:bg-transparent lg:inset-auto lg:right-0 lg:top-0 lg:h-screen lg:w-0">
+            {/* Mobile */}
+            <div className="lg:hidden w-full h-full flex flex-col bg-white dark:bg-background-dark">
+              <div className="flex items-center justify-between p-4 border-b border-black/5 sticky top-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl z-10">
+                <h3 className="text-lg font-black uppercase tracking-tight">Your Resume</h3>
+                <button onClick={closeResumeViewer} className="p-2">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
               </div>
-              <button onClick={closeResumeViewer} className="p-3 border border-black/10 dark:border-white/10">
-                <span className="material-symbols-outlined">close</span>
-              </button>
+              <div className="flex-1 overflow-auto">
+                <iframe src={`${resumePreviewUrl}#toolbar=0`} className="w-full h-full border-0" title="Resume Preview" />
+              </div>
             </div>
-            <div className="flex-1 overflow-hidden">
-              <iframe src={`${resumePreviewUrl}#toolbar=0`} className="w-full h-full border-0" title="Resume Preview" />
+
+            {/* Desktop slide-in panel */}
+            <div className="hidden lg:flex lg:absolute lg:right-0 lg:top-0 lg:h-screen lg:w-[600px] xl:w-[700px] lg:flex-col lg:bg-white dark:lg:bg-background-dark lg:shadow-2xl">
+              <div className="flex items-center justify-between p-8 border-b border-black/5 sticky top-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl z-10 shrink-0">
+                <div>
+                  <h3 className="text-2xl font-black uppercase tracking-tight">Your Resume</h3>
+                  <p className="text-xs opacity-40 uppercase tracking-widest mt-1">{resumeName}</p>
+                </div>
+                <button onClick={closeResumeViewer} className="p-3 border border-black/10 dark:border-white/10">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <iframe src={`${resumePreviewUrl}#toolbar=0`} className="w-full h-full border-0" title="Resume Preview" />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+
+      <InterviewTipsModal
+        isOpen={!!interviewTipsJob}
+        jobTitle={interviewTipsJob?.title || ''}
+        tips={interviewTips}
+        isLoading={isLoadingTips}
+        onClose={() => { setInterviewTipsJob(null); setInterviewTips(null); }}
+      />
 
       <style>{`
         @keyframes spin-slow { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
@@ -981,6 +1055,6 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         @keyframes marquee { 0% { transform: translateX(-100%) } 100% { transform: translateX(300%) } }
         .animate-marquee { animation: marquee 3s linear infinite; }
       `}</style>
-    </div>
+    </div >
   );
 }

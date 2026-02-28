@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
 import { authService, AuthUser } from '../authService';
+import { usePlan } from '../usePlan';
 import '../App.css';
 
 
@@ -83,8 +84,11 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
       { name: 'Settings', icon: 'settings', path: '/recruiter/settings' },
     ];
 
-  const isPremium = user?.isPremium ?? false;
-  const isStudent = user?.isStudent ?? false;
+  /* ── Plan detection — uses usePlan for accurate Firestore plan string ── */
+  const { plan, canManualApply } = usePlan();
+  // Also check legacy AuthUser flags as a fallback
+  const isPremium = canManualApply || (user?.isPremium ?? false);
+  const isStudent = isPremium && (plan === 'student_premium' || plan === 'premium_student' || (user?.isStudent ?? false));
   const hasAccess = isPremium || isStudent;
 
   /* ════════════════════════════════════════════════════════════════
@@ -204,8 +208,8 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
                 to={item.path}
                 onClick={onClose}
                 className={`flex items-center gap-3 px-3 py-3 transition-all ${isActive
-                    ? 'bg-black text-white dark:bg-white dark:text-black font-black'
-                    : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                  ? 'bg-black text-white dark:bg-white dark:text-black font-black'
+                  : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
               >
                 <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
