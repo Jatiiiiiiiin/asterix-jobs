@@ -82,10 +82,10 @@ const JobChatDrawer: React.FC<JobChatDrawerProps> = ({ job, onClose }) => {
         {/* Header */}
         <header className="px-6 py-6 border-b border-black/10 dark:border-white/10 flex justify-between items-center">
           <div>
-            <h2 className="text-lg font-black uppercase tracking-tight">
+            <h2 className="text-lg font-black tracking-tight">
               Neural Audit
             </h2>
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-40 truncate max-w-[250px]">
+            <p className="text-[10px] font-black tracking-widest opacity-40 truncate max-w-[250px]">
               {job.title} @ {job.company.name}
             </p>
           </div>
@@ -152,3 +152,4 @@ const JobChatDrawer: React.FC<JobChatDrawerProps> = ({ job, onClose }) => {
 };
 
 export default JobChatDrawer;
+

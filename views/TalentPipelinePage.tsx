@@ -268,8 +268,8 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               <span className="material-symbols-outlined">menu</span>
             </button>
             <div>
-              <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.5em] text-white/30">Recruiter Command</p>
-              <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tighter leading-none">Talent Pipeline</h1>
+              <p className="text-[8px] md:text-[9px] font-black  tracking-[0.5em] text-white/30">Recruiter Command</p>
+              <h1 className="text-2xl md:text-4xl font-black  tracking-tighter leading-none">Talent Pipeline</h1>
             </div>
           </div>
 
@@ -279,7 +279,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               {STAGES.map(s => (
                 <div key={s.id} className="flex items-center gap-1.5 px-3 py-1.5 border border-white/5 bg-white/[0.02]">
                   <span className={`size-1.5 rounded-full ${STAGE_DOT[s.id]}`} />
-                  <span className="text-[8px] font-black uppercase tracking-widest text-white/40">{byStage(s.id).length}</span>
+                  <span className="text-[8px] font-black  tracking-widest text-white/40">{byStage(s.id).length}</span>
                 </div>
               ))}
             </div>
@@ -298,14 +298,14 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
           {loading ? (
             <div className="flex-1 flex items-center justify-center gap-3 text-white/30">
               <span className="material-symbols-outlined animate-spin">autorenew</span>
-              <span className="text-[10px] font-black uppercase tracking-widest">Loading pipeline…</span>
+              <span className="text-[10px] font-black  tracking-widest">Loading pipeline…</span>
             </div>
           ) : candidates.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center p-10">
               <span className="material-symbols-outlined text-5xl text-white/10">schema</span>
               <div className="space-y-2">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Pipeline is empty</p>
-                <p className="text-[8px] font-medium text-white/20 uppercase tracking-widest max-w-xs">
+                <p className="text-[10px] font-black  tracking-widest text-white/30">Pipeline is empty</p>
+                <p className="text-[8px] font-medium text-white/20  tracking-widest max-w-xs">
                   Shortlist candidates from your job applications to populate the pipeline
                 </p>
               </div>
@@ -335,13 +335,13 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className={`size-2 rounded-full ${STAGE_DOT[stage.id]}`} />
-                          <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white">{stage.label}</h3>
+                          <h3 className="text-[9px] md:text-[10px] font-black  tracking-[0.3em] text-white">{stage.label}</h3>
                         </div>
                         <span className={`text-lg md:text-2xl font-black tabular-nums ${stage.accent}`}>
                           {stageCandidates.length}
                         </span>
                       </div>
-                      <p className="text-[7px] font-black uppercase tracking-widest text-white/20 mt-1 ml-4">
+                      <p className="text-[7px] font-black  tracking-widest text-white/20 mt-1 ml-4">
                         {stage.sublabel}
                       </p>
                     </div>
@@ -352,7 +352,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         <div className={`border-2 border-dashed rounded-none py-8 text-center transition-colors ${isDropTarget ? 'border-white/20 bg-white/[0.02]' : 'border-white/5'
                           }`}>
                           <span className="material-symbols-outlined text-2xl text-white/10">person_add</span>
-                          <p className="text-[7px] font-black uppercase tracking-widest text-white/15 mt-2">
+                          <p className="text-[7px] font-black  tracking-widest text-white/15 mt-2">
                             Drop here
                           </p>
                         </div>
@@ -386,10 +386,10 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                             </div>
 
                             <div className="flex-grow min-w-0">
-                              <p className="text-[11px] font-black uppercase tracking-tight truncate text-white">
+                              <p className="text-[11px] font-black  tracking-tight truncate text-white">
                                 {c.name}
                               </p>
-                              <p className="text-[8px] font-medium uppercase tracking-widest text-white/30 truncate">
+                              <p className="text-[8px] font-medium  tracking-widest text-white/30 truncate">
                                 {c.title || '—'}
                               </p>
                             </div>
@@ -403,11 +403,11 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
                           {/* Job tag */}
                           <div className="mt-3 flex items-center gap-2 flex-wrap">
-                            <span className="text-[7px] font-black uppercase tracking-widest text-white/25 border border-white/5 px-2 py-1 truncate max-w-[160px]">
+                            <span className="text-[7px] font-black  tracking-widest text-white/25 border border-white/5 px-2 py-1 truncate max-w-[160px]">
                               {c.jobTitle}
                             </span>
                             {c.autoApplied && (
-                              <span className="text-[6px] font-black uppercase tracking-widest text-emerald-400/70 border border-emerald-500/20 px-1.5 py-0.5">
+                              <span className="text-[6px] font-black  tracking-widest text-emerald-400/70 border border-emerald-500/20 px-1.5 py-0.5">
                                 Auto
                               </span>
                             )}
@@ -417,12 +417,12 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                           {c.skills.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-1">
                               {c.skills.slice(0, 3).map(s => (
-                                <span key={s} className="text-[6px] font-black uppercase tracking-widest text-white/30 bg-white/5 px-2 py-0.5">
+                                <span key={s} className="text-[6px] font-black  tracking-widest text-white/30 bg-white/5 px-2 py-0.5">
                                   {s}
                                 </span>
                               ))}
                               {c.skills.length > 3 && (
-                                <span className="text-[6px] font-black uppercase tracking-widest text-white/20 px-2 py-0.5">
+                                <span className="text-[6px] font-black  tracking-widest text-white/20 px-2 py-0.5">
                                   +{c.skills.length - 3}
                                 </span>
                               )}
@@ -431,7 +431,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
                           {/* Footer */}
                           <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
-                            <span className="text-[7px] font-black uppercase tracking-widest text-white/20">
+                            <span className="text-[7px] font-black  tracking-widest text-white/20">
                               {c.shortlistedAt ? `Shortlisted ${formatDate(c.shortlistedAt)}` : c.appliedAt ? `Applied ${formatDate(c.appliedAt)}` : ''}
                             </span>
                             {/* WhatsApp button */}
@@ -441,7 +441,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={e => e.stopPropagation()}
-                                className="flex items-center gap-1 px-2 py-1 bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] text-[7px] font-black uppercase tracking-widest hover:bg-[#25D366] hover:text-black transition-colors"
+                                className="flex items-center gap-1 px-2 py-1 bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] text-[7px] font-black  tracking-widest hover:bg-[#25D366] hover:text-black transition-colors"
                                 title={`WhatsApp ${c.name}`}
                               >
                                 <svg viewBox="0 0 24 24" className="size-3 fill-current" xmlns="http://www.w3.org/2000/svg">
@@ -452,7 +452,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                             ) : (
                               <button
                                 onClick={e => { e.stopPropagation(); setSelectedCandidate(c); }}
-                                className="flex items-center gap-1 px-2 py-1 border border-white/10 text-white/30 text-[7px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-colors"
+                                className="flex items-center gap-1 px-2 py-1 border border-white/10 text-white/30 text-[7px] font-black  tracking-widest hover:border-white/30 hover:text-white transition-colors"
                                 title="Add phone in profile"
                               >
                                 <span className="material-symbols-outlined text-[10px]">mail</span>
@@ -499,10 +499,10 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     {(selectedCandidate.name?.trim() || '?')[0].toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight leading-none">
+                    <h2 className="text-xl md:text-2xl font-black  tracking-tight leading-none">
                       {selectedCandidate.name}
                     </h2>
-                    <p className="text-xs font-black uppercase tracking-widest text-white/40 mt-1">
+                    <p className="text-xs font-black  tracking-widest text-white/40 mt-1">
                       {selectedCandidate.title}
                     </p>
                     {selectedCandidate.email && (
@@ -524,13 +524,13 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   {selectedCandidate.matchScore > 0 ? `${selectedCandidate.matchScore}%` : '—'}
                 </div>
                 <div>
-                  <p className="text-[7px] font-black uppercase tracking-widest text-white/30">Fidelity Score</p>
-                  <p className="text-[8px] font-black uppercase tracking-widest text-white/50">{selectedCandidate.jobTitle}</p>
+                  <p className="text-[7px] font-black  tracking-widest text-white/30">Fidelity Score</p>
+                  <p className="text-[8px] font-black  tracking-widest text-white/50">{selectedCandidate.jobTitle}</p>
                 </div>
                 <div className="ml-auto">
                   <div className="flex items-center gap-1.5">
                     <span className={`size-2 rounded-full ${STAGE_DOT[selectedCandidate.pipelineStage]}`} />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-white/50">
+                    <span className="text-[8px] font-black  tracking-widest text-white/50">
                       {STAGES.find(s => s.id === selectedCandidate.pipelineStage)?.label}
                     </span>
                   </div>
@@ -545,7 +545,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     href={whatsappUrl(selectedCandidate.phone, selectedCandidate.name, selectedCandidate.jobTitle)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#25D366]/10 border border-[#25D366]/40 text-[#25D366] text-[8px] font-black uppercase tracking-widest hover:bg-[#25D366] hover:text-black transition-all"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#25D366]/10 border border-[#25D366]/40 text-[#25D366] text-[8px] font-black  tracking-widest hover:bg-[#25D366] hover:text-black transition-all"
                   >
                     <svg viewBox="0 0 24 24" className="size-3.5 fill-current" xmlns="http://www.w3.org/2000/svg">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
@@ -553,7 +553,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     WhatsApp
                   </a>
                 ) : (
-                  <div className="flex items-center gap-2 px-4 py-2.5 border border-white/10 text-white/25 text-[8px] font-black uppercase tracking-widest" title="No phone number on profile">
+                  <div className="flex items-center gap-2 px-4 py-2.5 border border-white/10 text-white/25 text-[8px] font-black  tracking-widest" title="No phone number on profile">
                     <svg viewBox="0 0 24 24" className="size-3.5 fill-current opacity-30" xmlns="http://www.w3.org/2000/svg">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                     </svg>
@@ -567,7 +567,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     href={selectedCandidate.resumeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2.5 border border-white/10 text-white/60 text-[8px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 border border-white/10 text-white/60 text-[8px] font-black  tracking-widest hover:border-white/30 hover:text-white transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">description</span>
                     Resume
@@ -578,14 +578,14 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
             {/* Stage mover */}
             <div className="shrink-0 px-6 md:px-8 py-4 border-b border-white/5 bg-white/[0.01]">
-              <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-3">Move to stage</p>
+              <p className="text-[7px] font-black  tracking-widest text-white/30 mb-3">Move to stage</p>
               <div className="flex gap-2 flex-wrap">
                 {STAGES.map(s => (
                   <button
                     key={s.id}
                     onClick={() => moveToStage(selectedCandidate.applicationId, s.id)}
                     disabled={selectedCandidate.pipelineStage === s.id || movingId === selectedCandidate.applicationId}
-                    className={`flex items-center gap-1.5 px-3 py-2 text-[7px] font-black uppercase tracking-widest transition-all border ${selectedCandidate.pipelineStage === s.id
+                    className={`flex items-center gap-1.5 px-3 py-2 text-[7px] font-black  tracking-widest transition-all border ${selectedCandidate.pipelineStage === s.id
                       ? `${s.color} ${s.accent} bg-white/[0.03] cursor-default`
                       : 'border-white/10 text-white/40 hover:border-white/30 hover:text-white'
                       } disabled:opacity-50`}
@@ -605,7 +605,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
               {selectedCandidate.manifesto && (
                 <section className="space-y-3">
-                  <h4 className="text-[7px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                  <h4 className="text-[7px] font-black  tracking-[0.5em] text-white/30 flex items-center gap-3">
                     <span className="flex-1 h-px bg-white/5" />About<span className="flex-1 h-px bg-white/5" />
                   </h4>
                   <p className="text-sm font-medium text-white/60 leading-relaxed">{selectedCandidate.manifesto}</p>
@@ -614,12 +614,12 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
               {selectedCandidate.skills.length > 0 && (
                 <section className="space-y-3">
-                  <h4 className="text-[7px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                  <h4 className="text-[7px] font-black  tracking-[0.5em] text-white/30 flex items-center gap-3">
                     <span className="flex-1 h-px bg-white/5" />Skills<span className="flex-1 h-px bg-white/5" />
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedCandidate.skills.map(s => (
-                      <span key={s} className="text-[8px] font-black uppercase tracking-widest px-3 py-1.5 border border-white/10 text-white/50 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors">
+                      <span key={s} className="text-[8px] font-black  tracking-widest px-3 py-1.5 border border-white/10 text-white/50 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors">
                         {s}
                       </span>
                     ))}
@@ -629,14 +629,14 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
               {selectedCandidate.experience.length > 0 && (
                 <section className="space-y-3">
-                  <h4 className="text-[7px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                  <h4 className="text-[7px] font-black  tracking-[0.5em] text-white/30 flex items-center gap-3">
                     <span className="flex-1 h-px bg-white/5" />Experience<span className="flex-1 h-px bg-white/5" />
                   </h4>
                   <div className="space-y-5">
                     {selectedCandidate.experience.map((exp, i) => (
                       <div key={i} className="border-l-2 border-white/10 pl-4 space-y-1 hover:border-emerald-500/40 transition-colors">
-                        {exp.date && <p className="text-[7px] font-black uppercase tracking-widest text-white/25">{exp.date}</p>}
-                        <p className="text-sm font-black uppercase tracking-tight">
+                        {exp.date && <p className="text-[7px] font-black  tracking-widest text-white/25">{exp.date}</p>}
+                        <p className="text-sm font-black  tracking-tight">
                           {exp.role}<span className="text-white/30 font-medium mx-2">@</span>{exp.co}
                         </p>
                         {exp.desc && <p className="text-xs font-medium text-white/40 leading-relaxed">{exp.desc}</p>}
@@ -648,7 +648,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
               {selectedCandidate.education && (
                 <section className="space-y-3">
-                  <h4 className="text-[7px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                  <h4 className="text-[7px] font-black tracking-[0.5em] text-white/30 flex items-center gap-3">
                     <span className="flex-1 h-px bg-white/5" />Education<span className="flex-1 h-px bg-white/5" />
                   </h4>
                   <p className="text-sm font-medium text-white/50 leading-relaxed">{selectedCandidate.education}</p>

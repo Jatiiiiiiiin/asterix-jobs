@@ -39,13 +39,13 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
           {/* Headline */}
           <div className="space-y-3">
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-500">
+            <p className="text-[9px] font-black tracking-[0.4em] text-emerald-500">
               Access Restricted
             </p>
-            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-[0.9]">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-[0.9]">
               Premium<br />Student Plan<br />Required
             </h2>
-            <p className="text-xs font-bold uppercase tracking-widest opacity-40 leading-relaxed pt-1">
+            <p className="text-xs font-bold tracking-widest opacity-40 leading-relaxed pt-1">
               Manual applications are reserved for Premium Student members.
               Free plan users can only be auto-matched via Neural Auto-Pilot.
             </p>
@@ -61,7 +61,7 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
               { label: 'Priority recruiter visibility', free: false, premium: true },
             ].map(({ label, free, premium }) => (
               <div key={label} className="flex items-center justify-between py-2 border-b border-black/5 dark:border-white/5">
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{label}</span>
+                <span className="text-[10px] font-black tracking-widest opacity-60">{label}</span>
                 <div className="flex gap-6">
                   <span className={`text-[10px] font-black ${free ? 'text-emerald-500' : 'opacity-20'}`}>
                     {free ? '✓' : '✗'}
@@ -74,10 +74,10 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
             ))}
             {/* Column headers */}
             <div className="flex items-center justify-between pt-1">
-              <span className="text-[8px] font-black uppercase tracking-widest opacity-30">Feature</span>
+              <span className="text-[8px] font-black tracking-widest opacity-30">Feature</span>
               <div className="flex gap-4">
-                <span className="text-[8px] font-black uppercase tracking-widest opacity-30 w-6 text-center">Free</span>
-                <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500 w-10 text-center">Student</span>
+                <span className="text-[8px] font-black tracking-widest opacity-30 w-6 text-center">Free</span>
+                <span className="text-[8px] font-black tracking-widest text-emerald-500 w-10 text-center">Student</span>
               </div>
             </div>
           </div>
@@ -89,21 +89,21 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                 // TODO: route to your upgrade/pricing page
                 onClose();
               }}
-              className="flex-1 bg-black dark:bg-white text-white dark:text-black py-4 text-[10px] font-black uppercase tracking-widest hover:invert transition-all shadow-lg flex items-center justify-center gap-2"
+              className="flex-1 bg-black dark:bg-white text-white dark:text-black py-4 text-[10px] font-black tracking-widest hover:invert transition-all shadow-lg flex items-center justify-center gap-2"
             >
               <span className="material-symbols-outlined text-base">upgrade</span>
               Upgrade to Student Plan
             </button>
             <button
               onClick={onClose}
-              className="flex-1 border-2 border-black/20 dark:border-white/20 py-4 text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 hover:border-black dark:hover:border-white transition-all"
+              className="flex-1 border-2 border-black/20 dark:border-white/20 py-4 text-[10px] font-black tracking-widest opacity-40 hover:opacity-100 hover:border-black dark:hover:border-white transition-all"
             >
               Stay on Free
             </button>
           </div>
 
           {/* Footnote */}
-          <p className="text-[8px] font-black uppercase tracking-widest opacity-20 text-center">
+          <p className="text-[8px] font-black tracking-widest opacity-20 text-center">
             No payment gateway required — contact support to activate your student plan.
           </p>
         </div>

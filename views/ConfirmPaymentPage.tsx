@@ -173,7 +173,7 @@ const ConfirmPaymentPage: React.FC = () => {
                     <div className="w-8 h-8 bg-white text-black flex items-center justify-center font-black rounded-sm">
                         ✦
                     </div>
-                    <span className="font-black text-sm uppercase tracking-widest">Asterix</span>
+                    <span className="font-black text-sm tracking-widest">Asterix</span>
                 </div>
             </header>
 
@@ -183,12 +183,12 @@ const ConfirmPaymentPage: React.FC = () => {
 
                     {/* Left Side: Plan Info */}
                     <div className="space-y-8">
-                        <div className="inline-block px-4 py-1.5 rounded-full border border-purple-500/50 bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase tracking-widest">
+                        <div className="inline-block px-4 py-1.5 rounded-full border border-purple-500/50 bg-purple-500/10 text-purple-400 text-[10px] font-black tracking-widest">
                             Selected Configuration
                         </div>
 
                         <div className="space-y-2">
-                            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none italic">
+                            <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none italic">
                                 {plan.name.split(' ')[0]}<br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
                                     {plan.name.split(' ')[1]}
@@ -205,7 +205,7 @@ const ConfirmPaymentPage: React.FC = () => {
                                     <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
                                         <span className="material-symbols-outlined text-[12px] text-emerald-400">check</span>
                                     </div>
-                                    <span className="text-sm font-bold uppercase tracking-widest text-gray-300 group-hover:text-white transition-colors">
+                                    <span className="text-sm font-bold tracking-widest text-gray-300 group-hover:text-white transition-colors">
                                         {feature}
                                     </span>
                                 </li>
@@ -222,17 +222,17 @@ const ConfirmPaymentPage: React.FC = () => {
                             </div>
 
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Total Commitment</p>
+                                <p className="text-[10px] font-black tracking-[0.3em] text-gray-400">Total Commitment</p>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-6xl font-black tracking-tighter">{plan.price}</span>
-                                    <span className="text-gray-400 font-bold uppercase tracking-widest text-xs">/month</span>
+                                    <span className="text-gray-400 font-bold tracking-widest text-xs">/month</span>
                                 </div>
                             </div>
 
                             <div className="h-px bg-white/10" />
 
                             {error && (
-                                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-xs font-bold uppercase tracking-widest text-center">
+                                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-xs font-bold tracking-widest text-center">
                                     {error}
                                 </div>
                             )}
@@ -243,7 +243,7 @@ const ConfirmPaymentPage: React.FC = () => {
                                 className="w-full relative group"
                             >
                                 <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-                                <div className="relative px-8 py-5 bg-white text-black rounded-2xl font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50">
+                                <div className="relative px-8 py-5 bg-white text-black rounded-2xl font-black tracking-[0.2em] text-xs flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50">
                                     {isLoading ? (
                                         <span className="material-symbols-outlined animate-spin">refresh</span>
                                     ) : (
@@ -259,7 +259,7 @@ const ConfirmPaymentPage: React.FC = () => {
                                     <span className="text-[10px] font-black">MASTERCARD</span>
                                     <span className="text-[10px] font-black">UPI</span>
                                 </div>
-                                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 text-center">
+                                <p className="text-[9px] font-black tracking-[0.3em] text-gray-500 text-center">
                                     Encrypted via Cashfree PG • PCI-DSS Compliant
                                 </p>
                             </div>
@@ -268,7 +268,7 @@ const ConfirmPaymentPage: React.FC = () => {
                         {/* Back Button */}
                         <button
                             onClick={() => navigate(-1)}
-                            className="mt-6 w-full text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 hover:text-white transition-colors"
+                            className="mt-6 w-full text-[10px] font-black tracking-[0.4em] text-gray-500 hover:text-white transition-colors"
                         >
                             ← Cancel Operation
                         </button>
@@ -276,7 +276,7 @@ const ConfirmPaymentPage: React.FC = () => {
                 </div>
             </main>
 
-            <footer className="p-8 text-center text-[8px] font-black uppercase tracking-[0.5em] text-gray-600">
+            <footer className="p-8 text-center text-[8px] font-black tracking-[0.5em] text-gray-600">
                 Asterix Protocol V4.2.0 • Session ID: {Math.random().toString(36).substring(7).toUpperCase()}
             </footer>
 
@@ -289,3 +289,4 @@ const ConfirmPaymentPage: React.FC = () => {
 };
 
 export default ConfirmPaymentPage;
+

@@ -135,11 +135,11 @@ const PipelineBar = ({
                 >
                   <span className="material-symbols-outlined text-sm">{cfg.icon}</span>
                 </div>
-                <span className={`text-[8px] font-black uppercase tracking-widest whitespace-nowrap ${isDone ? "opacity-80" : "opacity-20"}`}>
+                <span className={`text-[8px] font-black tracking-widest whitespace-nowrap ${isDone ? "opacity-80" : "opacity-20"}`}>
                   {cfg.label}
                 </span>
                 {isActive && recruiterName && s === "reviewing" && (
-                  <span className="text-[7px] font-black uppercase tracking-wider text-amber-500 whitespace-nowrap">
+                  <span className="text-[7px] font-black tracking-wider text-amber-500 whitespace-nowrap">
                     {recruiterName}
                   </span>
                 )}
@@ -158,7 +158,7 @@ const PipelineBar = ({
               <div className="size-9 flex items-center justify-center border-2 bg-red-500 border-transparent text-white">
                 <span className="material-symbols-outlined text-sm">cancel</span>
               </div>
-              <span className="text-[8px] font-black uppercase tracking-widest text-red-500">Declined</span>
+              <span className="text-[8px] font-black tracking-widest text-red-500">Declined</span>
             </div>
           </>
         )}
@@ -173,7 +173,7 @@ const PipelineBar = ({
           return (
             <div
               key={s}
-              className={`flex items-center gap-1.5 px-3 py-1.5 border text-[8px] font-black uppercase tracking-widest transition-all
+              className={`flex items-center gap-1.5 px-3 py-1.5 border text-[8px] font-black tracking-widest transition-all
                 ${isDone ? `${cfg.activeColor} border-transparent text-white` : "border-black/20 dark:border-white/20 text-black/20 dark:text-white/20"}
                 ${isActive ? "ring-2 ring-offset-1 ring-black/20 dark:ring-white/20" : ""}
               `}
@@ -216,25 +216,25 @@ const ApplicationCard = ({ app }: { app: Application }) => {
         {/* LEFT */}
         <div className="space-y-4 flex-grow">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-[9px] font-black uppercase tracking-widest opacity-40 group-hover:text-white/40">
+            <span className="text-[9px] font-black tracking-widest opacity-40 group-hover:text-white/40">
               {app.date || "—"}
             </span>
 
             {/* Stage badge */}
-            <span className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest text-white ${stageConfig.activeColor} flex items-center gap-1`}>
+            <span className={`px-3 py-1 text-[8px] font-black tracking-widest text-white ${stageConfig.activeColor} flex items-center gap-1`}>
               <span className="material-symbols-outlined text-[10px] align-middle">{stageConfig.icon}</span>
               {stageConfig.label}
             </span>
 
             {app.aiApplied && (
-              <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-emerald-500">
+              <span className="flex items-center gap-1 text-[9px] font-black tracking-widest text-emerald-500">
                 <span className="material-symbols-outlined text-xs">auto_awesome</span>
                 AI Applied
               </span>
             )}
 
             {app.mailNotified && (
-              <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-sky-500">
+              <span className="flex items-center gap-1 text-[9px] font-black tracking-widest text-sky-500">
                 <span className="material-symbols-outlined text-xs">mark_email_read</span>
                 Notified
               </span>
@@ -242,7 +242,7 @@ const ApplicationCard = ({ app }: { app: Application }) => {
 
             {/* Show if recruiter manually moved this */}
             {app.pipelineStage && app.pipelineStage !== 'shortlisted' && (
-              <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-violet-400">
+              <span className="flex items-center gap-1 text-[9px] font-black tracking-widest text-violet-400">
                 <span className="material-symbols-outlined text-xs">schema</span>
                 In Pipeline
               </span>
@@ -250,16 +250,16 @@ const ApplicationCard = ({ app }: { app: Application }) => {
           </div>
 
           <div>
-            <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter group-hover:text-white">
+            <h3 className="text-2xl md:text-3xl font-black tracking-tighter group-hover:text-white">
               {app.role}
             </h3>
-            <p className="text-xs font-bold uppercase tracking-widest opacity-60 group-hover:text-white/60">
+            <p className="text-xs font-bold tracking-widest opacity-60 group-hover:text-white/60">
               {app.company}
               {app.location ? ` · ${app.location}` : ""}
               {app.employmentType ? ` · ${app.employmentType}` : ""}
             </p>
             {app.salaryRange && (
-              <p className="text-[9px] font-black uppercase tracking-widest opacity-40 group-hover:text-white/40 mt-1">
+              <p className="text-[9px] font-black tracking-widest opacity-40 group-hover:text-white/40 mt-1">
                 {app.salaryRange}
               </p>
             )}
@@ -268,7 +268,7 @@ const ApplicationCard = ({ app }: { app: Application }) => {
           {app.recruiterName && (
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-sm opacity-40 group-hover:text-white/40">person_search</span>
-              <span className="text-[9px] font-black uppercase tracking-widest opacity-50 group-hover:text-white/50">
+              <span className="text-[9px] font-black tracking-widest opacity-50 group-hover:text-white/50">
                 Reviewing: <span className="text-amber-500 opacity-100">{app.recruiterName}</span>
                 {app.recruiterTitle ? ` · ${app.recruiterTitle}` : ""}
               </span>
@@ -279,7 +279,7 @@ const ApplicationCard = ({ app }: { app: Application }) => {
           {isHired && (
             <div className="flex items-center gap-2 text-emerald-500">
               <span className="material-symbols-outlined text-lg animate-bounce">emoji_events</span>
-              <span className="text-[10px] font-black uppercase tracking-widest">Offer accepted — congratulations!</span>
+              <span className="text-[10px] font-black tracking-widest">Offer accepted — congratulations!</span>
             </div>
           )}
         </div>
@@ -287,7 +287,7 @@ const ApplicationCard = ({ app }: { app: Application }) => {
         {/* RIGHT */}
         <div className="flex items-center gap-8 border-t md:border-t-0 pt-4 md:pt-0 border-black/10 group-hover:border-white/20">
           <div className="w-32">
-            <div className="flex justify-between text-[9px] font-black uppercase tracking-widest group-hover:text-white">
+            <div className="flex justify-between text-[9px] font-black tracking-widest group-hover:text-white">
               <span>Confidence</span>
               <span>{app.progress ?? 0}%</span>
             </div>
@@ -314,7 +314,7 @@ const ApplicationCard = ({ app }: { app: Application }) => {
           {app.pipelineStage && app.pipelineStage !== 'shortlisted' && (
             <div className="mt-4 flex items-center gap-2 px-4 py-3 bg-violet-500/5 border border-violet-500/20">
               <span className="material-symbols-outlined text-sm text-violet-400">schema</span>
-              <p className="text-[8px] font-black uppercase tracking-widest text-violet-400">
+              <p className="text-[8px] font-black tracking-widest text-violet-400">
                 Recruiter moved you to{" "}
                 <span className="text-violet-300">
                   {STAGES.find(s => s.key === pipelineStageToAppStage(app.pipelineStage!))?.label ?? app.pipelineStage}
@@ -328,14 +328,14 @@ const ApplicationCard = ({ app }: { app: Application }) => {
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {app.lastActivity && (
                 <div>
-                  <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-1">Last Activity</p>
-                  <p className="text-xs font-black uppercase tracking-tight">{app.lastActivity}</p>
+                  <p className="text-[8px] font-black tracking-widest opacity-30 mb-1">Last Activity</p>
+                  <p className="text-xs font-black tracking-tight">{app.lastActivity}</p>
                 </div>
               )}
               {app.notes && (
                 <div>
-                  <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-1">Notes</p>
-                  <p className="text-xs font-bold uppercase tracking-wide opacity-60">{app.notes}</p>
+                  <p className="text-[8px] font-black tracking-widest opacity-30 mb-1">Notes</p>
+                  <p className="text-xs font-bold tracking-wide opacity-60">{app.notes}</p>
                 </div>
               )}
             </div>
@@ -365,10 +365,10 @@ const StatsBar = ({ apps }: { apps: Application[] }) => {
           className={`p-4 md:p-6 border-r last:border-r-0 border-black/10 dark:border-white/10 group hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all`}
         >
           <div className="flex items-center justify-between mb-1">
-            <p className="text-[7px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-60">{s.label}</p>
+            <p className="text-[7px] font-black tracking-widest opacity-40 group-hover:opacity-60">{s.label}</p>
             <span className="material-symbols-outlined text-sm opacity-20 group-hover:opacity-60">{s.icon}</span>
           </div>
-          <p className={`text-2xl md:text-4xl font-black uppercase tracking-tighter ${counts[s.key] > 0 ? s.accentText : ''} group-hover:text-inherit`}>
+          <p className={`text-2xl md:text-4xl font-black tracking-tighter ${counts[s.key] > 0 ? s.accentText : ''} group-hover:text-inherit`}>
             {counts[s.key]}
           </p>
         </div>
@@ -487,8 +487,8 @@ const ApplicationsPage: React.FC<{
               <span className="material-symbols-outlined">menu</span>
             </button>
             <div>
-              <div className="text-[9px] font-black uppercase tracking-[0.5em] opacity-40 mb-1">Application Tracking</div>
-              <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">My Applications</h1>
+              <div className="text-[9px] font-black tracking-[0.5em] opacity-40 mb-1">Application Tracking</div>
+              <h1 className="text-4xl md:text-6xl font-black tracking-tighter">My Applications</h1>
             </div>
           </div>
           <button onClick={onToggleTheme} className="p-4 border border-black dark:border-white hover:invert transition-all">
@@ -506,7 +506,7 @@ const ApplicationsPage: React.FC<{
               <button
                 key={t.key}
                 onClick={() => setActiveFilter(t.key)}
-                className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest border transition-all
+                className={`px-4 py-2 text-[9px] font-black tracking-widest border transition-all
                   ${activeFilter === t.key
                     ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
                     : "border-black/20 dark:border-white/20 hover:border-black dark:hover:border-white opacity-50 hover:opacity-100"
@@ -522,8 +522,8 @@ const ApplicationsPage: React.FC<{
         {applications.length === 0 && (
           <div className="border border-dashed border-black/20 dark:border-white/20 p-16 text-center">
             <span className="material-symbols-outlined text-4xl opacity-20 mb-4 block">inbox</span>
-            <p className="text-sm font-black uppercase tracking-widest opacity-40 mb-4">No applications yet</p>
-            <p className="text-xs uppercase tracking-widest opacity-30 max-w-md mx-auto">
+            <p className="text-sm font-black tracking-widest opacity-40 mb-4">No applications yet</p>
+            <p className="text-xs tracking-widest opacity-30 max-w-md mx-auto">
               Once you apply manually or via AI auto-apply, your applications will appear here with full mandate tracking.
             </p>
           </div>
@@ -534,12 +534,12 @@ const ApplicationsPage: React.FC<{
           <>
             <section className="mb-20">
               <div className="flex items-center gap-4 mb-6">
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-widest">Auto Applied</h2>
-                <span className="px-3 py-1 text-[9px] font-black uppercase tracking-widest bg-black/5 dark:bg-white/10">{autoApplied.length}</span>
+                <h2 className="text-xl md:text-2xl font-black tracking-widest">Auto Applied</h2>
+                <span className="px-3 py-1 text-[9px] font-black tracking-widest bg-black/5 dark:bg-white/10">{autoApplied.length}</span>
               </div>
               <div className="space-y-4">
                 {autoApplied.length === 0 && (
-                  <p className="text-xs uppercase tracking-widest opacity-30 border border-dashed border-black/10 dark:border-white/10 p-6 text-center">
+                  <p className="text-xs tracking-widest opacity-30 border border-dashed border-black/10 dark:border-white/10 p-6 text-center">
                     No auto-applied applications matching filter
                   </p>
                 )}
@@ -549,12 +549,12 @@ const ApplicationsPage: React.FC<{
 
             <section className="mb-20">
               <div className="flex items-center gap-4 mb-6">
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-widest">Manual Applied</h2>
-                <span className="px-3 py-1 text-[9px] font-black uppercase tracking-widest bg-black/5 dark:bg-white/10">{manualApplied.length}</span>
+                <h2 className="text-xl md:text-2xl font-black tracking-widest">Manual Applied</h2>
+                <span className="px-3 py-1 text-[9px] font-black tracking-widest bg-black/5 dark:bg-white/10">{manualApplied.length}</span>
               </div>
               <div className="space-y-4">
                 {manualApplied.length === 0 && (
-                  <p className="text-xs uppercase tracking-widest opacity-30 border border-dashed border-black/10 dark:border-white/10 p-6 text-center">
+                  <p className="text-xs tracking-widest opacity-30 border border-dashed border-black/10 dark:border-white/10 p-6 text-center">
                     No manual applications matching filter
                   </p>
                 )}

@@ -297,7 +297,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
           <div className="h-px bg-white/10 relative overflow-hidden">
             <div className="absolute inset-y-0 left-0 bg-white animate-logout-progress" />
           </div>
-          <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/20 text-center animate-pulse">Redirecting to login</p>
+          <p className="text-[8px] font-black tracking-[0.5em] text-white/20 text-center animate-pulse">Redirecting to login</p>
         </div>
       </div>
     </div>
@@ -317,7 +317,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
         <div className={`fixed top-6 right-6 z-[500] transition-all duration-500 ${saveState === 'done' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
           <div className="bg-emerald-500 text-white px-8 py-4 flex items-center gap-3 shadow-2xl">
             <span className="material-symbols-outlined text-lg animate-bounce">check_circle</span>
-            <span className="text-[10px] font-black uppercase tracking-widest">Protocol Updated</span>
+            <span className="text-[10px] font-black tracking-widest">Protocol Updated</span>
           </div>
         </div>
 
@@ -330,15 +330,15 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                 <span className="material-symbols-outlined">menu</span>
               </button>
               <div className="min-w-0">
-                <div className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.5em] opacity-40 mb-0.5 md:mb-1 truncate">Operational Parameters</div>
-                <h1 className="text-2xl md:text-6xl font-black uppercase tracking-tighter truncate">System Settings</h1>
+                <div className="text-[7px] md:text-[10px] font-black tracking-[0.5em] opacity-40 mb-0.5 md:mb-1 truncate">Operational Parameters</div>
+                <h1 className="text-2xl md:text-6xl font-black tracking-tighter truncate">System Settings</h1>
               </div>
             </div>
             <div className="flex gap-2 md:gap-3 items-center w-full md:w-auto">
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className={`flex-1 md:flex-none relative overflow-hidden px-4 md:px-6 py-2.5 md:py-3 border text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all
+                className={`flex-1 md:flex-none relative overflow-hidden px-4 md:px-6 py-2.5 md:py-3 border text-[8px] md:text-[10px] font-black tracking-widest transition-all
                   ${isLoggingOut ? 'border-red-500 text-red-500 bg-red-500/10 cursor-not-allowed' : 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white'}`}
               >
                 {isLoggingOut ? <span className="font-mono text-[8px] md:text-[9px]">{glitchText}</span> : 'Sign Out'}
@@ -359,7 +359,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`whitespace-nowrap flex-shrink-0 flex items-center gap-2.5 md:gap-3 text-left px-4 md:px-5 py-3 md:py-4 lg:p-6 border text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all
+                    className={`whitespace-nowrap flex-shrink-0 flex items-center gap-2.5 md:gap-3 text-left px-4 md:px-5 py-3 md:py-4 lg:p-6 border text-[8px] md:text-[10px] font-black tracking-widest transition-all
                       ${activeTab === tab.id
                         ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white'
                         : 'border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5'}`}
@@ -378,7 +378,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
               {/* ── ACCOUNT ── */}
               {activeTab === 'ACCOUNT' && (
                 <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-400">
-                  <h3 className="text-lg md:text-xl font-black uppercase tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Profile Matrix</h3>
+                  <h3 className="text-lg md:text-xl font-black tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Profile Matrix</h3>
 
                   {user && (
                     <div className="flex items-center gap-5 p-6 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
@@ -388,16 +388,16 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                           : <span className="material-symbols-outlined text-2xl opacity-40">person</span>}
                       </div>
                       <div className="space-y-1.5">
-                        <p className="text-sm font-black uppercase tracking-tight">{account.name || 'Unknown'}</p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">{account.email}</p>
+                        <p className="text-sm font-black tracking-tight">{account.name || 'Unknown'}</p>
+                        <p className="text-[10px] font-bold tracking-widest opacity-40">{account.email}</p>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border border-emerald-500 text-emerald-500">LIVE SESSION</span>
+                          <span className="text-[8px] font-black tracking-widest px-2 py-0.5 border border-emerald-500 text-emerald-500">LIVE SESSION</span>
                           {hasAccess && (
-                            <span className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border border-blue-400 text-blue-400">
+                            <span className="text-[8px] font-black tracking-widest px-2 py-0.5 border border-blue-400 text-blue-400">
                               {role === 'candidate' ? (isStudent ? 'STUDENT' : 'PREMIUM') : 'PRO'}
                             </span>
                           )}
-                          <span className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border border-purple-400 text-purple-400">{role.toUpperCase()}</span>
+                          <span className="text-[8px] font-black tracking-widest px-2 py-0.5 border border-purple-400 text-purple-400">{role.toUpperCase()}</span>
                         </div>
                       </div>
                     </div>
@@ -410,14 +410,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                       { label: 'Contact Node (Phone)', name: 'phone', type: 'tel', value: account.phone },
                     ].map(field => (
                       <div key={field.name} className="space-y-3">
-                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{field.label}</label>
+                        <label className="text-[9px] md:text-[10px] font-black tracking-[0.3em] opacity-40">{field.label}</label>
                         <input
                           type={field.type}
                           name={field.name}
                           value={field.value}
                           onChange={handleAccountChange}
                           readOnly={field.name === 'email'}
-                          className={`w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-black dark:focus:border-white p-4 md:p-5 text-xs md:text-sm font-bold outline-none uppercase tracking-wide transition-colors ${field.name === 'email' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          className={`w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-black dark:focus:border-white p-4 md:p-5 text-xs md:text-sm font-bold outline-none tracking-wide transition-colors ${field.name === 'email' ? 'opacity-50 cursor-not-allowed' : ''}`}
                         />
                       </div>
                     ))}
@@ -428,7 +428,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
               {/* ── COMPANY ── */}
               {activeTab === 'COMPANY' && role === 'recruiter' && (
                 <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-400">
-                  <h3 className="text-lg md:text-xl font-black uppercase tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Enterprise Profile</h3>
+                  <h3 className="text-lg md:text-xl font-black tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Enterprise Profile</h3>
 
                   <div className="grid gap-8">
                     {[
@@ -437,25 +437,25 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                       { label: 'Headcount / Size', name: 'headCount', type: 'text', value: company.headCount },
                     ].map(field => (
                       <div key={field.name} className="space-y-3">
-                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{field.label}</label>
+                        <label className="text-[9px] md:text-[10px] font-black tracking-[0.3em] opacity-40">{field.label}</label>
                         <input
                           type={field.type}
                           name={field.name}
                           value={field.value}
                           onChange={handleCompanyChange}
-                          className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-black dark:focus:border-white p-4 md:p-5 text-xs md:text-sm font-bold outline-none uppercase tracking-wide transition-colors"
+                          className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-black dark:focus:border-white p-4 md:p-5 text-xs md:text-sm font-bold outline-none tracking-wide transition-colors"
                         />
                       </div>
                     ))}
 
                     <div className="space-y-3">
-                      <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Organization Manifesto (Bio)</label>
+                      <label className="text-[9px] md:text-[10px] font-black tracking-[0.3em] opacity-40">Organization Manifesto (Bio)</label>
                       <textarea
                         name="bio"
                         value={company.bio}
                         onChange={handleCompanyChange}
                         rows={4}
-                        className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-black dark:focus:border-white p-4 md:p-5 text-xs md:text-sm font-bold outline-none uppercase tracking-wide transition-colors resize-none"
+                        className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-black dark:focus:border-white p-4 md:p-5 text-xs md:text-sm font-bold outline-none tracking-wide transition-colors resize-none"
                       />
                     </div>
                   </div>
@@ -465,21 +465,21 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
               {/* ── BILLING ── */}
               {activeTab === 'BILLING' && (
                 <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-400">
-                  <h3 className="text-lg md:text-xl font-black uppercase tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Billing Matrix</h3>
+                  <h3 className="text-lg md:text-xl font-black tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Billing Matrix</h3>
 
                   {/* Current plan card */}
                   <div className={`p-8 md:p-12 space-y-4 ${hasAccess ? 'bg-emerald-500 text-white' : 'bg-black dark:bg-white text-white dark:text-black'}`}>
-                    <p className="text-[9px] font-black uppercase tracking-widest opacity-60">Current Plan</p>
-                    <p className="text-4xl md:text-5xl font-black uppercase tracking-tighter">
+                    <p className="text-[9px] font-black tracking-widest opacity-60">Current Plan</p>
+                    <p className="text-4xl md:text-5xl font-black tracking-tighter">
                       {hasAccess ? planConfig.paidName : planConfig.freeName}
                     </p>
-                    <p className="text-[9px] font-bold uppercase tracking-widest opacity-60 max-w-sm leading-relaxed">
+                    <p className="text-[9px] font-bold tracking-widest opacity-60 max-w-sm leading-relaxed">
                       {hasAccess ? planConfig.paidDesc : planConfig.freeDesc}
                     </p>
                     {hasAccess && (
                       <div className="flex items-center gap-2 pt-2">
                         <span className="material-symbols-outlined text-sm">check_circle</span>
-                        <span className="text-[9px] font-black uppercase tracking-widest">All features unlocked</span>
+                        <span className="text-[9px] font-black tracking-widest">All features unlocked</span>
                       </div>
                     )}
                   </div>
@@ -487,13 +487,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                   {/* Feature comparison */}
                   <div className="border border-black dark:border-white/20 divide-y divide-black/5 dark:divide-white/5">
                     <div className="grid grid-cols-3 px-6 py-3 bg-black/5 dark:bg-white/5">
-                      <span className="text-[8px] font-black uppercase tracking-widest opacity-40 col-span-1">Feature</span>
-                      <span className="text-[8px] font-black uppercase tracking-widest opacity-40 text-center">{planConfig.freeName}</span>
-                      <span className="text-[8px] font-black uppercase tracking-widest opacity-40 text-center">{planConfig.paidName}</span>
+                      <span className="text-[8px] font-black tracking-widest opacity-40 col-span-1">Feature</span>
+                      <span className="text-[8px] font-black tracking-widest opacity-40 text-center">{planConfig.freeName}</span>
+                      <span className="text-[8px] font-black tracking-widest opacity-40 text-center">{planConfig.paidName}</span>
                     </div>
                     {planConfig.features.map((f) => (
                       <div key={f.label} className="grid grid-cols-3 px-6 py-4 items-center">
-                        <span className="text-[9px] font-black uppercase tracking-widest col-span-1">{f.label}</span>
+                        <span className="text-[9px] font-black tracking-widest col-span-1">{f.label}</span>
                         <div className="flex justify-center">
                           {f.free
                             ? <span className="material-symbols-outlined text-sm text-emerald-500">check</span>
@@ -511,25 +511,25 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-6 border-2 border-black dark:border-white">
                         <div>
-                          <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Unlock Full Access</p>
-                          <p className="text-2xl font-black uppercase tracking-tighter mt-1">{planConfig.price}</p>
+                          <p className="text-[9px] font-black tracking-widest opacity-40">Unlock Full Access</p>
+                          <p className="text-2xl font-black tracking-tighter mt-1">{planConfig.price}</p>
                         </div>
                         <button
                           onClick={() => handleUpgrade(role === 'candidate' ? 'student' : 'recruiter')}
-                          className="bg-black dark:bg-white text-white dark:text-black px-8 py-4 text-[10px] font-black uppercase tracking-widest hover:invert transition-all"
+                          className="bg-black dark:bg-white text-white dark:text-black px-8 py-4 text-[10px] font-black tracking-widest hover:invert transition-all"
                         >
                           {planConfig.upgradeLabel}
                         </button>
                       </div>
-                      <p className="text-[8px] font-black uppercase tracking-widest opacity-30 text-center">
+                      <p className="text-[8px] font-black tracking-widest opacity-30 text-center">
                         Secure payment via Cashfree PG · Cancel anytime
                       </p>
                     </div>
                   ) : (
                     <div className="p-6 border border-emerald-500/30 bg-emerald-500/5 flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Plan Active</p>
-                        <p className="text-[8px] font-bold uppercase tracking-widest opacity-40">Renews automatically · Manage via payment provider</p>
+                        <p className="text-[9px] font-black tracking-widest text-emerald-500">Plan Active</p>
+                        <p className="text-[8px] font-bold tracking-widest opacity-40">Renews automatically · Manage via payment provider</p>
                       </div>
                       <span className="material-symbols-outlined text-emerald-500">verified</span>
                     </div>
@@ -540,13 +540,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
               {/* ── NEURAL / AI ── */}
               {activeTab === 'AI' && (
                 <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-400">
-                  <h3 className="text-lg md:text-xl font-black uppercase tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Neural Protocol</h3>
+                  <h3 className="text-lg md:text-xl font-black tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Neural Protocol</h3>
                   <div className="space-y-0 divide-y divide-black/5 dark:divide-white/5">
                     {aiFeatures.map(f => (
                       <div key={f.id} className="flex items-center justify-between py-8 group">
                         <div className="space-y-2 pr-8">
-                          <p className="text-base md:text-lg font-black uppercase tracking-tighter">{f.label}</p>
-                          <p className="text-[9px] font-bold uppercase tracking-widest opacity-40 leading-relaxed max-w-sm">{f.desc}</p>
+                          <p className="text-base md:text-lg font-black tracking-tighter">{f.label}</p>
+                          <p className="text-[9px] font-bold tracking-widest opacity-40 leading-relaxed max-w-sm">{f.desc}</p>
                         </div>
                         <button
                           onClick={() => togglePreference(f.id as keyof typeof preferences)}
@@ -568,7 +568,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
               {/* ── SECURITY ── */}
               {activeTab === 'SECURITY' && (
                 <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-400">
-                  <h3 className="text-lg md:text-xl font-black uppercase tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Access Control</h3>
+                  <h3 className="text-lg md:text-xl font-black tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Access Control</h3>
                   <div className="space-y-4">
                     {[
                       { label: 'Rotate Access Keys', icon: 'key', desc: 'Generate a new password reset link.' },
@@ -583,8 +583,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                         <div className="flex items-center gap-4">
                           <span className="material-symbols-outlined text-xl">{action.icon}</span>
                           <div>
-                            <p className="text-[10px] md:text-xs font-black uppercase tracking-widest">{action.label}</p>
-                            <p className="text-[8px] font-bold uppercase tracking-widest opacity-40 mt-1">{action.desc}</p>
+                            <p className="text-[10px] md:text-xs font-black tracking-widest">{action.label}</p>
+                            <p className="text-[8px] font-bold tracking-widest opacity-40 mt-1">{action.desc}</p>
                           </div>
                         </div>
                         <span className="material-symbols-outlined text-lg opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all">arrow_forward</span>
@@ -597,7 +597,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
               {/* ── NOTIFICATIONS ── */}
               {activeTab === 'NOTIFICATIONS' && (
                 <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-400">
-                  <h3 className="text-lg md:text-xl font-black uppercase tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Alert Matrix</h3>
+                  <h3 className="text-lg md:text-xl font-black tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Alert Matrix</h3>
                   <div className="divide-y divide-black/5 dark:divide-white/5">
                     {[
                       { id: 'emailNotifications', label: 'Email Pings', desc: 'Match alerts and application updates.' },
@@ -605,8 +605,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                     ].map(f => (
                       <div key={f.id} className="flex items-center justify-between py-8">
                         <div className="space-y-2 pr-8">
-                          <p className="text-base md:text-lg font-black uppercase tracking-tighter">{f.label}</p>
-                          <p className="text-[9px] font-bold uppercase tracking-widest opacity-40 max-w-sm">{f.desc}</p>
+                          <p className="text-base md:text-lg font-black tracking-tighter">{f.label}</p>
+                          <p className="text-[9px] font-bold tracking-widest opacity-40 max-w-sm">{f.desc}</p>
                         </div>
                         <button
                           onClick={() => togglePreference(f.id as keyof typeof preferences)}
@@ -629,12 +629,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                 className={`bg-black text-white dark:bg-white dark:text-black p-6 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 cursor-pointer group transition-opacity ${saveState === 'saving' ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}
               >
                 <div className="space-y-1.5 md:space-y-2">
-                  <h4 className="text-xl md:text-3xl font-black uppercase tracking-tighter leading-none">
+                  <h4 className="text-xl md:text-3xl font-black tracking-tighter leading-none">
                     {saveState === 'saving' ? 'Syncing...' : saveState === 'done' ? 'Synced ✓' : 'Sync Protocol'}
                   </h4>
-                  <p className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.4em] opacity-40">Apply new operational parameters to network.</p>
+                  <p className="text-[7px] md:text-[9px] font-black tracking-[0.4em] opacity-40">Apply new operational parameters to network.</p>
                 </div>
-                <button className="w-full md:w-auto bg-white text-black dark:bg-black dark:text-white px-6 md:px-12 py-3.5 md:py-5 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] group-hover:invert transition-all flex items-center justify-center gap-3">
+                <button className="w-full md:w-auto bg-white text-black dark:bg-black dark:text-white px-6 md:px-12 py-3.5 md:py-5 text-[8px] md:text-[10px] font-black tracking-[0.4em] group-hover:invert transition-all flex items-center justify-center gap-3">
                   {saveState === 'saving'
                     ? <span className="material-symbols-outlined animate-spin text-sm">refresh</span>
                     : saveState === 'done'
@@ -645,10 +645,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
 
               {/* Danger zone */}
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-black/5 dark:border-white/5 pt-10">
-                <button className="text-[9px] font-black uppercase tracking-[0.4em] text-red-600 hover:text-red-700 transition-colors">
+                <button className="text-[9px] font-black tracking-[0.4em] text-red-600 hover:text-red-700 transition-colors">
                   Decommission Profile
                 </button>
-                <span className="text-[9px] font-black uppercase tracking-[0.5em] opacity-10">
+                <span className="text-[9px] font-black tracking-[0.5em] opacity-10">
                   CORE-V4-{role?.toUpperCase()}
                 </span>
               </div>

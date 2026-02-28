@@ -105,8 +105,8 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
               <span className="material-symbols-outlined text-2xl">auto_awesome</span>
             </div>
             <div className="flex flex-col">
-              <h1 className="text-black dark:text-white text-base font-black uppercase tracking-tighter">Asterix</h1>
-              <p className="text-black/60 dark:text-white/60 text-[10px] font-bold uppercase tracking-widest">
+              <h1 className="text-black dark:text-white text-base font-black tracking-tighter">Asterix</h1>
+              <p className="text-black/60 dark:text-white/60 text-[10px] font-bold tracking-widest">
                 {role === 'candidate' ? 'Job Seeker' : 'Talent Lead'}
               </p>
             </div>
@@ -123,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
           <div className="border-2 border-black/10 dark:border-white/10 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-black/60 dark:text-white/60">
+                <p className="text-[10px] font-black tracking-widest text-black/60 dark:text-white/60">
                   {hasAccess ? (isStudent ? 'Student Plan' : 'Premium') : 'Free Plan'}
                 </p>
                 {hasAccess && (
@@ -131,12 +131,12 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
                 )}
               </div>
               {isStudent && (
-                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 text-[9px] font-black uppercase tracking-widest">
+                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 text-[9px] font-black tracking-widest">
                   Student
                 </span>
               )}
               {isPremium && !isStudent && (
-                <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 text-[9px] font-black uppercase tracking-widest">
+                <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 text-[9px] font-black tracking-widest">
                   Premium
                 </span>
               )}
@@ -146,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
             {!hasAccess && (
               <button
                 onClick={() => handleUpgrade('student')}
-                className="w-full bg-black dark:bg-white text-white dark:text-black py-2.5 text-[9px] font-black uppercase tracking-widest hover:invert transition-all"
+                className="w-full bg-black dark:bg-white text-white dark:text-black py-2.5 text-[9px] font-black tracking-widest hover:invert transition-all"
               >
                 Upgrade to Student Plan
               </button>
@@ -155,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
             {hasAccess && (
               <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <span className="material-symbols-outlined text-sm">check_circle</span>
-                <span className="text-[9px] font-black uppercase tracking-widest">Full access active</span>
+                <span className="text-[9px] font-black tracking-widest">Full access active</span>
               </div>
             )}
           </div>
@@ -166,14 +166,14 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
           <div className="border-2 border-black/10 dark:border-white/10 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-black/60 dark:text-white/60">
+                <p className="text-[10px] font-black tracking-widest text-black/60 dark:text-white/60">
                   {hasAccess ? 'Pro Plan' : 'Starter Plan'}
                 </p>
                 {hasAccess && (
                   <p className="text-[8px] font-bold text-black/40 dark:text-white/40 mt-1">₹1,999 / month</p>
                 )}
               </div>
-              <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-1 text-[9px] font-black uppercase tracking-widest">
+              <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-1 text-[9px] font-black tracking-widest">
                 Recruiter
               </span>
             </div>
@@ -182,7 +182,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
             {!hasAccess && (
               <button
                 onClick={() => handleUpgrade('recruiter')}
-                className="w-full bg-black dark:bg-white text-white dark:text-black py-2.5 text-[9px] font-black uppercase tracking-widest hover:invert transition-all flex items-center justify-center gap-2"
+                className="w-full bg-black dark:bg-white text-white dark:text-black py-2.5 text-[9px] font-black tracking-widest hover:invert transition-all flex items-center justify-center gap-2"
               >
                 <span className="material-symbols-outlined text-sm">lock</span>
                 Upgrade to Pro
@@ -192,7 +192,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
             {hasAccess && (
               <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <span className="material-symbols-outlined text-sm">check_circle</span>
-                <span className="text-[9px] font-black uppercase tracking-widest">Pro access active</span>
+                <span className="text-[9px] font-black tracking-widest">Pro access active</span>
               </div>
             )}
           </div>
@@ -213,7 +213,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
                   }`}
               >
                 <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                <span className="text-[10px] uppercase tracking-widest font-black">{item.name}</span>
+                <span className="text-[10px] tracking-widest font-black">{item.name}</span>
               </Link>
             );
           })}
@@ -229,7 +229,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
               : <span className="material-symbols-outlined size-full flex items-center justify-center text-black/40 dark:text-white/40">person</span>}
           </div>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-[10px] font-black text-black dark:text-white truncate uppercase">
+            <span className="text-[10px] font-black text-black dark:text-white truncate">
               {user?.displayName || user?.email?.split('@')[0] || 'User'}
             </span>
             <span className="text-[8px] font-bold text-black/40 dark:text-white/40 truncate">{user?.email}</span>
@@ -239,7 +239,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className={`w-full flex items-center justify-center gap-2 py-3 border transition-all text-[9px] font-black uppercase tracking-widest group relative overflow-hidden
+          className={`w-full flex items-center justify-center gap-2 py-3 border transition-all text-[9px] font-black tracking-widest group relative overflow-hidden
             ${isLoggingOut
               ? 'border-red-500 text-red-500 bg-red-500/10 cursor-not-allowed'
               : 'border-black dark:border-white text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black'}`}
@@ -280,7 +280,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
             <div className="h-px bg-white/10 relative overflow-hidden">
               <div className="absolute inset-y-0 left-0 bg-white animate-logout-progress" />
             </div>
-            <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/20 text-center animate-pulse">Redirecting to login</p>
+            <p className="text-[8px] font-black tracking-[0.5em] text-white/20 text-center animate-pulse">Redirecting to login</p>
           </div>
         </div>
       </div>,

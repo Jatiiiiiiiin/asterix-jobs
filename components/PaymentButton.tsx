@@ -13,7 +13,7 @@ const PaymentButton: React.FC = () => {
   return (
     <button
       onClick={handleUpgrade}
-      className="px-6 py-3 bg-black text-white hover:bg-gray-800 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+      className="px-6 py-3 bg-black text-white hover:bg-gray-800 rounded-lg text-xs font-black tracking-widest transition-all"
     >
       Upgrade to Premium
     </button>
@@ -21,3 +21,4 @@ const PaymentButton: React.FC = () => {
 };
 
 export default PaymentButton;
+

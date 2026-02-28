@@ -236,10 +236,10 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div>
-            <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/30">
+            <p className="text-[8px] font-black tracking-[0.5em] text-white/30">
               Mandate Protocol
             </p>
-            <h1 className="text-2xl font-black uppercase tracking-tight">Post New Role</h1>
+            <h1 className="text-2xl font-black tracking-tight">Post New Role</h1>
           </div>
         </div>
 
@@ -274,7 +274,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
 
           {/* Error banner */}
           {errorMsg && (
-            <div className="mb-6 flex items-center gap-3 border border-red-500/30 bg-red-500/10 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-red-400">
+            <div className="mb-6 flex items-center gap-3 border border-red-500/30 bg-red-500/10 px-5 py-4 text-[10px] font-black tracking-widest text-red-400">
               <span className="material-symbols-outlined text-sm">error</span>
               {errorMsg}
             </div>
@@ -287,7 +287,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
                 value={form.title}
                 onChange={set('title')}
                 placeholder="E.G. SENIOR ML ENGINEER"
-                className={INPUT_CLS + ' text-2xl font-black uppercase tracking-tight'}
+                className={INPUT_CLS + ' text-2xl font-black tracking-tight'}
               />
             </Field>
 
@@ -358,7 +358,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
                 <button
                   type="button"
                   onClick={toggle('remoteAllowed')}
-                  className={`w-full px-5 py-4 text-[9px] font-black uppercase tracking-widest border transition-colors ${form.remoteAllowed
+                  className={`w-full px-5 py-4 text-[9px] font-black tracking-widest border transition-colors ${form.remoteAllowed
                     ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
                     : 'border-white/10 text-white/30 hover:border-white/20'
                     }`}
@@ -398,7 +398,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
             </div>
 
             {(form.salaryMin || form.salaryMax) && (
-              <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">
+              <p className="text-[9px] font-black text-white/30 tracking-widest">
                 Range: {form.currency}{' '}
                 {form.salaryMin ? parseInt(form.salaryMin).toLocaleString() : '?'}
                 {' – '}
@@ -476,7 +476,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
                 {splitCommas(form.requiredSkills).map(s => (
                   <span
                     key={s}
-                    className="text-[7px] font-black uppercase tracking-widest px-2.5 py-1 border border-emerald-500/30 text-emerald-400"
+                    className="text-[7px] font-black tracking-widest px-2.5 py-1 border border-emerald-500/30 text-emerald-400"
                   >
                     {s}
                   </span>
@@ -489,7 +489,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
           <FormSection index={5} label="06 / Match Settings" active={activeSection} onFocus={() => setActiveSection(5)}>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <label className="text-[9px] font-black uppercase tracking-widest text-white/40">
+                <label className="text-[9px] font-black tracking-widest text-white/40">
                   Auto-shortlist Threshold
                 </label>
                 <span className="text-2xl font-black text-emerald-400">{form.matchThreshold}%</span>
@@ -514,14 +514,14 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
             <button
               onClick={saveDraft}
               disabled={status === 'saving'}
-              className="flex-1 border border-white/10 py-5 text-[9px] font-black uppercase tracking-widest text-white/40 hover:border-white/30 hover:text-white transition-all disabled:opacity-30"
+              className="flex-1 border border-white/10 py-5 text-[9px] font-black tracking-widest text-white/40 hover:border-white/30 hover:text-white transition-all disabled:opacity-30"
             >
               Save Draft
             </button>
             <button
               onClick={activate}
               disabled={status === 'saving' || status === 'saved'}
-              className={`flex-1 py-5 text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-2 ${status === 'saved'
+              className={`flex-1 py-5 text-[9px] font-black tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-2 ${status === 'saved'
                 ? 'bg-emerald-500 text-white'
                 : 'bg-white text-black hover:bg-white/80'
                 }`}
@@ -552,7 +552,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
               <span className={`material-symbols-outlined text-base ${isAnalyzing ? 'animate-pulse' : ''}`}>
                 auto_awesome
               </span>
-              <h4 className="text-[9px] font-black uppercase tracking-[0.4em]">Neural Prediction</h4>
+              <h4 className="text-[9px] font-black tracking-[0.4em]">Neural Prediction</h4>
             </div>
 
             {isAnalyzing ? (
@@ -565,24 +565,24 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Est. Match Pool</p>
+                    <p className="text-[7px] font-black tracking-widest text-white/30 mb-1">Est. Match Pool</p>
                     <p className="text-3xl font-black">{aiAnalysis.estimatedMatchPool ?? '—'}</p>
                   </div>
                   <div>
-                    <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Threshold</p>
+                    <p className="text-[7px] font-black tracking-widest text-white/30 mb-1">Threshold</p>
                     <p className="text-3xl font-black text-emerald-400">{form.matchThreshold}%</p>
                   </div>
                 </div>
                 {(aiAnalysis.requirements ?? []).length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-[7px] font-black uppercase tracking-widest text-white/30">
+                    <p className="text-[7px] font-black tracking-widest text-white/30">
                       Detected Key Skills
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {aiAnalysis.requirements!.map((r: string, i: number) => (
                         <span
                           key={i}
-                          className="text-[7px] font-black uppercase tracking-widest px-2 py-1 bg-white/5 border border-white/10 text-white/60"
+                          className="text-[7px] font-black tracking-widest px-2 py-1 bg-white/5 border border-white/10 text-white/60"
                         >
                           {r}
                         </span>
@@ -600,7 +600,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
 
           {/* Form completion */}
           <div className="border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h4 className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30">
+            <h4 className="text-[8px] font-black tracking-[0.3em] text-white/30">
               Completion
             </h4>
             <div className="space-y-2">
@@ -611,7 +611,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
                       }`}
                   />
                   <span
-                    className={`text-[8px] font-black uppercase tracking-widest transition-colors ${filled[i] ? 'text-white/60' : 'text-white/20'
+                    className={`text-[8px] font-black tracking-widest transition-colors ${filled[i] ? 'text-white/60' : 'text-white/20'
                       }`}
                   >
                     {sec}
@@ -625,15 +625,15 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
                 style={{ width: `${completePct}%` }}
               />
             </div>
-            <p className="text-[7px] font-black uppercase tracking-widest text-white/20">
+            <p className="text-[7px] font-black tracking-widest text-white/20">
               {completePct}% complete
             </p>
           </div>
 
           {/* Tip */}
           <div className="bg-white text-black p-6 space-y-3">
-            <h4 className="text-[8px] font-black uppercase tracking-widest opacity-40">Tip</h4>
-            <p className="text-[9px] font-bold uppercase tracking-widest leading-relaxed">
+            <h4 className="text-[8px] font-black tracking-widest opacity-40">Tip</h4>
+            <p className="text-[9px] font-bold tracking-widest leading-relaxed">
               Listing specific tech stack items increases candidate match fidelity by up to 24%.
             </p>
           </div>
@@ -648,17 +648,17 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) 
 ================================================================ */
 
 const INPUT_CLS =
-  'w-full bg-white/[0.03] border border-white/10 px-4 py-3.5 text-[10px] font-black uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors text-white';
+  'w-full bg-white/[0.03] border border-white/10 px-4 py-3.5 text-[10px] font-black tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors text-white';
 
 const SELECT_CLS =
-  'w-full bg-[#111111] border border-white/10 px-4 py-3.5 text-[10px] font-black uppercase tracking-widest outline-none focus:border-white/30 transition-colors text-white appearance-none [color-scheme:dark]';
+  'w-full bg-[#111111] border border-white/10 px-4 py-3.5 text-[10px] font-black tracking-widest outline-none focus:border-white/30 transition-colors text-white appearance-none [color-scheme:dark]';
 
 const TEXTAREA_CLS =
-  'w-full bg-white/[0.03] border border-white/10 px-4 py-3.5 text-[10px] font-medium uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors text-white resize-y';
+  'w-full bg-white/[0.03] border border-white/10 px-4 py-3.5 text-[10px] font-medium tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors text-white resize-y';
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div className="space-y-2">
-    <label className="text-[8px] font-black uppercase tracking-[0.4em] text-white/30">{label}</label>
+    <label className="text-[8px] font-black tracking-[0.4em] text-white/30">{label}</label>
     {children}
   </div>
 );
@@ -675,7 +675,7 @@ const FormSection: React.FC<{
     className={`border-t border-white/5 py-8 space-y-5 transition-opacity ${active === index ? 'opacity-100' : 'opacity-60 hover:opacity-80'
       }`}
   >
-    <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/30">{label}</p>
+    <p className="text-[8px] font-black tracking-[0.5em] text-white/30">{label}</p>
     {children}
   </div>
 );

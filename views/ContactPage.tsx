@@ -23,17 +23,17 @@ const ContactPage: React.FC = () => {
                     <div className="size-9 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
                         <span className="material-symbols-outlined text-xl">auto_awesome</span>
                     </div>
-                    <span className="text-xl font-black uppercase tracking-tighter">Asterix</span>
+                    <span className="text-xl font-black tracking-tighter">Asterix</span>
                 </Link>
-                <Link to="/" className="text-[9px] font-black uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity">← Back</Link>
+                <Link to="/" className="text-[9px] font-black tracking-widest opacity-50 hover:opacity-100 transition-opacity">← Back</Link>
             </header>
 
             <main className="max-w-6xl mx-auto px-6 md:px-10 py-20 md:py-32">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24">
                     <div className="space-y-10">
                         <div>
-                            <p className="text-[9px] font-black uppercase tracking-[0.5em] opacity-40 mb-4">Contact</p>
-                            <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none">Let's Talk</h1>
+                            <p className="text-[9px] font-black tracking-[0.5em] opacity-40 mb-4">Contact</p>
+                            <h1 className="text-5xl md:text-6xl font-black tracking-tighter leading-none">Let's Talk</h1>
                         </div>
 
                         <div className="space-y-6">
@@ -46,7 +46,7 @@ const ContactPage: React.FC = () => {
                                 <div key={c.label} className="flex items-start gap-4 p-4 border border-black/10 dark:border-white/10">
                                     <span className="material-symbols-outlined text-lg opacity-40 mt-0.5">{c.icon}</span>
                                     <div>
-                                        <p className="text-[8px] font-black uppercase tracking-widest opacity-40 mb-1">{c.label}</p>
+                                        <p className="text-[8px] font-black tracking-widest opacity-40 mb-1">{c.label}</p>
                                         {c.href
                                             ? <a href={c.href} className="text-sm font-black hover:opacity-60 transition-opacity">{c.value}</a>
                                             : <p className="text-sm font-black">{c.value}</p>
@@ -57,7 +57,7 @@ const ContactPage: React.FC = () => {
                         </div>
 
                         <div className="space-y-3">
-                            <p className="text-[8px] font-black uppercase tracking-widest opacity-40">Response Time</p>
+                            <p className="text-[8px] font-black tracking-widest opacity-40">Response Time</p>
                             <p className="text-sm font-medium opacity-70">We typically respond within 24 hours on business days.</p>
                         </div>
                     </div>
@@ -67,10 +67,10 @@ const ContactPage: React.FC = () => {
                             <div className="h-full flex flex-col items-center justify-center text-center gap-6 border border-emerald-500/30 bg-emerald-500/5 p-12">
                                 <span className="material-symbols-outlined text-5xl text-emerald-500">check_circle</span>
                                 <div>
-                                    <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Message Sent</h2>
+                                    <h2 className="text-2xl font-black tracking-tight mb-2">Message Sent</h2>
                                     <p className="text-sm opacity-60">We'll get back to you within 24 hours.</p>
                                 </div>
-                                <button onClick={() => setSubmitted(false)} className="px-6 py-3 border border-black/20 dark:border-white/20 text-[9px] font-black uppercase tracking-widest hover:border-black dark:hover:border-white transition-colors">
+                                <button onClick={() => setSubmitted(false)} className="px-6 py-3 border border-black/20 dark:border-white/20 text-[9px] font-black tracking-widest hover:border-black dark:hover:border-white transition-colors">
                                     Send Another
                                 </button>
                             </div>
@@ -78,18 +78,18 @@ const ContactPage: React.FC = () => {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="text-[8px] font-black uppercase tracking-widest opacity-50">Name</label>
+                                        <label className="text-[8px] font-black tracking-widest opacity-50">Name</label>
                                         <input required className={field} placeholder="Your name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="text-[8px] font-black uppercase tracking-widest opacity-50">Email</label>
+                                        <label className="text-[8px] font-black tracking-widest opacity-50">Email</label>
                                         <input required type="email" className={field} placeholder="your@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
                                     </div>
                                 </div>
 
                                 {/* Custom dropdown — avoids native OS white popup */}
                                 <div className="space-y-1.5">
-                                    <label className="text-[8px] font-black uppercase tracking-widest opacity-50">Subject</label>
+                                    <label className="text-[8px] font-black tracking-widest opacity-50">Subject</label>
                                     <div className="relative" onClick={e => e.stopPropagation()}>
                                         <button
                                             type="button"
@@ -106,7 +106,7 @@ const ContactPage: React.FC = () => {
                                                         key={t}
                                                         type="button"
                                                         onClick={() => { setForm(f => ({ ...f, subject: t })); setDropdownOpen(false); }}
-                                                        className={`w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors ${form.subject === t ? 'bg-black text-white dark:bg-white dark:text-black' : ''}`}
+                                                        className={`w-full text-left px-4 py-3 text-xs font-black tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors ${form.subject === t ? 'bg-black text-white dark:bg-white dark:text-black' : ''}`}
                                                     >
                                                         {t}
                                                     </button>
@@ -119,10 +119,10 @@ const ContactPage: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="text-[8px] font-black uppercase tracking-widest opacity-50">Message</label>
+                                    <label className="text-[8px] font-black tracking-widest opacity-50">Message</label>
                                     <textarea required rows={6} className={field} placeholder="Tell us what's on your mind..." value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
                                 </div>
-                                <button type="submit" className="w-full py-4 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-widest hover:opacity-80 transition-opacity">
+                                <button type="submit" className="w-full py-4 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black tracking-widest hover:opacity-80 transition-opacity">
                                     Send Message
                                 </button>
                             </form>
@@ -135,3 +135,4 @@ const ContactPage: React.FC = () => {
 };
 
 export default ContactPage;
+

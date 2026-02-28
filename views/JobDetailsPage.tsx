@@ -211,7 +211,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               <span className="material-symbols-outlined text-lg group-hover:scale-125 transition-transform">west</span>
             </button>
             <div className="h-5 w-px bg-black/10 dark:bg-white/10 shrink-0"></div>
-            <div className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] opacity-40 truncate">
+            <div className="text-[8px] md:text-[9px] font-black tracking-[0.2em] opacity-40 truncate">
               MANDATE_ID: {(job?.id ?? '').toString().toUpperCase()}
             </div>
           </div>
@@ -231,10 +231,10 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
               <div className="lg:col-span-8 space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="bg-emerald-500 text-white px-2 py-0.5 text-[7px] font-black uppercase tracking-widest">
+                  <span className="bg-emerald-500 text-white px-2 py-0.5 text-[7px] font-black tracking-widest">
                     {job?.department ?? 'Priority Recruitment'}
                   </span>
-                  <span className="text-[7px] font-black uppercase tracking-widest opacity-40">
+                  <span className="text-[7px] font-black tracking-widest opacity-40">
                     {job?.employmentType ?? 'Full-time'} • {job?.experienceRequired ?? '0-2 Years'}
                   </span>
                   {/* Plan badge in hero */}
@@ -244,26 +244,26 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                       className="flex items-center gap-1 px-2 py-0.5 border border-black/20 dark:border-white/20 cursor-pointer hover:border-emerald-500 transition-colors group"
                     >
                       <span className="material-symbols-outlined text-[10px] opacity-40 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">lock</span>
-                      <span className="text-[7px] font-black uppercase tracking-widest opacity-40 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">Free Plan</span>
+                      <span className="text-[7px] font-black tracking-widest opacity-40 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">Free Plan</span>
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-[0.85] break-words">
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter leading-[0.85] break-words">
                   {job?.title ?? 'Position'}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4 md:gap-6">
                   <div className="flex items-center gap-2">
-                    <div className="size-7 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black font-black uppercase text-[8px]">
+                    <div className="size-7 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black font-black text-[8px]">
                       {(typeof job?.company === 'string' ? job.company : job?.company?.name ?? 'CO').substring(0, 2)}
                     </div>
-                    <span className="text-base md:text-lg font-black uppercase tracking-tight">
+                    <span className="text-base md:text-lg font-black tracking-tight">
                       {typeof job?.company === 'string' ? job.company : (job?.company?.name ?? 'Unknown')}
                     </span>
                   </div>
                   <div className="h-4 w-px bg-black/10 dark:bg-white/10"></div>
                   <div className="flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-sm opacity-40">location_on</span>
-                    <span className="text-sm md:text-base font-black uppercase tracking-tight opacity-40">
+                    <span className="text-sm md:text-base font-black tracking-tight opacity-40">
                       {typeof job?.location === 'string' ? job.location : (job?.location?.city ?? 'Remote')}
                       {job?.location?.type && ` • ${job.location.type}`}
                     </span>
@@ -274,7 +274,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                 <div className="text-4xl md:text-5xl lg:text-6xl font-black leading-none text-emerald-500 tracking-tighter">
                   {job?.matchScore ?? 0}%
                 </div>
-                <div className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] opacity-40 lg:text-right">
+                <div className="text-[8px] md:text-[9px] font-black tracking-[0.3em] opacity-40 lg:text-right">
                   Neural Fidelity
                 </div>
               </div>
@@ -287,9 +287,9 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
 
               <section className="space-y-5">
                 <div className="border-b border-black dark:border-white pb-3">
-                  <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em]">01 / Job Summary</h3>
+                  <h3 className="text-[9px] md:text-[10px] font-black tracking-[0.3em]">01 / Job Summary</h3>
                 </div>
-                <p className="text-base md:text-lg font-medium uppercase tracking-tight leading-snug text-black/90 dark:text-white/95">
+                <p className="text-base md:text-lg font-medium tracking-tight leading-snug text-black/90 dark:text-white/95">
                   {job?.jobSummary ?? job?.description ?? 'No description available'}
                 </p>
               </section>
@@ -297,7 +297,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               {job?.responsibilities && Array.isArray(job.responsibilities) && job.responsibilities.length > 0 && (
                 <section className="space-y-5">
                   <div className="border-b border-black dark:border-white pb-3">
-                    <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em]">02 / Key Responsibilities</h3>
+                    <h3 className="text-[9px] md:text-[10px] font-black tracking-[0.3em]">02 / Key Responsibilities</h3>
                   </div>
                   <ul className="space-y-3">
                     {job.responsibilities.map((item: string, i: number) => (
@@ -312,23 +312,23 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
 
               <section className="space-y-6">
                 <div className="border-b border-black dark:border-white pb-3">
-                  <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em]">03 / Technical Mastery Audit</h3>
+                  <h3 className="text-[9px] md:text-[10px] font-black tracking-[0.3em]">03 / Technical Mastery Audit</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {isLoadingPrep ? (
                     <div className="col-span-full py-12 text-center animate-pulse border border-dashed border-black/10">
-                      <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40">Evaluating Technical Nodes...</p>
+                      <p className="text-[8px] font-black tracking-[0.3em] opacity-40">Evaluating Technical Nodes...</p>
                     </div>
                   ) : skillAudit.length > 0 ? (
                     skillAudit.map(({ tag, score }) => (
                       <div key={tag} className="bg-white dark:bg-[#0c0c0c] border border-black dark:border-white/10 p-5 md:p-6 space-y-6 group hover:border-black dark:hover:border-white transition-all shadow-sm">
                         <div className="flex justify-between items-start gap-3">
-                          <h4 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none break-words">{tag ?? ''}</h4>
+                          <h4 className="text-xl md:text-2xl font-black tracking-tighter leading-none break-words">{tag ?? ''}</h4>
                           <span className="material-symbols-outlined text-lg opacity-20 group-hover:opacity-100 group-hover:text-emerald-500 transition-all shrink-0">shield_with_heart</span>
                         </div>
                         <div className="space-y-3">
                           <div className="flex justify-between items-end">
-                            <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.15em] opacity-40">Skill Match Rate</span>
+                            <span className="text-[7px] md:text-[8px] font-black tracking-[0.15em] opacity-40">Skill Match Rate</span>
                             <span className="text-xs md:text-sm font-black">{score ?? 0}%</span>
                           </div>
                           <div className="w-full h-[2px] bg-black/5 dark:bg-white/5 relative">
@@ -339,7 +339,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                     ))
                   ) : (
                     <div className="col-span-full py-12 text-center border border-dashed border-black/10">
-                      <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40">No skill audit data available</p>
+                      <p className="text-[8px] font-black tracking-[0.3em] opacity-40">No skill audit data available</p>
                     </div>
                   )}
                 </div>
@@ -348,11 +348,11 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               {job?.requiredSkills && Array.isArray(job.requiredSkills) && job.requiredSkills.length > 0 && (
                 <section className="space-y-5">
                   <div className="border-b border-black dark:border-white pb-3">
-                    <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em]">04 / Required Skills</h3>
+                    <h3 className="text-[9px] md:text-[10px] font-black tracking-[0.3em]">04 / Required Skills</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {(job.requiredSkills ?? []).map((skill: string) => (
-                      <span key={skill} className="px-3 py-1.5 border border-black dark:border-white text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">{skill ?? ''}</span>
+                      <span key={skill} className="px-3 py-1.5 border border-black dark:border-white text-[9px] md:text-[10px] font-black tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">{skill ?? ''}</span>
                     ))}
                   </div>
                 </section>
@@ -361,11 +361,11 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               {job?.preferredSkills && Array.isArray(job.preferredSkills) && job.preferredSkills.length > 0 && (
                 <section className="space-y-5">
                   <div className="border-b border-black dark:border-white pb-3">
-                    <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em]">05 / Preferred Skills</h3>
+                    <h3 className="text-[9px] md:text-[10px] font-black tracking-[0.3em]">05 / Preferred Skills</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {(job.preferredSkills ?? []).map((skill: string) => (
-                      <span key={skill} className="px-3 py-1.5 border border-black/30 dark:border-white/30 text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 hover:border-black dark:hover:border-white transition-all">{skill ?? ''}</span>
+                      <span key={skill} className="px-3 py-1.5 border border-black/30 dark:border-white/30 text-[9px] md:text-[10px] font-black tracking-widest opacity-60 hover:opacity-100 hover:border-black dark:hover:border-white transition-all">{skill ?? ''}</span>
                     ))}
                   </div>
                 </section>
@@ -374,13 +374,13 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               {job?.hiringProcess && Array.isArray(job.hiringProcess) && job.hiringProcess.length > 0 && (
                 <section className="space-y-5">
                   <div className="border-b border-black dark:border-white pb-3">
-                    <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em]">06 / Hiring Process</h3>
+                    <h3 className="text-[9px] md:text-[10px] font-black tracking-[0.3em]">06 / Hiring Process</h3>
                   </div>
                   <div className="flex flex-wrap gap-3">
                     {job.hiringProcess.map((step: string, i: number) => (
                       <div key={i} className="flex items-center gap-2">
                         <div className="size-6 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-[10px] font-black">{i + 1}</div>
-                        <span className="text-[10px] md:text-xs font-black uppercase tracking-wide">{step ?? ''}</span>
+                        <span className="text-[10px] md:text-xs font-black tracking-wide">{step ?? ''}</span>
                       </div>
                     ))}
                   </div>
@@ -391,12 +391,12 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
             <aside className="lg:col-span-4 space-y-10">
               {job?.company?.name && (
                 <div className="border-2 border-black dark:border-white p-5 space-y-4">
-                  <h4 className="text-[9px] font-black uppercase tracking-[0.3em]">Company Details</h4>
+                  <h4 className="text-[9px] font-black tracking-[0.3em]">Company Details</h4>
                   <div className="space-y-3 text-xs">
-                    {job.company.industry && <div className="flex justify-between"><span className="opacity-40 font-black uppercase text-[8px]">Industry</span><span className="font-bold">{job.company.industry}</span></div>}
-                    {job.company.size && <div className="flex justify-between"><span className="opacity-40 font-black uppercase text-[8px]">Size</span><span className="font-bold">{job.company.size}</span></div>}
-                    {job.company.founded && <div className="flex justify-between"><span className="opacity-40 font-black uppercase text-[8px]">Founded</span><span className="font-bold">{job.company.founded}</span></div>}
-                    {job.company.headquarters && <div className="flex justify-between"><span className="opacity-40 font-black uppercase text-[8px]">HQ</span><span className="font-bold">{job.company.headquarters}</span></div>}
+                    {job.company.industry && <div className="flex justify-between"><span className="opacity-40 font-black text-[8px]">Industry</span><span className="font-bold">{job.company.industry}</span></div>}
+                    {job.company.size && <div className="flex justify-between"><span className="opacity-40 font-black text-[8px]">Size</span><span className="font-bold">{job.company.size}</span></div>}
+                    {job.company.founded && <div className="flex justify-between"><span className="opacity-40 font-black text-[8px]">Founded</span><span className="font-bold">{job.company.founded}</span></div>}
+                    {job.company.headquarters && <div className="flex justify-between"><span className="opacity-40 font-black text-[8px]">HQ</span><span className="font-bold">{job.company.headquarters}</span></div>}
                   </div>
                 </div>
               )}
@@ -404,7 +404,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               <div className="bg-black text-white dark:bg-white dark:text-black p-6 space-y-6 shadow-2xl">
                 <div className="flex items-center gap-3 text-emerald-500">
                   <span className="material-symbols-outlined animate-pulse text-lg">insights</span>
-                  <h4 className="text-[8px] font-black uppercase tracking-[0.3em]">Audit Intelligence</h4>
+                  <h4 className="text-[8px] font-black tracking-[0.3em]">Audit Intelligence</h4>
                 </div>
                 {isLoadingPrep ? (
                   <div className="space-y-4 animate-pulse">
@@ -414,8 +414,8 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                   <ul className="space-y-5">
                     {interviewPrep.map((tip, i) => (
                       <li key={i} className="space-y-1.5">
-                        <p className="text-[7px] font-black uppercase tracking-widest opacity-40">Protocol 0{i + 1}</p>
-                        <p className="text-[10px] md:text-xs font-black uppercase tracking-widest leading-relaxed">{tip ?? ''}</p>
+                        <p className="text-[7px] font-black tracking-widest opacity-40">Protocol 0{i + 1}</p>
+                        <p className="text-[10px] md:text-xs font-black tracking-widest leading-relaxed">{tip ?? ''}</p>
                       </li>
                     ))}
                   </ul>
@@ -424,12 +424,12 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
 
               {job?.benefits && Array.isArray(job.benefits) && job.benefits.length > 0 && (
                 <div className="space-y-5">
-                  <h4 className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40">Benefits & Perks</h4>
+                  <h4 className="text-[8px] font-black tracking-[0.3em] opacity-40">Benefits & Perks</h4>
                   <div className="space-y-2">
                     {job.benefits.map((benefit: string, i: number) => (
                       <div key={i} className="flex items-center gap-2 border border-black/10 dark:border-white/10 p-3">
                         <span className="material-symbols-outlined text-emerald-500 text-sm">check_circle</span>
-                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-wide">{benefit ?? ''}</span>
+                        <span className="text-[9px] md:text-[10px] font-black tracking-wide">{benefit ?? ''}</span>
                       </div>
                     ))}
                   </div>
@@ -437,14 +437,14 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               )}
 
               <div className="space-y-5">
-                <h4 className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40">Vetting Checklist</h4>
+                <h4 className="text-[8px] font-black tracking-[0.3em] opacity-40">Vetting Checklist</h4>
                 <div className="space-y-3">
                   {['Review Case Study', 'Validate Tech Stack', 'Company Research'].map(item => (
                     <div key={item} onClick={() => toggleCheck(item)} className={`flex items-center gap-3 group cursor-pointer border border-black/5 dark:border-white/5 p-3 transition-all ${checkedItems[item] ? 'bg-emerald-500/5 border-emerald-500' : 'hover:bg-black/5'}`}>
                       <div className={`size-5 border border-black dark:border-white flex items-center justify-center transition-all shrink-0 ${checkedItems[item] ? 'bg-emerald-500 border-emerald-500' : 'opacity-20'}`}>
                         {checkedItems[item] && <span className="material-symbols-outlined text-white text-sm font-bold">check</span>}
                       </div>
-                      <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${checkedItems[item] ? 'opacity-100' : 'opacity-40'}`}>{item}</span>
+                      <span className={`text-[9px] md:text-[10px] font-black tracking-widest ${checkedItems[item] ? 'opacity-100' : 'opacity-40'}`}>{item}</span>
                     </div>
                   ))}
                 </div>
@@ -458,7 +458,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
           <div className="max-w-4xl mx-auto pointer-events-auto bg-white dark:bg-background-dark border-2 border-black dark:border-white/30 shadow-[0_-20px_60px_rgba(0,0,0,0.15)] p-4 md:p-6">
 
             {applyError && (
-              <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500 text-red-500 text-[9px] font-black uppercase tracking-widest">
+              <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500 text-red-500 text-[9px] font-black tracking-widest">
                 ⚠ {applyError}
               </div>
             )}
@@ -471,11 +471,11 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               >
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-sm opacity-40 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">lock</span>
-                  <span className="text-[9px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-all">
+                  <span className="text-[9px] font-black tracking-widest opacity-40 group-hover:opacity-100 transition-all">
                     Manual applications require Premium Student Plan
                   </span>
                 </div>
-                <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500 opacity-0 group-hover:opacity-100 transition-all">
+                <span className="text-[8px] font-black tracking-widest text-emerald-500 opacity-0 group-hover:opacity-100 transition-all">
                   Upgrade →
                 </span>
               </div>
@@ -484,13 +484,13 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 md:gap-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-6 flex-1 min-w-0">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[7px] font-black uppercase tracking-[0.25em] opacity-40">Salary Range</span>
-                  <span className="text-[9px] md:text-[10px] font-black uppercase text-emerald-500">{formatSalary()}</span>
+                  <span className="text-[7px] font-black tracking-[0.25em] opacity-40">Salary Range</span>
+                  <span className="text-[9px] md:text-[10px] font-black text-emerald-500">{formatSalary()}</span>
                 </div>
                 <div className="hidden sm:block h-8 w-px bg-black/10 dark:bg-white/10 shrink-0"></div>
                 <div className="flex flex-col gap-0.5 overflow-hidden flex-1 min-w-0">
-                  <span className="text-[7px] font-black uppercase tracking-[0.25em] opacity-40">Openings</span>
-                  <span className="text-[9px] md:text-[10px] font-black uppercase">
+                  <span className="text-[7px] font-black tracking-[0.25em] opacity-40">Openings</span>
+                  <span className="text-[9px] md:text-[10px] font-black">
                     {(job?.openings ?? 1)} Position{((job?.openings ?? 1) > 1) ? 's' : ''}
                   </span>
                 </div>
@@ -498,15 +498,15 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                   <>
                     <div className="hidden sm:block h-8 w-px bg-black/10 dark:bg-white/10 shrink-0"></div>
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[7px] font-black uppercase tracking-[0.25em] opacity-40">Deadline</span>
-                      <span className="text-[9px] md:text-[10px] font-black uppercase">{new Date(job.applicationDeadline).toLocaleDateString()}</span>
+                      <span className="text-[7px] font-black tracking-[0.25em] opacity-40">Deadline</span>
+                      <span className="text-[9px] md:text-[10px] font-black">{new Date(job.applicationDeadline).toLocaleDateString()}</span>
                     </div>
                   </>
                 )}
               </div>
 
               <div className="flex gap-3 w-full lg:w-auto">
-                <button className="flex-1 lg:flex-none border border-black dark:border-white px-5 py-2.5 text-[8px] md:text-[9px] font-black uppercase tracking-wider hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
+                <button className="flex-1 lg:flex-none border border-black dark:border-white px-5 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
                   Context Chat
                 </button>
 
@@ -514,18 +514,18 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                 {appliedLocally ? (
                   <button
                     disabled
-                    className="flex-1 lg:flex-none px-6 py-2.5 text-[8px] md:text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white cursor-default shadow-lg"
+                    className="flex-1 lg:flex-none px-6 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider bg-emerald-500 text-white cursor-default shadow-lg"
                   >
                     ✓ Synced
                   </button>
                 ) : !canManualApply ? (
                   <button
                     onClick={() => setShowUpgradeModal(true)}
-                    className="flex-1 lg:flex-none px-6 py-2.5 text-[8px] md:text-[9px] font-black uppercase tracking-wider border-2 border-black/20 dark:border-white/20 text-black/30 dark:text-white/30 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-2 relative group shadow-lg"
+                    className="flex-1 lg:flex-none px-6 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider border-2 border-black/20 dark:border-white/20 text-black/30 dark:text-white/30 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-2 relative group shadow-lg"
                   >
                     <span className="material-symbols-outlined text-sm">lock</span>
                     Initialize
-                    <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[6px] font-black uppercase tracking-widest px-1.5 py-0.5">
+                    <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[6px] font-black tracking-widest px-1.5 py-0.5">
                       PRO
                     </span>
                   </button>
@@ -534,7 +534,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                     disabled={isApplying}
                     onClick={handleApply}
                     className={`
-                      flex-1 lg:flex-none px-6 py-2.5 text-[8px] md:text-[9px] font-black uppercase tracking-wider transition-all shadow-lg
+                      flex-1 lg:flex-none px-6 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider transition-all shadow-lg
                       ${isApplying
                         ? 'bg-black/50 dark:bg-white/50 text-white dark:text-black cursor-wait'
                         : applyError

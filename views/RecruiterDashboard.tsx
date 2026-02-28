@@ -520,7 +520,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
       draft: 'bg-white/10 text-white/40 border-white/10',
     };
     return (
-      <span className={`text-[7px] font-black uppercase tracking-[0.3em] px-2 py-1 border ${map[status]}`}>
+      <span className={`text-[7px] font-black  tracking-[0.3em] px-2 py-1 border ${map[status]}`}>
         {status}
       </span>
     );
@@ -535,7 +535,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
     const safeStatus = status && status in statusMap ? status : 'Submitted';
     const config = statusMap[safeStatus];
     return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[7px] font-black uppercase tracking-widest ${config.bg} border ${config.border} ${config.text}`}>
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[7px] font-black  tracking-widest ${config.bg} border ${config.border} ${config.text}`}>
         <span className="material-symbols-outlined text-[10px]">
           {status === 'shortlisted' ? 'check_circle' : status === 'rejected' ? 'cancel' : 'schedule'}
         </span>
@@ -575,10 +575,10 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     {initials}
                   </div>
                   <div className="space-y-0.5 md:space-y-1 min-w-0">
-                    <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight leading-tight truncate">
+                    <h3 className="text-xl md:text-3xl font-black  tracking-tight leading-tight truncate">
                       {applicant.candidateName ?? 'Unknown'}
                     </h3>
-                    <p className="text-[10px] md:text-sm font-black uppercase tracking-widest text-white/40 truncate">
+                    <p className="text-[10px] md:text-sm font-black  tracking-widest text-white/40 truncate">
                       {applicant.candidateTitle}
                     </p>
                     {applicant.candidateEmail && (
@@ -587,7 +587,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       </p>
                     )}
                     {applicant.autoApplied && (
-                      <span className="inline-flex items-center gap-1 text-[5px] md:text-[7px] font-black uppercase tracking-[0.3em] text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 mt-1">
+                      <span className="inline-flex items-center gap-1 text-[5px] md:text-[7px] font-black  tracking-[0.3em] text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 mt-1">
                         <span className="material-symbols-outlined text-[8px] md:text-[9px]">auto_awesome</span>
                         Auto
                       </span>
@@ -599,11 +599,11 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   <div className={`text-4xl md:text-6xl font-black tabular-nums leading-none ${scoreColor}`}>
                     {applicant.matchScore > 0 ? `${applicant.matchScore}%` : '—'}
                   </div>
-                  <p className="text-[5px] md:text-[7px] font-black uppercase tracking-[0.3em] text-white/30">Fidelity</p>
+                  <p className="text-[5px] md:text-[7px] font-black  tracking-[0.3em] text-white/30">Fidelity</p>
 
                   {job.matchThreshold != null && applicant.matchScore > 0 && (
                     <div
-                      className={`inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2 md:py-1 text-[5px] md:text-[7px] font-black uppercase tracking-widest ${isAboveThreshold
+                      className={`inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2 md:py-1 text-[5px] md:text-[7px] font-black  tracking-widest ${isAboveThreshold
                         ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
                         : 'bg-red-500/10 border border-red-500/20 text-red-400'
                         }`}
@@ -616,7 +616,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   )}
 
                   {applicant.matchScore === 0 && (
-                    <p className="text-[7px] font-black uppercase tracking-widest text-white/20 max-w-[100px]">
+                    <p className="text-[7px] font-black  tracking-widest text-white/20 max-w-[100px]">
                       Score pending sync
                     </p>
                   )}
@@ -628,7 +628,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
             <div className="border-b border-white/5 flex z-10 bg-[#080808]">
               <button
                 onClick={() => setDetailTab('profile')}
-                className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all border-b-2 ${detailTab === 'profile'
+                className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black  tracking-widest transition-all border-b-2 ${detailTab === 'profile'
                   ? 'text-white border-b-emerald-400'
                   : 'text-white/40 border-b-transparent hover:text-white/70'
                   }`}
@@ -641,7 +641,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
               <button
                 onClick={() => setDetailTab('resume')}
-                className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all border-b-2 ${detailTab === 'resume'
+                className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black  tracking-widest transition-all border-b-2 ${detailTab === 'resume'
                   ? 'text-white border-b-emerald-400'
                   : 'text-white/40 border-b-transparent hover:text-white/70'
                   }`}
@@ -650,7 +650,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   <span className="material-symbols-outlined text-sm">description</span>
                   Resume
                   {!applicant.resumeUrl && (
-                    <span className="text-[5px] font-black uppercase tracking-widest text-white/20 border border-white/10 px-1 py-0.5">
+                    <span className="text-[5px] font-black  tracking-widest text-white/20 border border-white/10 px-1 py-0.5">
                       Profile
                     </span>
                   )}
@@ -664,7 +664,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                 <div className="px-6 md:px-10 py-6 md:py-8 space-y-8 md:space-y-10">
                   {applicant.candidateManifesto && (
                     <section className="space-y-4">
-                      <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                      <h4 className="text-[7px] md:text-[8px] font-black  tracking-[0.5em] text-white/30 flex items-center gap-3">
                         <span className="flex-1 h-px bg-white/5" />
                         About
                         <span className="flex-1 h-px bg-white/5" />
@@ -677,7 +677,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
                   {(applicant.candidateSkills ?? []).length > 0 && (
                     <section className="space-y-4">
-                      <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                      <h4 className="text-[7px] md:text-[8px] font-black  tracking-[0.5em] text-white/30 flex items-center gap-3">
                         <span className="flex-1 h-px bg-white/5" />
                         Skills
                         <span className="flex-1 h-px bg-white/5" />
@@ -686,7 +686,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         {applicant.candidateSkills!.map((s) => (
                           <span
                             key={s}
-                            className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 md:px-4 py-1.5 md:py-2 border border-white/10 text-white/60 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors"
+                            className="text-[8px] md:text-[9px] font-black  tracking-widest px-3 md:px-4 py-1.5 md:py-2 border border-white/10 text-white/60 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors"
                           >
                             {s}
                           </span>
@@ -697,7 +697,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
                   {(applicant.candidateExperience ?? []).length > 0 && (
                     <section className="space-y-4">
-                      <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                      <h4 className="text-[7px] md:text-[8px] font-black  tracking-[0.5em] text-white/30 flex items-center gap-3">
                         <span className="flex-1 h-px bg-white/5" />
                         Experience
                         <span className="flex-1 h-px bg-white/5" />
@@ -705,7 +705,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       <div className="space-y-6">
                         {applicant.candidateExperience!.map((exp, i) => (
                           <div key={i} className="border-l-2 border-white/10 pl-4 md:pl-5 space-y-1.5">
-                            <p className="text-sm md:text-base font-black uppercase tracking-tight">
+                            <p className="text-sm md:text-base font-black  tracking-tight">
                               {exp.role}
                               <span className="text-white/30 font-medium mx-2">@</span>
                               {exp.co}
@@ -719,7 +719,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
                   {applicant.candidateEducation && (
                     <section className="space-y-4">
-                      <h4 className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3">
+                      <h4 className="text-[7px] md:text-[8px] font-black  tracking-[0.5em] text-white/30 flex items-center gap-3">
                         <span className="flex-1 h-px bg-white/5" />
                         Education
                         <span className="flex-1 h-px bg-white/5" />
@@ -748,8 +748,8 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   <div className="flex flex-col items-center justify-center h-full gap-6 p-10 text-center">
                     <span className="material-symbols-outlined text-5xl text-white/10">description</span>
                     <div className="space-y-2">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/30">No resume uploaded</p>
-                      <p className="text-[8px] font-medium text-white/20 uppercase tracking-widest max-w-xs">
+                      <p className="text-[10px] font-black  tracking-widest text-white/30">No resume uploaded</p>
+                      <p className="text-[8px] font-medium text-white/20  tracking-widest max-w-xs">
                         Candidate hasn't synced a resume file yet. Their profile is visible in the Profile tab.
                       </p>
                     </div>
@@ -775,7 +775,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       <button
                         onClick={() => handleShortlist(applicant)}
                         disabled={!!actionInProgress}
-                        className="flex-1 bg-emerald-500 text-white py-2.5 md:py-3.5 text-[8px] md:text-[9px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                        className="flex-1 bg-emerald-500 text-white py-2.5 md:py-3.5 text-[8px] md:text-[9px] font-black  tracking-widest hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                       >
                         <span className="material-symbols-outlined text-sm">
                           {actionInProgress === 'shortlist' ? 'hourglass_empty' : 'verified'}
@@ -785,7 +785,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       <button
                         onClick={() => handleMessage(applicant)}
                         disabled={!!actionInProgress}
-                        className="flex-1 border border-white/10 py-2.5 md:py-3.5 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/50 hover:border-white/30 hover:text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                        className="flex-1 border border-white/10 py-2.5 md:py-3.5 text-[8px] md:text-[9px] font-black  tracking-widest text-white/50 hover:border-white/30 hover:text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                       >
                         <span className="material-symbols-outlined text-sm">mail</span>
                         Message
@@ -793,7 +793,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       <button
                         onClick={() => handleReject(applicant)}
                         disabled={!!actionInProgress}
-                        className="px-4 md:px-6 py-2.5 md:py-3.5 border border-red-500/20 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-400/60 hover:border-red-500/40 hover:text-red-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                        className="px-4 md:px-6 py-2.5 md:py-3.5 border border-red-500/20 text-[8px] md:text-[9px] font-black  tracking-widest text-red-400/60 hover:border-red-500/40 hover:text-red-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                       >
                         <span className="material-symbols-outlined text-sm">close</span>
                         Pass
@@ -804,7 +804,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   {/* SHORTLISTED */}
                   {currentStatus === 'shortlisted' && (
                     <div className="space-y-2">
-                      <div className="p-3 md:p-4 bg-emerald-500/10 border border-emerald-500/30 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-2">
+                      <div className="p-3 md:p-4 bg-emerald-500/10 border border-emerald-500/30 text-[8px] md:text-[9px] font-black  tracking-widest text-emerald-400 flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">check_circle</span>
                         Shortlisted — added to Talent Pipeline
                       </div>
@@ -812,7 +812,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         <button
                           onClick={() => handleMessage(applicant)}
                           disabled={!!actionInProgress}
-                          className="flex-1 border border-white/10 py-2 text-[8px] font-black uppercase tracking-widest text-white/40 hover:border-white/30 hover:text-white transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
+                          className="flex-1 border border-white/10 py-2 text-[8px] font-black  tracking-widest text-white/40 hover:border-white/30 hover:text-white transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
                         >
                           <span className="material-symbols-outlined text-sm">mail</span>
                           Message
@@ -820,7 +820,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         <button
                           onClick={() => handleRestore(applicant)}
                           disabled={!!actionInProgress}
-                          className="px-4 py-2 border border-white/10 text-[8px] font-black uppercase tracking-widest text-white/30 hover:border-white/30 hover:text-white/60 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
+                          className="px-4 py-2 border border-white/10 text-[8px] font-black  tracking-widest text-white/30 hover:border-white/30 hover:text-white/60 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
                           title="Move back to Applied"
                         >
                           <span className="material-symbols-outlined text-sm">undo</span>
@@ -829,7 +829,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         <button
                           onClick={() => handleReject(applicant)}
                           disabled={!!actionInProgress}
-                          className="px-4 py-2 border border-red-500/20 text-[8px] font-black uppercase tracking-widest text-red-400/50 hover:border-red-500/40 hover:text-red-400 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
+                          className="px-4 py-2 border border-red-500/20 text-[8px] font-black  tracking-widest text-red-400/50 hover:border-red-500/40 hover:text-red-400 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
                         >
                           <span className="material-symbols-outlined text-sm">close</span>
                           Pass
@@ -841,7 +841,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   {/* REJECTED */}
                   {currentStatus === 'rejected' && (
                     <div className="space-y-2">
-                      <div className="p-3 md:p-4 bg-red-500/5 border border-red-500/20 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-400/70 flex items-center gap-2">
+                      <div className="p-3 md:p-4 bg-red-500/5 border border-red-500/20 text-[8px] md:text-[9px] font-black  tracking-widest text-red-400/70 flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">cancel</span>
                         Marked as passed — use buttons below to reconsider
                       </div>
@@ -849,7 +849,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         <button
                           onClick={() => handleRestore(applicant)}
                           disabled={!!actionInProgress}
-                          className="flex-1 border border-white/20 py-2.5 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/60 hover:border-white/40 hover:text-white hover:bg-white/5 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                          className="flex-1 border border-white/20 py-2.5 text-[8px] md:text-[9px] font-black  tracking-widest text-white/60 hover:border-white/40 hover:text-white hover:bg-white/5 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                         >
                           <span className="material-symbols-outlined text-sm">
                             {actionInProgress === 'restore' ? 'hourglass_empty' : 'undo'}
@@ -859,7 +859,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         <button
                           onClick={() => handleShortlist(applicant)}
                           disabled={!!actionInProgress}
-                          className="flex-1 bg-emerald-500/10 border border-emerald-500/30 py-2.5 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                          className="flex-1 bg-emerald-500/10 border border-emerald-500/30 py-2.5 text-[8px] md:text-[9px] font-black  tracking-widest text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                         >
                           <span className="material-symbols-outlined text-sm">
                             {actionInProgress === 'shortlist' ? 'hourglass_empty' : 'verified'}
@@ -893,7 +893,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
             <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 text-white/40 hover:text-white">
               <span className="material-symbols-outlined">menu</span>
             </button>
-            <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em]">
+            <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black  tracking-[0.4em]">
               <button
                 onClick={backToJobs}
                 className={`transition-colors truncate max-w-[50px] sm:max-w-none ${view === 'jobs' ? 'text-white' : 'text-white/30 hover:text-white/60'}`}
@@ -920,7 +920,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
             </button>
             <Link
               to="/post-job"
-              className="flex items-center gap-1.5 md:gap-2 bg-white text-black px-3 md:px-5 py-2 md:py-2.5 text-[7px] md:text-[9px] font-black uppercase tracking-widest hover:bg-white/80 transition-colors"
+              className="flex items-center gap-1.5 md:gap-2 bg-white text-black px-3 md:px-5 py-2 md:py-2.5 text-[7px] md:text-[9px] font-black  tracking-widest hover:bg-white/80 transition-colors"
             >
               <span className="material-symbols-outlined text-[14px] md:text-sm">add</span>
               <span className="hidden sm:inline">New Job</span>
@@ -936,8 +936,8 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
           {view === 'jobs' && (
             <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 space-y-6 md:space-y-8">
               <div className="space-y-1">
-                <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.5em] text-white/30">Recruiter Command</p>
-                <h1 className="text-4xl md:text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none">
+                <p className="text-[8px] md:text-[9px] font-black  tracking-[0.5em] text-white/30">Recruiter Command</p>
+                <h1 className="text-4xl md:text-5xl lg:text-7xl font-black  tracking-tighter leading-none">
                   Talent<br />
                   <span className="text-white/20">Inventory</span>
                 </h1>
@@ -951,7 +951,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   { label: 'Closed', val: postedJobs.filter((j) => j.status === 'closed').length },
                 ].map((s, i) => (
                   <div key={i} className="p-3 md:p-6 border-r last:border-r-0 border-b md:border-b-0 border-white/10 group hover:bg-white/[0.02] transition-colors">
-                    <p className="text-[6px] md:text-[8px] font-black uppercase tracking-[0.3em] text-white/30 mb-0.5 md:mb-1">
+                    <p className="text-[6px] md:text-[8px] font-black  tracking-[0.3em] text-white/30 mb-0.5 md:mb-1">
                       {s.label}
                     </p>
                     <p className="text-xl md:text-3xl font-black tabular-nums">{s.val}</p>
@@ -962,17 +962,17 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               {loadingJobs ? (
                 <div className="flex items-center gap-3 text-white/30 py-20">
                   <span className="material-symbols-outlined animate-spin">autorenew</span>
-                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">Fetching mandates…</span>
+                  <span className="text-[9px] md:text-[10px] font-black  tracking-widest">Fetching mandates…</span>
                 </div>
               ) : postedJobs.length === 0 ? (
                 <div className="py-32 text-center space-y-4">
                   <span className="material-symbols-outlined text-4xl md:text-5xl text-white/10">work_off</span>
-                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/30">
+                  <p className="text-[9px] md:text-[10px] font-black  tracking-widest text-white/30">
                     No jobs posted yet
                   </p>
                   <Link
                     to="/post-job"
-                    className="inline-block mt-4 border border-white/20 px-6 md:px-8 py-2 md:py-3 text-[8px] md:text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+                    className="inline-block mt-4 border border-white/20 px-6 md:px-8 py-2 md:py-3 text-[8px] md:text-[9px] font-black  tracking-widest hover:bg-white hover:text-black transition-all"
                   >
                     Post First Job
                   </Link>
@@ -1002,7 +1002,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                             <div className="flex flex-wrap items-center gap-2">
                               <StatusPill status={job.status} />
                               {job.employmentType && (
-                                <span className="text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-white/40 border border-white/10 px-2 py-1 bg-white/[0.02]">
+                                <span className="text-[6px] md:text-[7px] font-black  tracking-[0.3em] text-white/40 border border-white/10 px-2 py-1 bg-white/[0.02]">
                                   {job.employmentType}
                                 </span>
                               )}
@@ -1028,11 +1028,11 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                           </div>
 
                           <div>
-                            <h3 className="text-xl md:text-2xl lg:text-2xl font-black uppercase tracking-tight leading-tight mb-2">
+                            <h3 className="text-xl md:text-2xl lg:text-2xl font-black  tracking-tight leading-tight mb-2">
                               {job.title}
                             </h3>
 
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-white/50">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[9px] md:text-[10px] font-bold  tracking-wider text-white/50">
                               {companyStr !== '—' && (
                                 <>
                                   <span className="flex items-center gap-1">
@@ -1053,7 +1053,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                             </div>
 
                             {salaryStr && (
-                              <div className="mt-2 flex items-center gap-1.5 text-[10px] md:text-[11px] font-black uppercase tracking-wider text-emerald-400">
+                              <div className="mt-2 flex items-center gap-1.5 text-[10px] md:text-[11px] font-black  tracking-wider text-emerald-400">
                                 <span className="material-symbols-outlined text-[14px]">payments</span>
                                 {salaryStr}
                               </div>
@@ -1069,10 +1069,10 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                   </span>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] md:text-[11px] font-black uppercase tracking-tight leading-none">
+                                  <p className="text-[10px] md:text-[11px] font-black  tracking-tight leading-none">
                                     Applicants
                                   </p>
-                                  <p className="text-[7px] md:text-[8px] font-bold uppercase tracking-wider text-white/30">
+                                  <p className="text-[7px] md:text-[8px] font-bold  tracking-wider text-white/30">
                                     Total received
                                   </p>
                                 </div>
@@ -1081,7 +1081,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                               {job.matchThreshold != null && (
                                 <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/20 rounded-sm">
                                   <span className="material-symbols-outlined text-[12px] text-emerald-400">verified</span>
-                                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-wider text-emerald-400">
+                                  <span className="text-[8px] md:text-[9px] font-black  tracking-wider text-emerald-400">
                                     ≥{job.matchThreshold}%
                                   </span>
                                 </div>
@@ -1089,7 +1089,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                             </div>
 
                             <div className="flex items-center gap-3">
-                              <span className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/30">
+                              <span className="hidden md:block text-[9px] font-black  tracking-widest text-white/30">
                                 View Details
                               </span>
                               <span className="material-symbols-outlined text-white/40 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all">
@@ -1101,7 +1101,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                           {job.matchThreshold != null && (
                             <div className="sm:hidden flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/20">
                               <span className="material-symbols-outlined text-[12px] text-emerald-400">verified</span>
-                              <span className="text-[8px] font-black uppercase tracking-wider text-emerald-400">
+                              <span className="text-[8px] font-black  tracking-wider text-emerald-400">
                                 Match Threshold: ≥{job.matchThreshold}%
                               </span>
                             </div>
@@ -1111,7 +1111,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         <div className="hidden md:block absolute top-4 right-4">
                           {isConfirming ? (
                             <div className="flex items-center gap-2 bg-[#080808]/95 backdrop-blur-sm border border-red-500/30 px-3 py-2">
-                              <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-red-400/70">
+                              <span className="text-[7px] md:text-[8px] font-black  tracking-widest text-red-400/70">
                                 Delete?
                               </span>
                               <button
@@ -1120,7 +1120,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                   handleDeleteJob(job.id);
                                 }}
                                 disabled={isDeleting}
-                                className="px-3 py-1.5 bg-red-500 text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest hover:bg-red-400 transition-colors disabled:opacity-50"
+                                className="px-3 py-1.5 bg-red-500 text-white text-[7px] md:text-[8px] font-black  tracking-widest hover:bg-red-400 transition-colors disabled:opacity-50"
                               >
                                 {isDeleting ? '…' : 'Yes'}
                               </button>
@@ -1129,7 +1129,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                   e.stopPropagation();
                                   setConfirmDeleteId(null);
                                 }}
-                                className="px-3 py-1.5 border border-white/10 text-white/40 text-[7px] md:text-[8px] font-black uppercase tracking-widest hover:text-white hover:border-white/30 transition-colors"
+                                className="px-3 py-1.5 border border-white/10 text-white/40 text-[7px] md:text-[8px] font-black  tracking-widest hover:text-white hover:border-white/30 transition-colors"
                               >
                                 No
                               </button>
@@ -1151,8 +1151,8 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                           <div className="md:hidden absolute inset-0 bg-[#080808]/98 backdrop-blur-sm flex flex-col items-center justify-center gap-4 p-6 z-10">
                             <div className="text-center space-y-2">
                               <span className="material-symbols-outlined text-4xl text-red-400">delete_forever</span>
-                              <p className="text-sm font-black uppercase tracking-tight">Delete this job?</p>
-                              <p className="text-[9px] font-medium uppercase tracking-wider text-white/40">
+                              <p className="text-sm font-black  tracking-tight">Delete this job?</p>
+                              <p className="text-[9px] font-medium  tracking-wider text-white/40">
                                 This action cannot be undone
                               </p>
                             </div>
@@ -1162,7 +1162,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                   e.stopPropagation();
                                   setConfirmDeleteId(null);
                                 }}
-                                className="flex-1 py-3 border border-white/20 text-[9px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:border-white/40 transition-colors"
+                                className="flex-1 py-3 border border-white/20 text-[9px] font-black  tracking-widest text-white/60 hover:text-white hover:border-white/40 transition-colors"
                               >
                                 Cancel
                               </button>
@@ -1172,7 +1172,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                   handleDeleteJob(job.id);
                                 }}
                                 disabled={isDeleting}
-                                className="flex-1 py-3 bg-red-500 text-white text-[9px] font-black uppercase tracking-widest hover:bg-red-400 transition-colors disabled:opacity-50"
+                                className="flex-1 py-3 bg-red-500 text-white text-[9px] font-black  tracking-widest hover:bg-red-400 transition-colors disabled:opacity-50"
                               >
                                 {isDeleting ? 'Deleting…' : 'Delete Job'}
                               </button>
@@ -1203,10 +1203,10 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       <div className="shrink-0 px-6 py-5 border-b border-white/5 space-y-4 bg-[#080808]">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 space-y-1">
-                            <h2 className="text-base font-black uppercase tracking-tight leading-tight truncate">
+                            <h2 className="text-base font-black  tracking-tight leading-tight truncate">
                               {selectedJob.title}
                             </h2>
-                            <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30">
+                            <p className="text-[8px] font-black  tracking-[0.3em] text-white/30">
                               {resolveLocation(selectedJob.location)}
                             </p>
                           </div>
@@ -1215,17 +1215,17 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
                         <div className="grid grid-cols-3 border border-white/5">
                           <div className="px-4 py-3 border-r border-white/5">
-                            <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Total</p>
+                            <p className="text-[7px] font-black  tracking-widest text-white/30 mb-1">Total</p>
                             <p className="text-xl font-black tabular-nums">{applications.length}</p>
                           </div>
                           <div className="px-4 py-3 border-r border-white/5">
-                            <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Avg Score</p>
+                            <p className="text-[7px] font-black  tracking-widest text-white/30 mb-1">Avg Score</p>
                             <p className="text-xl font-black tabular-nums text-emerald-400">
                               {avgScore > 0 ? `${avgScore}%` : '—'}
                             </p>
                           </div>
                           <div className="px-4 py-3">
-                            <p className="text-[7px] font-black uppercase tracking-widest text-white/30 mb-1">Threshold</p>
+                            <p className="text-[7px] font-black  tracking-widest text-white/30 mb-1">Threshold</p>
                             {selectedJob.matchThreshold != null ? (
                               <p className="text-xl font-black tabular-nums text-emerald-400">{selectedJob.matchThreshold}%</p>
                             ) : (
@@ -1238,7 +1238,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         {!isPremium && (
                           <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/5 border border-amber-500/20">
                             <span className="material-symbols-outlined text-amber-400 text-sm">sort</span>
-                            <span className="text-[7px] font-black uppercase tracking-widest text-amber-400/80">
+                            <span className="text-[7px] font-black  tracking-widest text-amber-400/80">
                               Free plan · Candidates in order of application
                             </span>
                           </div>
@@ -1246,7 +1246,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         {aboveThreshold != null && selectedJob.matchThreshold != null && (
                           <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/5 border border-emerald-500/20">
                             <span className="material-symbols-outlined text-emerald-400 text-sm">verified</span>
-                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">
+                            <span className="text-[8px] font-black  tracking-widest text-emerald-400">
                               {aboveThreshold} of {applications.length} above {selectedJob.matchThreshold}% threshold
                             </span>
                           </div>
@@ -1261,7 +1261,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search by name, title, skill…"
-                            className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-4 py-2.5 text-[10px] font-medium uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors"
+                            className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-4 py-2.5 text-[10px] font-medium  tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors"
                           />
                         </div>
                       </div>
@@ -1270,12 +1270,12 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         {loadingApplicants ? (
                           <div className="flex items-center gap-3 text-white/30 p-8">
                             <span className="material-symbols-outlined animate-spin text-sm">autorenew</span>
-                            <span className="text-[9px] font-black uppercase tracking-widest">Loading applicants…</span>
+                            <span className="text-[9px] font-black  tracking-widest">Loading applicants…</span>
                           </div>
                         ) : filteredApplicants.length === 0 ? (
                           <div className="p-10 text-center space-y-3">
                             <span className="material-symbols-outlined text-4xl text-white/10">person_off</span>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-white/30">
+                            <p className="text-[9px] font-black  tracking-widest text-white/30">
                               {applications.length === 0 ? 'No applications yet' : 'No matches'}
                             </p>
                           </div>
@@ -1315,21 +1315,21 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
                                 <div className="flex-grow min-w-0 space-y-1.5">
                                   <div className="flex items-center gap-2">
-                                    <p className="text-sm font-black uppercase tracking-tight truncate">
+                                    <p className="text-sm font-black  tracking-tight truncate">
                                       {app.candidateName ?? 'Unknown Candidate'}
                                     </p>
                                     {app.autoApplied && (
-                                      <span className="flex items-center gap-1 px-2 py-0.5 text-[6px] font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/30 bg-emerald-500/5 shrink-0">
+                                      <span className="flex items-center gap-1 px-2 py-0.5 text-[6px] font-black  tracking-widest text-emerald-400 border border-emerald-500/30 bg-emerald-500/5 shrink-0">
                                         <span className="material-symbols-outlined text-[10px]">auto_awesome</span>
                                         Auto
                                       </span>
                                     )}
                                   </div>
-                                  <p className="text-[9px] font-medium uppercase tracking-widest text-white/40 truncate">
+                                  <p className="text-[9px] font-medium  tracking-widest text-white/40 truncate">
                                     {app.candidateTitle || 'Job Seeker'}
                                   </p>
                                   {selectedJob.matchThreshold != null && (
-                                    <p className="text-[7px] font-black uppercase tracking-widest text-white/25">
+                                    <p className="text-[7px] font-black  tracking-widest text-white/25">
                                       {isAbove ? '✓ Above threshold' : '↓ Below threshold'}
                                     </p>
                                   )}
@@ -1341,9 +1341,9 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                       <div className={`text-3xl font-black tabular-nums leading-none ${scoreColor}`}>
                                         {app.matchScore > 0 ? `${app.matchScore}%` : '—'}
                                       </div>
-                                      <p className="text-[6px] font-black uppercase tracking-[0.3em] text-white/30">Match</p>
+                                      <p className="text-[6px] font-black  tracking-[0.3em] text-white/30">Match</p>
                                       {selectedJob.matchThreshold != null && app.matchScore > 0 && (
-                                        <span className={`text-[5px] font-black uppercase tracking-widest px-1.5 py-0.5 border ${isAbove
+                                        <span className={`text-[5px] font-black  tracking-widest px-1.5 py-0.5 border ${isAbove
                                           ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                                           : 'bg-red-500/10 border-red-500/20 text-red-400'
                                           }`}>
@@ -1354,7 +1354,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                   ) : (
                                     <div className="flex flex-col items-center gap-0.5 opacity-30">
                                       <span className="material-symbols-outlined text-lg">lock</span>
-                                      <p className="text-[6px] font-black uppercase tracking-[0.3em]">Score</p>
+                                      <p className="text-[6px] font-black  tracking-[0.3em]">Score</p>
                                     </div>
                                   )}
                                 </div>
@@ -1375,7 +1375,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       <div className="size-20 border border-white/5 flex items-center justify-center">
                         <span className="material-symbols-outlined text-4xl text-white/10">person_search</span>
                       </div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/20">
+                      <p className="text-[10px] font-black  tracking-widest text-white/20">
                         Select a candidate to review
                       </p>
                     </div>
@@ -1388,10 +1388,10 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                     <div className="shrink-0 px-4 py-4 border-b border-white/5 space-y-3 bg-[#080808]">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 space-y-0.5">
-                          <h2 className="text-xs md:text-sm font-black uppercase tracking-tight leading-tight truncate">
+                          <h2 className="text-xs md:text-sm font-black  tracking-tight leading-tight truncate">
                             {selectedJob.title}
                           </h2>
-                          <p className="text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] text-white/30">
+                          <p className="text-[6px] md:text-[7px] font-black  tracking-[0.3em] text-white/30">
                             {resolveLocation(selectedJob.location)}
                           </p>
                         </div>
@@ -1400,17 +1400,17 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
                       <div className="grid grid-cols-3 border border-white/5 text-[10px]">
                         <div className="px-3 py-2 border-r border-white/5">
-                          <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Total</p>
+                          <p className="text-[6px] font-black  tracking-widest text-white/30 mb-0.5">Total</p>
                           <p className="text-lg font-black">{applications.length}</p>
                         </div>
                         <div className="px-3 py-2 border-r border-white/5">
-                          <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Avg Score</p>
+                          <p className="text-[6px] font-black  tracking-widest text-white/30 mb-0.5">Avg Score</p>
                           <p className="text-lg font-black text-emerald-400">
                             {avgScore > 0 ? `${avgScore}%` : '—'}
                           </p>
                         </div>
                         <div className="px-3 py-2">
-                          <p className="text-[6px] font-black uppercase tracking-widest text-white/30 mb-0.5">Threshold</p>
+                          <p className="text-[6px] font-black  tracking-widest text-white/30 mb-0.5">Threshold</p>
                           <p className="text-lg font-black text-emerald-400">
                             {selectedJob.matchThreshold != null ? `${selectedJob.matchThreshold}%` : '—'}
                           </p>
@@ -1426,7 +1426,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Search…"
-                          className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-4 py-2 text-[9px] font-medium uppercase tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors"
+                          className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-4 py-2 text-[9px] font-medium  tracking-widest placeholder:text-white/20 outline-none focus:border-white/30 transition-colors"
                         />
                       </div>
                     </div>
@@ -1435,12 +1435,12 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       {loadingApplicants ? (
                         <div className="flex items-center gap-3 text-white/30 p-6">
                           <span className="material-symbols-outlined animate-spin text-sm">autorenew</span>
-                          <span className="text-[8px] font-black uppercase tracking-widest">Loading…</span>
+                          <span className="text-[8px] font-black  tracking-widest">Loading…</span>
                         </div>
                       ) : filteredApplicants.length === 0 ? (
                         <div className="p-8 text-center space-y-2">
                           <span className="material-symbols-outlined text-3xl text-white/10">person_off</span>
-                          <p className="text-[8px] font-black uppercase tracking-widest text-white/30">
+                          <p className="text-[8px] font-black  tracking-widest text-white/30">
                             {applications.length === 0 ? 'No applications' : 'No matches'}
                           </p>
                         </div>
@@ -1475,10 +1475,10 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                 {(app.candidateName?.trim() || '?')[0].toUpperCase()}
                               </div>
                               <div className="flex-grow min-w-0">
-                                <p className="text-[10px] font-black uppercase tracking-tight truncate">
+                                <p className="text-[10px] font-black  tracking-tight truncate">
                                   {app.candidateName ?? 'Unknown'}
                                 </p>
-                                <p className="text-[7px] font-medium uppercase tracking-widest text-white/30 truncate">
+                                <p className="text-[7px] font-medium  tracking-widest text-white/30 truncate">
                                   {app.candidateTitle ?? '—'}
                                 </p>
                               </div>
@@ -1486,7 +1486,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                                 <p className={`text-xl font-black ${scoreColor}`}>
                                   {app.matchScore > 0 ? `${app.matchScore}%` : '—'}
                                 </p>
-                                <p className="text-[5px] font-black uppercase text-white/20">Match</p>
+                                <p className="text-[5px] font-black  text-white/20">Match</p>
                               </div>
                             </button>
                           );
@@ -1506,7 +1506,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
         selectedApplicant && isMobileView && view === 'applicants' && selectedJob && (
           <div className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm lg:hidden flex flex-col">
             <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/5 bg-[#080808]/95 backdrop-blur-xl">
-              <h3 className="text-sm font-black uppercase tracking-tight">Candidate Details</h3>
+              <h3 className="text-sm font-black  tracking-tight">Candidate Details</h3>
               <button onClick={closeApplicantModal} className="p-2 hover:bg-white/10 transition-colors -mr-2">
                 <span className="material-symbols-outlined text-xl">close</span>
               </button>

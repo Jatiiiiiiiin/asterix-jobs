@@ -254,8 +254,8 @@ const RecruiterReportsPage: React.FC<{
               <span className="material-symbols-outlined">menu</span>
             </button>
             <div>
-              <div className="text-[9px] font-black uppercase tracking-[0.5em] opacity-40 mb-1">Recruitment Analytics</div>
-              <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Sourcing Intelligence</h1>
+              <div className="text-[9px] font-black tracking-[0.5em] opacity-40 mb-1">Recruitment Analytics</div>
+              <h1 className="text-4xl md:text-6xl font-black tracking-tighter">Sourcing Intelligence</h1>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -266,7 +266,7 @@ const RecruiterReportsPage: React.FC<{
               {loading
                 ? <span className="material-symbols-outlined text-sm animate-spin opacity-40">autorenew</span>
                 : <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />}
-              <span className={`text-[8px] font-black uppercase tracking-widest ${loading ? 'opacity-40' : 'text-emerald-500'}`}>
+              <span className={`text-[8px] font-black tracking-widest ${loading ? 'opacity-40' : 'text-emerald-500'}`}>
                 {loading ? 'Syncing...' : 'Live Data'}
               </span>
             </div>
@@ -291,11 +291,11 @@ const RecruiterReportsPage: React.FC<{
                 className="p-6 md:p-8 border-r last:border-0 border-b lg:border-b-0 border-black/5 dark:border-white/5 group hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
               >
                 <div className="flex justify-between items-start mb-4">
-                  <p className="text-[8px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-60">{s.label}</p>
+                  <p className="text-[8px] font-black tracking-widest opacity-40 group-hover:opacity-60">{s.label}</p>
                   <span className="material-symbols-outlined text-base opacity-20 group-hover:opacity-60">{s.icon}</span>
                 </div>
-                <p className="text-3xl md:text-5xl font-black uppercase tracking-tighter">{s.val}</p>
-                <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mt-2">{s.sub}</p>
+                <p className="text-3xl md:text-5xl font-black tracking-tighter">{s.val}</p>
+                <p className="text-[8px] font-black tracking-widest opacity-30 mt-2">{s.sub}</p>
               </div>
             ))}
           </div>
@@ -312,7 +312,7 @@ const RecruiterReportsPage: React.FC<{
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex-1 px-4 py-3 text-[9px] font-black uppercase tracking-widest transition-all
+                    className={`flex-1 px-4 py-3 text-[9px] font-black tracking-widest transition-all
                       ${activeTab === tab
                         ? 'bg-black text-white dark:bg-white dark:text-black'
                         : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-40 hover:opacity-100'}`}
@@ -326,8 +326,8 @@ const RecruiterReportsPage: React.FC<{
               {activeTab === 'funnel' && (
                 <div className="border border-black dark:border-white/20 p-6 md:p-8 space-y-6">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Pipeline Conversion</h3>
-                    <span className="text-[8px] font-black uppercase tracking-widest opacity-20">
+                    <h3 className="text-[10px] font-black tracking-[0.4em] opacity-40">Pipeline Conversion</h3>
+                    <span className="text-[8px] font-black tracking-widest opacity-20">
                       {totalApps} active applicant{totalApps !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -335,7 +335,7 @@ const RecruiterReportsPage: React.FC<{
                   {totalApps === 0 && !loading ? (
                     <div className="py-16 flex flex-col items-center gap-3 opacity-20">
                       <span className="material-symbols-outlined text-4xl">inbox</span>
-                      <span className="text-xs font-black uppercase tracking-widest">No applications on live mandates</span>
+                      <span className="text-xs font-black tracking-widest">No applications on live mandates</span>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -344,10 +344,10 @@ const RecruiterReportsPage: React.FC<{
                           <div className="flex justify-between items-center mb-2">
                             <div className="flex items-center gap-2">
                               <span className="material-symbols-outlined text-sm opacity-40">{stage.icon}</span>
-                              <span className="text-[9px] font-black uppercase tracking-widest">{stage.label}</span>
+                              <span className="text-[9px] font-black tracking-widest">{stage.label}</span>
                             </div>
                             <div className="flex items-center gap-4">
-                              <span className="text-[8px] font-black uppercase tracking-widest opacity-40">
+                              <span className="text-[8px] font-black tracking-widest opacity-40">
                                 {stage.count} candidate{stage.count !== 1 ? 's' : ''}
                               </span>
                               <span className="text-[9px] font-black text-emerald-500 w-10 text-right">{stage.pct}%</span>
@@ -359,7 +359,7 @@ const RecruiterReportsPage: React.FC<{
                               style={{ width: `${stage.pct}%` }}
                             />
                             {i < funnelStages.length - 1 && stage.pct > 0 && (
-                              <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[7px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all text-white dark:text-black mix-blend-difference pointer-events-none">
+                              <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[7px] font-black tracking-widest opacity-0 group-hover:opacity-100 transition-all text-white dark:text-black mix-blend-difference pointer-events-none">
                                 {stage.pct - funnelStages[i + 1].pct}% drop-off →
                               </div>
                             )}
@@ -374,7 +374,7 @@ const RecruiterReportsPage: React.FC<{
                     <div className="flex items-center justify-between p-4 bg-red-500/5 border border-red-500/20">
                       <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm text-red-500">cancel</span>
-                        <span className="text-[8px] font-black uppercase tracking-widest text-red-500">Rejected / Closed</span>
+                        <span className="text-[8px] font-black tracking-widest text-red-500">Rejected / Closed</span>
                       </div>
                       <span className="text-[9px] font-black text-red-500">
                         {rejectedCount} applicant{rejectedCount !== 1 ? 's' : ''}
@@ -390,12 +390,12 @@ const RecruiterReportsPage: React.FC<{
                   {loadingJobs ? (
                     <div className="py-16 flex items-center justify-center gap-3 opacity-30">
                       <span className="material-symbols-outlined animate-spin">autorenew</span>
-                      <span className="text-xs font-black uppercase tracking-widest">Loading mandates...</span>
+                      <span className="text-xs font-black tracking-widest">Loading mandates...</span>
                     </div>
                   ) : jobStats.length === 0 ? (
                     <div className="py-16 flex flex-col items-center gap-3 opacity-20">
                       <span className="material-symbols-outlined text-4xl">work_off</span>
-                      <span className="text-xs font-black uppercase tracking-widest">No mandates published yet</span>
+                      <span className="text-xs font-black tracking-widest">No mandates published yet</span>
                     </div>
                   ) : (
                     jobStats.map((job) => (
@@ -405,26 +405,26 @@ const RecruiterReportsPage: React.FC<{
                       >
                         <div className="space-y-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="text-sm font-black uppercase tracking-tight truncate">{job.title}</h4>
+                            <h4 className="text-sm font-black tracking-tight truncate">{job.title}</h4>
                             {job.isFilled ? (
-                              <span className="text-[7px] font-black uppercase tracking-widest px-2 py-0.5 bg-emerald-500 text-white shrink-0">Filled</span>
+                              <span className="text-[7px] font-black tracking-widest px-2 py-0.5 bg-emerald-500 text-white shrink-0">Filled</span>
                             ) : (
-                              <span className="text-[7px] font-black uppercase tracking-widest px-2 py-0.5 border border-black/20 dark:border-white/20 group-hover:border-white/40 shrink-0">Open</span>
+                              <span className="text-[7px] font-black tracking-widest px-2 py-0.5 border border-black/20 dark:border-white/20 group-hover:border-white/40 shrink-0">Open</span>
                             )}
                             {job.activeOffers > 0 && (
-                              <span className="text-[7px] font-black uppercase tracking-widest px-2 py-0.5 bg-blue-500/10 border border-blue-400/40 text-blue-500 shrink-0">
+                              <span className="text-[7px] font-black tracking-widest px-2 py-0.5 bg-blue-500/10 border border-blue-400/40 text-blue-500 shrink-0">
                                 {job.activeOffers} offer{job.activeOffers !== 1 ? 's' : ''} out
                               </span>
                             )}
                           </div>
-                          <p className="text-[8px] font-black uppercase tracking-widest opacity-40">
+                          <p className="text-[8px] font-black tracking-widest opacity-40">
                             {job.applicants} applicant{job.applicants !== 1 ? 's' : ''} · {job.daysOpen}d open
                             {job.location?.city ? ` · ${job.location.city}` : ''}
                           </p>
                         </div>
                         <div className="flex items-center gap-6 shrink-0">
                           <div className="text-right">
-                            <p className="text-[7px] font-black uppercase tracking-widest opacity-40">Avg Match</p>
+                            <p className="text-[7px] font-black tracking-widest opacity-40">Avg Match</p>
                             <p className={`text-xl font-black ${job.avgScore >= 75 ? 'text-emerald-500' : ''}`}>
                               {job.applicants > 0 ? `${job.avgScore}%` : '—'}
                             </p>
@@ -446,8 +446,8 @@ const RecruiterReportsPage: React.FC<{
               {activeTab === 'skills' && (
                 <div className="border border-black dark:border-white/20 p-6 md:p-8 space-y-6">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Required Skills — Frequency</h3>
-                    <span className="text-[8px] font-black uppercase tracking-widest opacity-20">
+                    <h3 className="text-[10px] font-black tracking-[0.4em] opacity-40">Required Skills — Frequency</h3>
+                    <span className="text-[8px] font-black tracking-widest opacity-20">
                       Across {jobs.length} mandate{jobs.length !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -455,15 +455,15 @@ const RecruiterReportsPage: React.FC<{
                   {skillDemand.length === 0 ? (
                     <div className="py-16 flex flex-col items-center gap-3 opacity-20">
                       <span className="material-symbols-outlined text-4xl">psychology</span>
-                      <span className="text-xs font-black uppercase tracking-widest">No skill data yet</span>
+                      <span className="text-xs font-black tracking-widest">No skill data yet</span>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {skillDemand.map(({ skill, count, pct }) => (
                         <div key={skill} className="group">
                           <div className="flex justify-between items-center mb-1.5">
-                            <span className="text-[9px] font-black uppercase tracking-widest">{skill}</span>
-                            <span className="text-[8px] font-black uppercase tracking-widest opacity-40">
+                            <span className="text-[9px] font-black tracking-widest">{skill}</span>
+                            <span className="text-[8px] font-black tracking-widest opacity-40">
                               {count} mandate{count !== 1 ? 's' : ''}
                             </span>
                           </div>
@@ -486,14 +486,14 @@ const RecruiterReportsPage: React.FC<{
 
               {/* Source breakdown */}
               <div className="bg-black text-white dark:bg-white dark:text-black p-6 md:p-8 space-y-6">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] opacity-60">Source Breakdown</h4>
+                <h4 className="text-[10px] font-black tracking-[0.4em] opacity-60">Source Breakdown</h4>
                 {sourceBreakdown.length === 0 ? (
-                  <p className="text-[8px] font-black uppercase tracking-widest opacity-30">No data yet</p>
+                  <p className="text-[8px] font-black tracking-widest opacity-30">No data yet</p>
                 ) : (
                   <div className="space-y-5">
                     {sourceBreakdown.map((s) => (
                       <div key={s.label} className="space-y-2">
-                        <div className="flex justify-between text-[9px] font-black uppercase tracking-widest">
+                        <div className="flex justify-between text-[9px] font-black tracking-widest">
                           <span className={s.highlight ? 'text-emerald-400' : 'opacity-70'}>{s.label}</span>
                           <span>
                             {s.pct}%{' '}
@@ -510,7 +510,7 @@ const RecruiterReportsPage: React.FC<{
                     ))}
                   </div>
                 )}
-                <p className="text-[8px] font-black uppercase tracking-widest opacity-40 leading-relaxed border-t border-white/10 dark:border-black/10 pt-4">
+                <p className="text-[8px] font-black tracking-widest opacity-40 leading-relaxed border-t border-white/10 dark:border-black/10 pt-4">
                   {sourceBreakdown[0]?.pct >= 50
                     ? `Auto-Match is your strongest channel at ${sourceBreakdown[0]?.pct}%. Candidates sourced via Asterix carry higher profile fidelity.`
                     : 'Increase Auto-Match coverage by setting competitive match thresholds on your mandates.'}
@@ -520,14 +520,14 @@ const RecruiterReportsPage: React.FC<{
               {/* Live activity feed */}
               <div className="border border-black dark:border-white/20 p-6 md:p-8 space-y-6">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Live Activity</h4>
+                  <h4 className="text-[10px] font-black tracking-[0.4em] opacity-40">Live Activity</h4>
                   <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
                 </div>
 
                 {recentActivity.length === 0 && !loadingApps ? (
                   <div className="py-8 flex flex-col items-center gap-2 opacity-20">
                     <span className="material-symbols-outlined">notifications_none</span>
-                    <span className="text-[8px] font-black uppercase tracking-widest">No activity yet</span>
+                    <span className="text-[8px] font-black tracking-widest">No activity yet</span>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -539,12 +539,12 @@ const RecruiterReportsPage: React.FC<{
                             <span className="material-symbols-outlined text-sm">{icon}</span>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[9px] font-black uppercase tracking-widest">{activityLabel(a)}</p>
-                            <p className="text-[8px] font-black uppercase tracking-widest opacity-40 truncate mt-0.5">
+                            <p className="text-[9px] font-black tracking-widest">{activityLabel(a)}</p>
+                            <p className="text-[8px] font-black tracking-widest opacity-40 truncate mt-0.5">
                               {a.role} · {a.company}
                             </p>
                           </div>
-                          <span className="text-[7px] font-black uppercase tracking-widest opacity-20 shrink-0 pt-0.5 whitespace-nowrap">
+                          <span className="text-[7px] font-black tracking-widest opacity-20 shrink-0 pt-0.5 whitespace-nowrap">
                             {timeAgo(a.createdAt)}
                           </span>
                         </div>

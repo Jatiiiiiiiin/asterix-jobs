@@ -141,7 +141,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2 text-black dark:text-white" aria-label="Open menu">
                 <span className="material-symbols-outlined text-lg">menu</span>
               </button>
-              <h1 className="text-xl md:text-3xl font-black uppercase tracking-tighter truncate">Mission Control</h1>
+              <h1 className="text-xl md:text-3xl font-black  tracking-tighter truncate">Mission Control</h1>
             </div>
 
             <div className="flex items-center gap-2 flex-1 max-w-2xl hidden sm:flex">
@@ -152,7 +152,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                   placeholder="Search jobs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-3 pl-9 py-2 text-xs font-black uppercase tracking-tight focus:ring-0 focus:border-black dark:focus:border-white outline-none transition-all placeholder:opacity-20"
+                  className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-3 pl-9 py-2 text-xs font-black  tracking-tight focus:ring-0 focus:border-black dark:focus:border-white outline-none transition-all placeholder:opacity-20"
                 />
               </div>
               <button
@@ -160,7 +160,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                 className="flex items-center gap-2 px-4 py-2 border-2 border-black dark:border-white bg-white dark:bg-background-dark hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all shrink-0"
               >
                 <span className="material-symbols-outlined text-base">tune</span>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Filters</span>
+                <span className="text-[10px] font-black  tracking-[0.3em]">Filters</span>
               </button>
             </div>
 
@@ -181,7 +181,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               placeholder="Search jobs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-3 pl-9 py-2 text-xs font-black uppercase tracking-tight focus:ring-0 focus:border-black dark:focus:border-white outline-none transition-all placeholder:opacity-20"
+              className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-3 pl-9 py-2 text-xs font-black  tracking-tight focus:ring-0 focus:border-black dark:focus:border-white outline-none transition-all placeholder:opacity-20"
             />
           </div>
         </header>
@@ -196,7 +196,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
             ${showMobileFilters ? 'translate-x-0' : '-translate-x-full'}
           `}>
             <div className="flex justify-between items-center pb-4 border-b border-black/10 dark:border-white/10">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Filter Protocol</h3>
+              <h3 className="text-[10px] font-black  tracking-[0.3em] opacity-40">Filter Protocol</h3>
               <button onClick={() => setShowMobileFilters(false)} className="material-symbols-outlined text-lg hover:bg-black/5 dark:hover:bg-white/5 p-1 transition-colors">close</button>
             </div>
 
@@ -208,7 +208,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                 >
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-base">tune</span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Fidelity Guard</span>
+                    <span className="text-[10px] font-black  tracking-[0.3em]">Fidelity Guard</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-black">{matchThreshold}%</span>
@@ -219,7 +219,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                 {showFidelityFilter && (
                   <div className="space-y-4 p-4 border-2 border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5">
                     <div className="flex justify-between items-end">
-                      <span className="text-[8px] font-black uppercase tracking-widest opacity-60">Neural Threshold</span>
+                      <span className="text-[8px] font-black  tracking-widest opacity-60">Neural Threshold</span>
                       <span className="text-xl font-black">{matchThreshold}%</span>
                     </div>
                     <input
@@ -227,7 +227,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                       onChange={(e) => setMatchThreshold(parseInt(e.target.value))}
                       className="w-full h-1 bg-black/10 dark:bg-white/10 appearance-none accent-black dark:accent-white cursor-pointer"
                     />
-                    <div className="flex justify-between text-[7px] font-black uppercase tracking-wider opacity-30">
+                    <div className="flex justify-between text-[7px] font-black  tracking-wider opacity-30">
                       <span>0%</span><span>50%</span><span>95%</span>
                     </div>
                   </div>
@@ -235,11 +235,11 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40">Mission Type</h3>
+                <h3 className="text-[9px] font-black  tracking-[0.3em] opacity-40">Mission Type</h3>
                 <div className="space-y-2">
                   {['Full-time', 'Contract', 'Remote'].map(type => (
                     <label key={type} className="flex items-center justify-between group cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 p-2 transition-colors">
-                      <span className={`text-xs font-black uppercase tracking-widest transition-opacity ${selectedTypes.includes(type) ? 'opacity-100' : 'opacity-30 group-hover:opacity-60'}`}>
+                      <span className={`text-xs font-black  tracking-widest transition-opacity ${selectedTypes.includes(type) ? 'opacity-100' : 'opacity-30 group-hover:opacity-60'}`}>
                         {type}
                       </span>
                       <button
@@ -254,12 +254,12 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               </div>
 
               <div className="pt-6 border-t border-black/5 dark:border-white/5">
-                <h3 className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40 mb-4">Market View</h3>
+                <h3 className="text-[9px] font-black  tracking-[0.3em] opacity-40 mb-4">Market View</h3>
                 <div className="flex flex-col gap-2">
-                  <button onClick={() => scrollToSection('best-fit')} className="text-[9px] font-black uppercase tracking-[0.25em] px-4 py-3 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center">
+                  <button onClick={() => scrollToSection('best-fit')} className="text-[9px] font-black  tracking-[0.25em] px-4 py-3 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center">
                     Neural Syncs ({bestFitJobs.length})
                   </button>
-                  <button onClick={() => scrollToSection('all-jobs')} className="text-[9px] font-black uppercase tracking-[0.25em] px-4 py-3 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center opacity-40 hover:opacity-100">
+                  <button onClick={() => scrollToSection('all-jobs')} className="text-[9px] font-black  tracking-[0.25em] px-4 py-3 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center opacity-40 hover:opacity-100">
                     Universe Feed ({filteredJobs.length})
                   </button>
                 </div>
@@ -268,14 +268,14 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               <div className="bg-emerald-500 text-white p-6 space-y-4 shadow-xl">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-lg animate-pulse">auto_awesome</span>
-                  <h4 className="text-[9px] font-black uppercase tracking-widest">Neural Auto-Pilot</h4>
+                  <h4 className="text-[9px] font-black  tracking-widest">Neural Auto-Pilot</h4>
                 </div>
-                <p className="text-[8px] font-bold uppercase tracking-widest opacity-80 leading-relaxed">
+                <p className="text-[8px] font-bold  tracking-widest opacity-80 leading-relaxed">
                   Identity is synchronized. Application routing is 98.2% calibrated.
                 </p>
                 <button
                   onClick={() => setIsAutoPilotActive(!isAutoPilotActive)}
-                  className={`w-full py-3 text-[9px] font-black uppercase tracking-widest border-2 border-white transition-all ${isAutoPilotActive ? 'bg-white text-emerald-500' : 'hover:bg-white hover:text-emerald-500'}`}
+                  className={`w-full py-3 text-[9px] font-black  tracking-widest border-2 border-white transition-all ${isAutoPilotActive ? 'bg-white text-emerald-500' : 'hover:bg-white hover:text-emerald-500'}`}
                 >
                   {isAutoPilotActive ? '✓ System Active' : 'Initialize'}
                 </button>
@@ -289,11 +289,11 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
             <section id="best-fit" className="space-y-8 scroll-mt-4">
               <div className="flex justify-between items-center border-b-2 border-black dark:border-white pb-6">
                 <div className="space-y-1">
-                  <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tighter">Neural Synergy</h2>
-                  <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Top-tier calibrated missions</p>
+                  <h2 className="text-2xl md:text-4xl font-black  tracking-tighter">Neural Synergy</h2>
+                  <p className="text-[9px] font-black  tracking-widest opacity-40">Top-tier calibrated missions</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[9px] font-black uppercase tracking-widest opacity-30">{bestFitJobs.length} SYNCED</span>
+                  <span className="text-[9px] font-black  tracking-widest opacity-30">{bestFitJobs.length} SYNCED</span>
                   <div className="size-2 bg-emerald-500 rounded-full animate-pulse"></div>
                 </div>
               </div>
@@ -314,7 +314,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                 ) : (
                   <div className="py-20 border-4 border-dashed border-black/10 dark:border-white/10 text-center space-y-4 opacity-30">
                     <span className="material-symbols-outlined text-5xl">sync_problem</span>
-                    <p className="text-[10px] font-black uppercase tracking-widest leading-relaxed px-4">
+                    <p className="text-[10px] font-black  tracking-widest leading-relaxed px-4">
                       No high-fidelity syncs found.<br />Optimize parameters for elite view.
                     </p>
                   </div>
@@ -326,10 +326,10 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
             <section id="all-jobs" className="space-y-8 pb-32 scroll-mt-4">
               <div className="flex justify-between items-center border-b-2 border-black/10 dark:border-white/10 pb-6">
                 <div className="space-y-1">
-                  <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tighter opacity-40">Universe Feed</h2>
-                  <p className="text-[9px] font-black uppercase tracking-widest opacity-20">Full market inventory matching logic</p>
+                  <h2 className="text-2xl md:text-4xl font-black  tracking-tighter opacity-40">Universe Feed</h2>
+                  <p className="text-[9px] font-black  tracking-widest opacity-20">Full market inventory matching logic</p>
                 </div>
-                <div className="text-[9px] font-black uppercase tracking-widest opacity-30">
+                <div className="text-[9px] font-black  tracking-widest opacity-30">
                   {isLoadingJobs ? '...' : `${filteredJobs.length} Positions Vetted`}
                 </div>
               </div>
@@ -337,7 +337,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               {isLoadingJobs ? (
                 <div className="flex items-center justify-center gap-3 py-20 text-black/30 dark:text-white/30">
                   <span className="material-symbols-outlined animate-spin">autorenew</span>
-                  <span className="text-sm font-black uppercase tracking-widest">Loading live jobs...</span>
+                  <span className="text-sm font-black  tracking-widest">Loading live jobs...</span>
                 </div>
               ) : (
                 <div className="grid gap-5">
@@ -355,7 +355,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                     ))
                   ) : (
                     <div className="py-24 text-center opacity-30 border-2 border-black/5 dark:border-white/5">
-                      <p className="text-xs font-black uppercase tracking-[0.3em]">Empty Universe Protocol engaged.</p>
+                      <p className="text-xs font-black  tracking-[0.3em]">Empty Universe Protocol engaged.</p>
                     </div>
                   )}
                 </div>
@@ -419,15 +419,15 @@ const JobCard: React.FC<{
         <div className="flex-grow space-y-4 md:space-y-5 min-w-0">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
             <div className="flex-1 min-w-0 overflow-hidden">
-              <h2 className="text-xl md:text-3xl font-black uppercase tracking-tighter group-hover:text-white dark:group-hover:text-black transition-colors leading-tight break-words">
+              <h2 className="text-xl md:text-3xl font-black  tracking-tighter group-hover:text-white dark:group-hover:text-black transition-colors leading-tight break-words">
                 {job.title ?? 'Untitled Position'}
               </h2>
               <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-2">
-                <span className="text-[10px] md:text-sm font-black uppercase tracking-widest opacity-40 group-hover:text-white/60 dark:group-hover:text-black/60">
+                <span className="text-[10px] md:text-sm font-black  tracking-widest opacity-40 group-hover:text-white/60 dark:group-hover:text-black/60">
                   {typeof job.company === 'string' ? job.company : (job.company?.name ?? 'Unknown Company')}
                 </span>
                 <span className="size-1.5 bg-black/20 dark:bg-white/20 rounded-full group-hover:bg-white/40 dark:group-hover:bg-black/40 shrink-0"></span>
-                <span className="text-[10px] md:text-sm font-black uppercase tracking-widest opacity-40 group-hover:text-white/60 dark:group-hover:text-black/60">
+                <span className="text-[10px] md:text-sm font-black  tracking-widest opacity-40 group-hover:text-white/60 dark:group-hover:text-black/60">
                   {typeof job.location === 'string' ? job.location : (job.location?.city ?? 'Remote')}
                 </span>
               </div>
@@ -437,13 +437,13 @@ const JobCard: React.FC<{
               <div className={`text-4xl md:text-6xl font-black leading-none transition-colors duration-300 ${isBestFit ? 'text-emerald-500 group-hover:text-emerald-400' : 'group-hover:text-white dark:group-hover:text-black'}`}>
                 {job.matchScore ?? 0}%
               </div>
-              <div className="text-[8px] font-black uppercase tracking-[0.25em] opacity-30 group-hover:text-white/40 dark:group-hover:text-black/40">FIDELITY</div>
+              <div className="text-[8px] font-black  tracking-[0.25em] opacity-30 group-hover:text-white/40 dark:group-hover:text-black/40">FIDELITY</div>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
             {(job.requiredSkills ?? []).slice(0, 4).map(tag => (
-              <span key={tag} className="px-3 md:px-4 py-1.5 border-2 border-black/10 dark:border-white/10 group-hover:border-white/20 dark:group-hover:border-black/20 text-[9px] md:text-[10px] font-black uppercase tracking-widest group-hover:text-white/80 dark:group-hover:text-black/80 transition-all">
+              <span key={tag} className="px-3 md:px-4 py-1.5 border-2 border-black/10 dark:border-white/10 group-hover:border-white/20 dark:group-hover:border-black/20 text-[9px] md:text-[10px] font-black  tracking-widest group-hover:text-white/80 dark:group-hover:text-black/80 transition-all">
                 {tag}
               </span>
             ))}
@@ -452,14 +452,14 @@ const JobCard: React.FC<{
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-5 border-t-2 border-black/5 dark:border-white/5 group-hover:border-white/10 dark:group-hover:border-black/10">
             <div className="flex flex-wrap gap-x-8 gap-y-3">
               <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black uppercase tracking-widest opacity-40 group-hover:text-white/40 dark:group-hover:text-black/40">Capital Package</span>
-                <span className="text-xs md:text-base font-black uppercase group-hover:text-white dark:group-hover:text-black">
+                <span className="text-[8px] font-black  tracking-widest opacity-40 group-hover:text-white/40 dark:group-hover:text-black/40">Capital Package</span>
+                <span className="text-xs md:text-base font-black  group-hover:text-white dark:group-hover:text-black">
                   ₹{(job.salaryRange?.min ?? 0) / 100000}L - ₹{(job.salaryRange?.max ?? 0) / 100000}L
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black uppercase tracking-widest opacity-40 group-hover:text-white/40 dark:group-hover:text-black/40">Engagement</span>
-                <span className="text-xs md:text-base font-black uppercase group-hover:text-white dark:group-hover:text-black">{job.employmentType ?? 'Position'}</span>
+                <span className="text-[8px] font-black  tracking-widest opacity-40 group-hover:text-white/40 dark:group-hover:text-black/40">Engagement</span>
+                <span className="text-xs md:text-base font-black  group-hover:text-white dark:group-hover:text-black">{job.employmentType ?? 'Position'}</span>
               </div>
             </div>
 
@@ -475,7 +475,7 @@ const JobCard: React.FC<{
 
               <button
                 onClick={(e) => { e.stopPropagation(); setActiveChatJob(job); }}
-                className="flex items-center justify-center gap-2 border-2 border-black dark:border-white text-black dark:text-white px-5 md:px-8 py-3 md:py-4 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] group-hover:bg-white dark:group-hover:bg-black group-hover:text-black dark:group-hover:text-white transition-all"
+                className="flex items-center justify-center gap-2 border-2 border-black dark:border-white text-black dark:text-white px-5 md:px-8 py-3 md:py-4 text-[9px] md:text-[10px] font-black  tracking-[0.2em] group-hover:bg-white dark:group-hover:bg-black group-hover:text-black dark:group-hover:text-white transition-all"
               >
                 <span className="material-symbols-outlined text-base md:text-lg">neurology</span>
                 <span className="hidden sm:inline">AI Audit</span>
@@ -485,18 +485,18 @@ const JobCard: React.FC<{
               {canManualApply ? (
                 <button
                   onClick={() => navigate(`/job/${job.id}`, { state: { job } })}
-                  className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black px-8 md:px-12 py-3 md:py-4 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] group-hover:bg-white dark:group-hover:bg-black group-hover:text-black dark:group-hover:text-white transition-all shadow-xl"
+                  className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black px-8 md:px-12 py-3 md:py-4 text-[9px] md:text-[10px] font-black  tracking-[0.2em] group-hover:bg-white dark:group-hover:bg-black group-hover:text-black dark:group-hover:text-white transition-all shadow-xl"
                 >
                   Initialize
                 </button>
               ) : (
                 <button
                   onClick={(e) => { e.stopPropagation(); onLockedClick(); }}
-                  className="flex-1 sm:flex-none relative px-8 md:px-12 py-3 md:py-4 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] border-2 border-black/20 dark:border-white/20 text-black/30 dark:text-white/30 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-2"
+                  className="flex-1 sm:flex-none relative px-8 md:px-12 py-3 md:py-4 text-[9px] md:text-[10px] font-black  tracking-[0.2em] border-2 border-black/20 dark:border-white/20 text-black/30 dark:text-white/30 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-2"
                 >
                   <span className="material-symbols-outlined text-sm">lock</span>
                   Initialize
-                  <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[6px] font-black uppercase tracking-widest px-1.5 py-0.5">
+                  <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[6px] font-black  tracking-widest px-1.5 py-0.5">
                     PRO
                   </span>
                 </button>

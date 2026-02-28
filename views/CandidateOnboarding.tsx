@@ -133,7 +133,7 @@ export default function CandidateOnboarding({
      RENDER
      ══════════════════════════════════════════════════════════════════ */
 
-  const INPUT = 'w-full bg-black/5 dark:bg-[#111111] border border-black/10 dark:border-white/10 p-4 font-black uppercase tracking-tight outline-none focus:border-black dark:focus:border-white transition-colors text-black dark:text-white [color-scheme:light] dark:[color-scheme:dark]';
+  const INPUT = 'w-full bg-black/5 dark:bg-[#111111] border border-black/10 dark:border-white/10 p-4 font-black tracking-tight outline-none focus:border-black dark:focus:border-white transition-colors text-black dark:text-white [color-scheme:light] dark:[color-scheme:dark]';
   const TEXTAREA = INPUT + ' font-medium resize-y';
 
   return (
@@ -145,12 +145,12 @@ export default function CandidateOnboarding({
           <div className="bg-black dark:bg-white size-10 flex items-center justify-center text-white dark:text-black">
             <span className="material-symbols-outlined font-black">auto_awesome</span>
           </div>
-          <h2 className="text-2xl font-black uppercase tracking-tighter">Onboarding Protocol</h2>
+          <h2 className="text-2xl font-black tracking-tighter">Onboarding Protocol</h2>
         </div>
         <div className="hidden md:flex gap-4">
           {STEPS.map((s, idx) => (
             <div key={s.id} className="flex items-center gap-2">
-              <span className={`text-[10px] font-black uppercase tracking-widest transition-opacity ${idx <= step ? 'opacity-100' : 'opacity-20'}`}>
+              <span className={`text-[10px] font-black tracking-widest transition-opacity ${idx <= step ? 'opacity-100' : 'opacity-20'}`}>
                 {s.label}
               </span>
               {idx < STEPS.length - 1 && <span className="text-[10px] opacity-20">—</span>}
@@ -162,7 +162,7 @@ export default function CandidateOnboarding({
       {/* Main */}
       <main className="flex-grow flex items-center justify-center p-6 md:p-12 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none opacity-5 select-none overflow-hidden">
-          <div className="text-[25vw] font-black uppercase tracking-tighter leading-none absolute -bottom-10 -left-10 opacity-20">PROTOCOL</div>
+          <div className="text-[25vw] font-black tracking-tighter leading-none absolute -bottom-10 -left-10 opacity-20">PROTOCOL</div>
         </div>
 
         <div className="w-full max-w-4xl bg-white dark:bg-background-dark border-4 border-black dark:border-white p-8 md:p-16 space-y-12 relative z-10 shadow-[40px_40px_0px_rgba(0,0,0,0.05)]">
@@ -174,7 +174,7 @@ export default function CandidateOnboarding({
 
           {/* Error */}
           {error && (
-            <div className="border border-red-500/30 bg-red-500/10 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-red-500">
+            <div className="border border-red-500/30 bg-red-500/10 px-5 py-3 text-[10px] font-black tracking-widest text-red-500">
               {error}
             </div>
           )}
@@ -185,8 +185,8 @@ export default function CandidateOnboarding({
             {step === 0 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">01 / Identity Matrix</h3>
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">Core bio and professional coordinates.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">01 / Identity Matrix</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">Core bio and professional coordinates.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {[
@@ -198,7 +198,7 @@ export default function CandidateOnboarding({
                     { name: 'linkedin', label: 'LinkedIn URL', placeholder: 'LINKEDIN.COM/IN/USER' },
                   ].map(f => (
                     <div key={f.name} className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-widest opacity-60">{f.label}</label>
+                      <label className="text-[10px] font-black tracking-widest opacity-60">{f.label}</label>
                       <input name={f.name} value={(form as any)[f.name]} onChange={handle} className={INPUT} placeholder={f.placeholder} />
                     </div>
                   ))}
@@ -210,8 +210,8 @@ export default function CandidateOnboarding({
             {step === 1 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">02 / Neural Stack</h3>
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">Select your core technical competencies or add your own.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">02 / Neural Stack</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">Select your core technical competencies or add your own.</p>
                 </div>
 
                 {/* Predefined skill chips */}
@@ -221,7 +221,7 @@ export default function CandidateOnboarding({
                       key={skill}
                       type="button"
                       onClick={() => toggleSkill(skill)}
-                      className={`px-6 py-3 border-2 text-[10px] font-black uppercase tracking-widest transition-all ${form.skills.includes(skill)
+                      className={`px-6 py-3 border-2 text-[10px] font-black tracking-widest transition-all ${form.skills.includes(skill)
                           ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-xl'
                           : 'border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
                         }`}
@@ -233,7 +233,7 @@ export default function CandidateOnboarding({
 
                 {/* Custom skill input */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Add Custom Skill</label>
+                  <label className="text-[10px] font-black tracking-widest opacity-60">Add Custom Skill</label>
                   <div className="flex gap-3">
                     <input
                       type="text"
@@ -247,7 +247,7 @@ export default function CandidateOnboarding({
                       type="button"
                       onClick={addCustomSkill}
                       disabled={!customSkillInput.trim()}
-                      className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-widest hover:invert transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
+                      className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black tracking-widest hover:invert transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
                     >
                       <span className="material-symbols-outlined text-sm">add</span>
                       Add
@@ -258,12 +258,12 @@ export default function CandidateOnboarding({
                 {/* Custom-added skills (ones not in the SKILLS preset) */}
                 {form.skills.filter(s => !SKILLS.includes(s)).length > 0 && (
                   <div className="space-y-3">
-                    <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Custom Skills Added</p>
+                    <p className="text-[10px] font-black tracking-widest opacity-60">Custom Skills Added</p>
                     <div className="flex flex-wrap gap-3">
                       {form.skills.filter(s => !SKILLS.includes(s)).map(skill => (
                         <span
                           key={skill}
-                          className="flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black text-[10px] font-black uppercase tracking-widest"
+                          className="flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black text-[10px] font-black tracking-widest"
                         >
                           {skill}
                           <button
@@ -280,7 +280,7 @@ export default function CandidateOnboarding({
                 )}
 
                 {form.skills.length > 0 && (
-                  <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500">
+                  <p className="text-[9px] font-black tracking-widest text-emerald-500">
                     {form.skills.length} skill{form.skills.length !== 1 ? 's' : ''} selected
                   </p>
                 )}
@@ -291,16 +291,16 @@ export default function CandidateOnboarding({
             {step === 2 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">03 / Experience Log</h3>
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">Detail your professional trajectory.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">03 / Experience Log</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">Detail your professional trajectory.</p>
                 </div>
                 <div className="space-y-8">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Work History</label>
+                    <label className="text-[10px] font-black tracking-widest opacity-60">Work History</label>
                     <textarea name="experience" value={form.experience} onChange={handle} rows={5} className={TEXTAREA} placeholder="COMPANY – ROLE – ACHIEVEMENT..." />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Education Matrix</label>
+                    <label className="text-[10px] font-black tracking-widest opacity-60">Education Matrix</label>
                     <textarea name="education" value={form.education} onChange={handle} rows={3} className={TEXTAREA} placeholder="DEGREE @ UNIVERSITY – YEAR" />
                   </div>
                 </div>
@@ -311,22 +311,22 @@ export default function CandidateOnboarding({
             {step === 3 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">04 / Target Directives</h3>
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">Mission parameters for job matching.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">04 / Target Directives</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">Mission parameters for job matching.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Min Salary Expectation</label>
+                    <label className="text-[10px] font-black tracking-widest opacity-60">Min Salary Expectation</label>
                     <input name="minSalary" value={form.minSalary} onChange={handle} className={INPUT} placeholder="E.G. $120,000" />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Preferred Deployment</label>
+                    <label className="text-[10px] font-black tracking-widest opacity-60">Preferred Deployment</label>
                     <select name="jobType" value={form.jobType} onChange={handle} className={INPUT}>
                       <option>Full-time</option><option>Contract</option><option>Part-time</option>
                     </select>
                   </div>
                   <div className="space-y-3 md:col-span-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Remote Protocol</label>
+                    <label className="text-[10px] font-black tracking-widest opacity-60">Remote Protocol</label>
                     <select name="remotePreference" value={form.remotePreference} onChange={handle} className={INPUT}>
                       <option>Remote Only</option><option>Hybrid</option><option>On-site</option>
                     </select>
@@ -339,8 +339,8 @@ export default function CandidateOnboarding({
             {step === 4 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">05 / Profile Review</h3>
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">Verify before deployment.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">05 / Profile Review</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">Verify before deployment.</p>
                 </div>
                 <div className="border-2 border-emerald-500/30 p-8 bg-black/5 dark:bg-white/5 space-y-6">
                   <div className="grid grid-cols-2 gap-6 text-sm">
@@ -353,16 +353,16 @@ export default function CandidateOnboarding({
                       ['Job Type', form.jobType],
                     ].map(([label, val]) => (
                       <div key={label}>
-                        <span className="opacity-60 text-[10px] uppercase tracking-widest">{label}:</span>{' '}
+                        <span className="opacity-60 text-[10px] tracking-widest">{label}:</span>{' '}
                         <strong>{val || '—'}</strong>
                       </div>
                     ))}
                     <div className="col-span-2">
-                      <span className="opacity-60 text-[10px] uppercase tracking-widest">Skills:</span>{' '}
+                      <span className="opacity-60 text-[10px] tracking-widest">Skills:</span>{' '}
                       <strong>{form.skills.join(', ') || 'None selected'}</strong>
                     </div>
                     <div className="col-span-2">
-                      <span className="opacity-60 text-[10px] uppercase tracking-widest">Remote:</span>{' '}
+                      <span className="opacity-60 text-[10px] tracking-widest">Remote:</span>{' '}
                       <strong>{form.remotePreference}</strong>
                     </div>
                   </div>
@@ -376,7 +376,7 @@ export default function CandidateOnboarding({
                 type="button"
                 onClick={() => setStep(s => s - 1)}
                 disabled={step === 0}
-                className="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 disabled:opacity-0 transition-opacity"
+                className="text-[10px] font-black tracking-widest opacity-40 hover:opacity-100 disabled:opacity-0 transition-opacity"
               >
                 [ Back ]
               </button>
@@ -386,7 +386,7 @@ export default function CandidateOnboarding({
                   type="button"
                   onClick={finalizeOnboarding}
                   disabled={saving}
-                  className="bg-emerald-500 text-white px-12 py-5 text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl disabled:opacity-50 disabled:scale-100 flex items-center gap-2"
+                  className="bg-emerald-500 text-white px-12 py-5 text-[10px] font-black tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl disabled:opacity-50 disabled:scale-100 flex items-center gap-2"
                 >
                   {saving ? (
                     <>
@@ -409,7 +409,7 @@ export default function CandidateOnboarding({
                     setError('');
                     setStep(s => s + 1);
                   }}
-                  className="bg-black dark:bg-white text-white dark:text-black px-12 py-5 text-[10px] font-black uppercase tracking-widest hover:invert transition-all flex items-center gap-2"
+                  className="bg-black dark:bg-white text-white dark:text-black px-12 py-5 text-[10px] font-black tracking-widest hover:invert transition-all flex items-center gap-2"
                 >
                   Proceed <span className="material-symbols-outlined text-base">arrow_right_alt</span>
                 </button>
@@ -419,7 +419,7 @@ export default function CandidateOnboarding({
         </div>
       </main>
 
-      <footer className="px-6 py-8 border-t border-black/5 dark:border-white/5 flex items-center justify-between text-[8px] font-black uppercase tracking-[0.4em] opacity-20">
+      <footer className="px-6 py-8 border-t border-black/5 dark:border-white/5 flex items-center justify-between text-[8px] font-black tracking-[0.4em] opacity-20">
         <p>© 2026 Asterix-find. All telemetry encrypted.</p>
         <p>Step {step + 1} of {STEPS.length}</p>
       </footer>

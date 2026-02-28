@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div className="space-y-3 border-t border-black/10 dark:border-white/10 pt-8">
-        <h2 className="text-xl font-black uppercase tracking-tight">{title}</h2>
+        <h2 className="text-xl font-black tracking-tight">{title}</h2>
         <div className="space-y-3 text-black/70 dark:text-white/60 text-sm leading-relaxed">{children}</div>
     </div>
 );
@@ -15,15 +15,15 @@ const PrivacyPage: React.FC = () => (
                 <div className="size-9 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
                     <span className="material-symbols-outlined text-xl">auto_awesome</span>
                 </div>
-                <span className="text-xl font-black uppercase tracking-tighter">Asterix</span>
+                <span className="text-xl font-black tracking-tighter">Asterix</span>
             </Link>
-            <Link to="/" className="text-[9px] font-black uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity">← Back</Link>
+            <Link to="/" className="text-[9px] font-black tracking-widest opacity-50 hover:opacity-100 transition-opacity">← Back</Link>
         </header>
 
         <main className="max-w-3xl mx-auto px-6 py-20 md:py-32 space-y-8">
             <div>
-                <p className="text-[9px] font-black uppercase tracking-[0.5em] opacity-40 mb-4">Legal</p>
-                <h1 className="text-5xl font-black uppercase tracking-tighter mb-4">Privacy Policy</h1>
+                <p className="text-[9px] font-black tracking-[0.5em] opacity-40 mb-4">Legal</p>
+                <h1 className="text-5xl font-black tracking-tighter mb-4">Privacy Policy</h1>
                 <p className="text-sm opacity-50">Last updated: February 28, 2025</p>
             </div>
 
@@ -80,3 +80,4 @@ const PrivacyPage: React.FC = () => (
 );
 
 export default PrivacyPage;
+

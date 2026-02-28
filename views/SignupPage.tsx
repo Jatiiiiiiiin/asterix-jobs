@@ -172,11 +172,11 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
           <div className="bg-black dark:bg-white size-10 flex items-center justify-center text-white dark:text-black">
             <span className="material-symbols-outlined text-2xl font-black">auto_awesome</span>
           </div>
-          <h2 className="text-2xl font-black tracking-tighter uppercase">Asterix</h2>
+          <h2 className="text-2xl font-black tracking-tighter">Asterix</h2>
         </Link>
         <button
           onClick={() => setIsLogin(!isLogin)}
-          className="text-[10px] font-black uppercase tracking-[0.4em] hover:opacity-100 transition-opacity flex items-center gap-2"
+          className="text-[10px] font-black tracking-[0.4em] hover:opacity-100 transition-opacity flex items-center gap-2"
         >
           {isLogin ? 'Need an account?' : 'Returning user?'}
           <span className="border-b-2 border-black dark:border-white pb-0.5">{isLogin ? 'Sign Up' : 'Log In'}</span>
@@ -196,17 +196,17 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
               <span className="material-symbols-outlined text-4xl animate-pulse">encrypted</span>
             </div>
             <div className="space-y-3">
-              <h2 className="text-2xl font-black uppercase tracking-[0.3em]">{loadingText}</h2>
-              <p className="text-[10px] font-black uppercase tracking-[0.5em] opacity-40">Verifying Identity Integrity</p>
+              <h2 className="text-2xl font-black tracking-[0.3em]">{loadingText}</h2>
+              <p className="text-[10px] font-black tracking-[0.5em] opacity-40">Verifying Identity Integrity</p>
             </div>
           </div>
         ) : (
           <div className="w-full max-w-[460px] border-2 border-black dark:border-white p-8 md:p-12 z-20 bg-white dark:bg-background-dark space-y-10 animate-in slide-in-from-bottom-5 duration-700 shadow-[20px_20px_0px_rgba(0,0,0,0.05)] dark:shadow-[20px_20px_0px_rgba(255,255,255,0.02)]">
             <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
+              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
                 {isLogin ? 'Welcome Back' : 'Join Network'}
               </h1>
-              <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 leading-relaxed">
+              <p className="text-[10px] font-bold tracking-widest opacity-40 leading-relaxed">
                 {buyPlanIntent
                   ? 'Unlock premium access with AI-powered job matching.'
                   : isLogin
@@ -219,13 +219,13 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
               <div className="flex border border-black dark:border-white p-1">
                 <button
                   onClick={() => setSelectedRole('candidate')}
-                  className={`flex-1 flex items-center justify-center py-4 text-[10px] font-black uppercase tracking-widest transition-all ${selectedRole === 'candidate' ? 'bg-black text-white dark:bg-white dark:text-black' : 'opacity-40 hover:opacity-60'}`}
+                  className={`flex-1 flex items-center justify-center py-4 text-[10px] font-black tracking-widest transition-all ${selectedRole === 'candidate' ? 'bg-black text-white dark:bg-white dark:text-black' : 'opacity-40 hover:opacity-60'}`}
                 >
                   Candidate
                 </button>
                 <button
                   onClick={() => setSelectedRole('recruiter')}
-                  className={`flex-1 flex items-center justify-center py-4 text-[10px] font-black uppercase tracking-widest transition-all ${selectedRole === 'recruiter' ? 'bg-black text-white dark:bg-white dark:text-black' : 'opacity-40 hover:opacity-60'}`}
+                  className={`flex-1 flex items-center justify-center py-4 text-[10px] font-black tracking-widest transition-all ${selectedRole === 'recruiter' ? 'bg-black text-white dark:bg-white dark:text-black' : 'opacity-40 hover:opacity-60'}`}
                 >
                   Recruiter
                 </button>
@@ -234,7 +234,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
 
             {buyPlanIntent && !isLogin && (
               <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 rounded">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-60 flex items-center gap-2">
+                <p className="text-[9px] font-black tracking-[0.2em] opacity-60 flex items-center gap-2">
                   <span className="material-symbols-outlined text-sm">check_circle</span>
                   Premium Plan Selected
                 </p>
@@ -244,7 +244,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
             {/* Error Message Display */}
             {errorMessage && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded">
-                <p className="text-[9px] font-black uppercase tracking-[0.1em] text-red-700 dark:text-red-300 flex items-center gap-2">
+                <p className="text-[9px] font-black tracking-[0.1em] text-red-700 dark:text-red-300 flex items-center gap-2">
                   <span className="material-symbols-outlined text-sm">error</span>
                   {errorMessage}
                 </p>
@@ -254,7 +254,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
             <form onSubmit={handleEmailAuth} className="space-y-6">
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40">Operational ID (Email)</label>
+                  <label className="text-[9px] font-black tracking-[0.3em] opacity-40">Operational ID (Email)</label>
                   <input
                     required
                     disabled={isLoading}
@@ -263,14 +263,14 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
                       setEmail(e.target.value);
                       setErrorMessage(''); // Clear error on input change
                     }}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 text-xs font-bold uppercase tracking-widest focus:ring-0 focus:border-black dark:focus:border-white outline-none transition-all disabled:opacity-50"
+                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 text-xs font-bold tracking-widest focus:ring-0 focus:border-black dark:focus:border-white outline-none transition-all disabled:opacity-50"
                     placeholder="ID_0000@ASTERIX.NETWORK"
                     type="email"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40">Passphrase</label>
+                  <label className="text-[9px] font-black tracking-[0.3em] opacity-40">Passphrase</label>
                   <input
                     required
                     disabled={isLoading}
@@ -279,7 +279,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
                       setPassword(e.target.value);
                       setErrorMessage(''); // Clear error on input change
                     }}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 text-xs font-bold uppercase tracking-widest focus:ring-0 focus:border-black dark:focus:border-white outline-none transition-all disabled:opacity-50"
+                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 text-xs font-bold tracking-widest focus:ring-0 focus:border-black dark:focus:border-white outline-none transition-all disabled:opacity-50"
                     placeholder="••••••••"
                     type="password"
                   />
@@ -289,7 +289,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-black dark:bg-white text-white dark:text-black py-6 font-black uppercase tracking-[0.4em] text-[10px] hover:invert transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-4"
+                className="w-full bg-black dark:bg-white text-white dark:text-black py-6 font-black tracking-[0.4em] text-[10px] hover:invert transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-4"
               >
                 {isLogin ? 'Enter Portal' : 'Register Node'}
                 <span className="material-symbols-outlined text-base">arrow_right_alt</span>
@@ -299,7 +299,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <span className="flex-1 h-px bg-black/10 dark:bg-white/10"></span>
-                <span className="text-[8px] font-black uppercase tracking-widest opacity-20 whitespace-nowrap">External Auth Bridges</span>
+                <span className="text-[8px] font-black tracking-widest opacity-20 whitespace-nowrap">External Auth Bridges</span>
                 <span className="flex-1 h-px bg-black/10 dark:bg-white/10"></span>
               </div>
 
@@ -307,7 +307,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
                 <button
                   onClick={() => handleSocialAuth('google')}
                   disabled={isLoading}
-                  className="flex items-center justify-center gap-3 py-4 border border-black dark:border-white/20 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-[9px] font-black uppercase tracking-widest group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-3 py-4 border border-black dark:border-white/20 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-[9px] font-black tracking-widest group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="" className="size-4 grayscale group-hover:grayscale-0 transition-all" />
                   Google
@@ -315,7 +315,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
                 <button
                   onClick={() => handleSocialAuth('linkedin')}
                   disabled={isLoading}
-                  className="flex items-center justify-center gap-3 py-4 border border-black dark:border-white/20 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-[9px] font-black uppercase tracking-widest group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-3 py-4 border border-black dark:border-white/20 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-[9px] font-black tracking-widest group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <img src="https://www.svgrepo.com/show/448234/linkedin.svg" alt="" className="size-4 grayscale group-hover:grayscale-0 transition-all" />
                   LinkedIn
@@ -326,7 +326,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
         )}
       </main>
 
-      <footer className="w-full px-6 py-8 flex flex-col md:flex-row items-center justify-between text-[8px] font-black uppercase tracking-[0.4em] opacity-20 border-t border-black/5 dark:border-white/5">
+      <footer className="w-full px-6 py-8 flex flex-col md:flex-row items-center justify-between text-[8px] font-black tracking-[0.4em] opacity-20 border-t border-black/5 dark:border-white/5">
         <p>© 2024 Asterix-find. Session Protocol: V.0.9.1</p>
         <div className="flex gap-8 mt-4 md:mt-0">
           <a href="#" className="hover:opacity-100">Contact Node</a>

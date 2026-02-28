@@ -100,7 +100,7 @@ const Field = ({
   rows?: number;
 }) => (
   <div className="space-y-1">
-    <label className="text-[8px] font-black uppercase tracking-[0.4em] opacity-40">{label}</label>
+    <label className="text-[8px] font-black tracking-[0.4em] opacity-40">{label}</label>
     {multiline ? (
       <textarea
         name={name}
@@ -304,7 +304,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                 <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2 text-black dark:text-white">
                   <span className="material-symbols-outlined">menu</span>
                 </button>
-                <div className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.5em] opacity-40">
+                <div className="text-[7px] md:text-[8px] font-black tracking-[0.5em] opacity-40">
                   Candidate Profile
                 </div>
               </div>
@@ -316,25 +316,25 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                     value={profile.name}
                     onChange={handleProfileChange}
                     placeholder="Full Name"
-                    className="text-3xl md:text-4xl font-black uppercase tracking-tighter w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-2 outline-none focus:border-black dark:focus:border-white"
+                    className="text-3xl md:text-4xl font-black tracking-tighter w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-2 outline-none focus:border-black dark:focus:border-white"
                   />
                   <input
                     name="title"
                     value={profile.title}
                     onChange={handleProfileChange}
                     placeholder="Job Title"
-                    className="text-base font-black uppercase tracking-widest w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-2 outline-none focus:border-black dark:focus:border-white"
+                    className="text-base font-black tracking-widest w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-2 outline-none focus:border-black dark:focus:border-white"
                   />
                 </div>
               ) : (
                 <div className="space-y-0.5 md:space-y-1">
-                  <h1 className="text-3xl md:text-6xl font-black uppercase tracking-tighter leading-tight break-words">
+                  <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-tight break-words">
                     {profile.name || <span className="opacity-20">Your Name</span>}
                   </h1>
-                  <p className="text-base md:text-lg font-black uppercase tracking-widest opacity-40">
+                  <p className="text-base md:text-lg font-black tracking-widest opacity-40">
                     {profile.title || <span>Add your title</span>}
                   </p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1.5 text-[7px] md:text-[8px] font-black uppercase tracking-[0.4em] opacity-40">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1.5 text-[7px] md:text-[8px] font-black tracking-[0.4em] opacity-40">
                     <span className="truncate max-w-[120px] sm:max-w-none">UID: {authUser?.uid}</span>
                     <span className="truncate max-w-[150px] sm:max-w-none">EMAIL: {authUser?.email}</span>
                   </div>
@@ -348,13 +348,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                     <button
                       onClick={handleSave}
                       disabled={isSaving}
-                      className="flex-1 sm:flex-none px-6 py-2 text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                      className="flex-1 sm:flex-none px-6 py-2 text-[9px] font-black tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
                     >
                       {isSaving ? 'Saving...' : 'Save All Changes'}
                     </button>
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="flex-1 sm:flex-none px-6 py-2 text-[9px] font-black uppercase tracking-widest border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+                      className="flex-1 sm:flex-none px-6 py-2 text-[9px] font-black tracking-widest border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                     >
                       Cancel
                     </button>
@@ -362,7 +362,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                 ) : (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex-1 sm:flex-none px-6 py-2 text-[9px] font-black uppercase tracking-widest bg-black dark:bg-white text-white dark:text-black hover:invert transition-all"
+                    className="flex-1 sm:flex-none px-6 py-2 text-[9px] font-black tracking-widest bg-black dark:bg-white text-white dark:text-black hover:invert transition-all"
                   >
                     Edit Profile
                   </button>
@@ -398,13 +398,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
             {/* ── Work Experience ─────────────────────────────────────────── */}
             <section className="space-y-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-[9px] font-black uppercase tracking-[0.4em] opacity-40">
+                <h3 className="text-[9px] font-black tracking-[0.4em] opacity-40">
                   Work Experience
                 </h3>
                 {isEditing && (
                   <button
                     onClick={addDeployment}
-                    className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest hover:opacity-50 transition-opacity"
+                    className="flex items-center gap-1 text-[8px] font-black tracking-widest hover:opacity-50 transition-opacity"
                   >
                     <span className="material-symbols-outlined text-sm">add_circle</span> Add
                   </button>
@@ -423,43 +423,43 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                           value={editDepData?.date ?? ''}
                           onChange={(e) => setEditDepData((p) => p ? { ...p, date: e.target.value } : p)}
                           placeholder="Date / Period"
-                          className="w-full bg-white dark:bg-black border border-black/20 dark:border-white/20 p-2 text-xs font-black uppercase outline-none"
+                          className="w-full bg-white dark:bg-black border border-black/20 dark:border-white/20 p-2 text-xs font-black outline-none"
                         />
                         <input
                           value={editDepData?.role ?? ''}
                           onChange={(e) => setEditDepData((p) => p ? { ...p, role: e.target.value } : p)}
                           placeholder="Job Title"
-                          className="w-full bg-white dark:bg-black border border-black/20 dark:border-white/20 p-2 text-xs font-black uppercase outline-none"
+                          className="w-full bg-white dark:bg-black border border-black/20 dark:border-white/20 p-2 text-xs font-black outline-none"
                         />
                         <input
                           value={editDepData?.co ?? ''}
                           onChange={(e) => setEditDepData((p) => p ? { ...p, co: e.target.value } : p)}
                           placeholder="Company"
-                          className="w-full bg-white dark:bg-black border border-black/20 dark:border-white/20 p-2 text-xs font-black uppercase outline-none"
+                          className="w-full bg-white dark:bg-black border border-black/20 dark:border-white/20 p-2 text-xs font-black outline-none"
                         />
                         <textarea
                           value={editDepData?.desc ?? ''}
                           onChange={(e) => setEditDepData((p) => p ? { ...p, desc: e.target.value } : p)}
                           placeholder="Description"
                           rows={3}
-                          className="w-full bg-white dark:bg-black border border-black/20 dark:border-white/20 p-2 text-xs font-medium uppercase outline-none resize-none"
+                          className="w-full bg-white dark:bg-black border border-black/20 dark:border-white/20 p-2 text-xs font-medium outline-none resize-none"
                         />
                         <div className="flex gap-2">
                           <button
                             onClick={saveEditDep}
-                            className="bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 text-[9px] font-black uppercase tracking-widest hover:invert transition-all"
+                            className="bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 text-[9px] font-black tracking-widest hover:invert transition-all"
                           >
                             Save
                           </button>
                           <button
                             onClick={() => { setEditingDepId(null); setEditDepData(null); }}
-                            className="border border-black dark:border-white px-4 py-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+                            className="border border-black dark:border-white px-4 py-1.5 text-[9px] font-black tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                           >
                             Cancel
                           </button>
                           <button
                             onClick={() => { removeDeployment(exp.id); setEditingDepId(null); }}
-                            className="ml-auto text-red-500 text-[9px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity"
+                            className="ml-auto text-red-500 text-[9px] font-black tracking-widest hover:opacity-70 transition-opacity"
                           >
                             Delete
                           </button>
@@ -467,13 +467,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                       </div>
                     ) : (
                       <div className="flex-grow space-y-1 relative pr-8">
-                        <span className="text-[8px] font-black uppercase tracking-widest opacity-40">
+                        <span className="text-[8px] font-black tracking-widest opacity-40">
                           {exp.date}
                         </span>
-                        <h4 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-tight">
+                        <h4 className="text-xl md:text-2xl font-black tracking-tighter leading-tight">
                           {exp.role} <span className="opacity-20">@</span> {exp.co}
                         </h4>
-                        <p className="text-[10px] font-medium uppercase tracking-widest opacity-60 leading-relaxed">
+                        <p className="text-[10px] font-medium tracking-widest opacity-60 leading-relaxed">
                           {exp.desc}
                         </p>
                         {isEditing && (
@@ -490,7 +490,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                 ))}
 
                 {deployments.length === 0 && (
-                  <p className="text-[10px] font-black uppercase tracking-widest opacity-30">
+                  <p className="text-[10px] font-black tracking-widest opacity-30">
                     No experience added yet. {isEditing ? 'Click + Add above.' : 'Click Edit Profile to add.'}
                   </p>
                 )}
@@ -499,7 +499,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* ── About Me ──────────────────────────────────────────────── */}
             <section className="space-y-6">
-              <h3 className="text-[9px] font-black uppercase tracking-[0.4em] opacity-40">
+              <h3 className="text-[9px] font-black tracking-[0.4em] opacity-40">
                 About Me
               </h3>
               {isEditing ? (
@@ -509,10 +509,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                   onChange={handleProfileChange}
                   rows={4}
                   placeholder="Tell employers about yourself..."
-                  className="w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-3 text-lg font-black uppercase tracking-tighter outline-none focus:border-black dark:focus:border-white resize-none"
+                  className="w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-3 text-lg font-black tracking-tighter outline-none focus:border-black dark:focus:border-white resize-none"
                 />
               ) : (
-                <p className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-tight opacity-90">
+                <p className="text-lg md:text-2xl font-black tracking-tighter leading-tight opacity-90">
                   {profile.manifesto || <span className="opacity-30">No bio added yet.</span>}
                 </p>
               )}
@@ -520,7 +520,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* ── Job Preferences ───────────────────────────────────────── */}
             <section className="space-y-6">
-              <h3 className="text-[9px] font-black uppercase tracking-[0.4em] opacity-40">
+              <h3 className="text-[9px] font-black tracking-[0.4em] opacity-40">
                 Job Preferences
               </h3>
               {isEditing ? (
@@ -529,7 +529,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                   <Field label="Remote Preference" name="remotePreference" value={preferences.remotePreference ?? ''} onChange={handlePrefChange} />
                 </div>
               ) : (
-                <div className="space-y-3 text-[9px] font-black uppercase tracking-widest">
+                <div className="space-y-3 text-[9px] font-black tracking-widest">
                   {[
                     { label: 'Min Salary', value: preferences.minSalary },
                     { label: 'Remote', value: preferences.remotePreference },
@@ -545,7 +545,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* ── Session Access ────────────────────────────────────────── */}
             <section className="border border-black dark:border-white p-6 md:p-8 bg-neutral-100 dark:bg-neutral-900">
-              <h3 className="text-[9px] font-black uppercase tracking-[0.4em] mb-6 opacity-60">
+              <h3 className="text-[9px] font-black tracking-[0.4em] mb-6 opacity-60">
                 Session Access
               </h3>
               {isEditing ? (
@@ -555,7 +555,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                   <Field label="Access Level" name="accessLevel" value={profile.accessLevel} onChange={handleProfileChange} />
                 </div>
               ) : (
-                <div className="space-y-3 text-[9px] font-black uppercase tracking-widest">
+                <div className="space-y-3 text-[9px] font-black tracking-widest">
                   {[
                     { label: 'Status', value: profile.availability },
                     { label: 'Location', value: profile.coordinates },
@@ -572,7 +572,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* ── Contact ───────────────────────────────────────────────── */}
             <section className="space-y-6">
-              <h3 className="text-[9px] font-black uppercase tracking-[0.4em] opacity-40">
+              <h3 className="text-[9px] font-black tracking-[0.4em] opacity-40">
                 Contact
               </h3>
               {isEditing ? (
@@ -582,7 +582,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                   <Field label="LinkedIn" name="linkedin" value={contact.linkedin ?? ''} onChange={handleContactChange} />
                 </div>
               ) : (
-                <div className="space-y-3 text-[9px] font-black uppercase tracking-widest">
+                <div className="space-y-3 text-[9px] font-black tracking-widest">
                   {[
                     { label: 'Phone', value: contact.phone },
                     { label: 'GitHub', value: contact.github },
@@ -603,7 +603,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* ── Education ─────────────────────────────────────────────── */}
             <section className="space-y-6">
-              <h3 className="text-[9px] font-black uppercase tracking-[0.4em] opacity-40">
+              <h3 className="text-[9px] font-black tracking-[0.4em] opacity-40">
                 Education
               </h3>
               {isEditing ? (
@@ -612,10 +612,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                   onChange={(e) => setEducation(e.target.value)}
                   rows={4}
                   placeholder="Your education background..."
-                  className="w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-3 text-xs font-medium uppercase tracking-widest outline-none focus:border-black dark:focus:border-white resize-none"
+                  className="w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-3 text-xs font-medium tracking-widest outline-none focus:border-black dark:focus:border-white resize-none"
                 />
               ) : (
-                <p className="text-xs font-medium uppercase tracking-widest opacity-60 leading-relaxed">
+                <p className="text-xs font-medium tracking-widest opacity-60 leading-relaxed">
                   {education || <span className="opacity-50">No education added yet.</span>}
                 </p>
               )}
@@ -624,13 +624,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
             {/* ── Top Skills ────────────────────────────────────────────── */}
             <section className="space-y-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-[9px] font-black uppercase tracking-[0.4em] opacity-40">
+                <h3 className="text-[9px] font-black tracking-[0.4em] opacity-40">
                   Top Skills
                 </h3>
                 {isEditing && (
                   <button
                     onClick={addSkill}
-                    className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest hover:opacity-50 transition-opacity"
+                    className="flex items-center gap-1 text-[8px] font-black tracking-widest hover:opacity-50 transition-opacity"
                   >
                     <span className="material-symbols-outlined text-sm">add_circle</span> Add
                   </button>
@@ -640,14 +640,14 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
               <div className="space-y-5">
                 {neuralVectors.map((skill) => (
                   <div key={skill.id} className="space-y-1.5 group cursor-default">
-                    <div className="flex justify-between text-[9px] font-black uppercase tracking-widest">
+                    <div className="flex justify-between text-[9px] font-black tracking-widest">
                       {isEditing ? (
                         <div className="flex gap-2 w-full items-center">
                           <input
                             type="text"
                             value={skill.s}
                             onChange={(e) => handleSkillChange(skill.id, 's', e.target.value)}
-                            className="flex-1 bg-transparent border-b border-black/20 dark:border-white/20 pb-0.5 outline-none uppercase font-black tracking-widest focus:border-black dark:focus:border-white"
+                            className="flex-1 bg-transparent border-b border-black/20 dark:border-white/20 pb-0.5 outline-none font-black tracking-widest focus:border-black dark:focus:border-white"
                           />
                           <span className="opacity-40 shrink-0">{skill.l}%</span>
                           <button
@@ -686,7 +686,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                 ))}
 
                 {neuralVectors.length === 0 && (
-                  <p className="text-[10px] font-black uppercase tracking-widest opacity-30">
+                  <p className="text-[10px] font-black tracking-widest opacity-30">
                     No skills added yet. {isEditing ? 'Click + Add above.' : 'Click Edit Profile to add.'}
                   </p>
                 )}
@@ -698,19 +698,19 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
         {/* ── Floating Save Banner (visible when editing) ─────────────── */}
         {isEditing && (
           <div className="fixed bottom-6 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-auto flex gap-3 bg-black dark:bg-white text-white dark:text-black px-4 md:px-6 py-3 shadow-2xl z-[1000] animate-in fade-in slide-in-from-bottom-4 duration-300 border border-white/20 dark:border-black/20">
-            <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest my-auto hidden sm:block">
+            <span className="text-[7px] md:text-[9px] font-black tracking-widest my-auto hidden sm:block">
               Unsaved changes
             </span>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex-1 md:flex-none px-4 py-2 text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
+              className="flex-1 md:flex-none px-4 py-2 text-[8px] md:text-[9px] font-black tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
             >
               {isSaving ? 'Saving...' : 'Save Now'}
             </button>
             <button
               onClick={() => setIsEditing(false)}
-              className="flex-1 md:flex-none px-4 py-2 text-[8px] md:text-[9px] font-black uppercase tracking-widest border border-white/30 dark:border-black/20 hover:border-white transition-colors"
+              className="flex-1 md:flex-none px-4 py-2 text-[8px] md:text-[9px] font-black tracking-widest border border-white/30 dark:border-black/20 hover:border-white transition-colors"
             >
               Discard
             </button>

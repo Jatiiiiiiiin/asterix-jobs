@@ -54,7 +54,7 @@ export default function AIChatOverlay() {
         <div className="w-[400px] h-[600px] bg-white dark:bg-background-dark border border-black dark:border-white/20 shadow-2xl flex flex-col mb-4">
 
           <header className="p-4 border-b border-black dark:border-white/10 bg-black text-white dark:bg-white dark:text-black flex justify-between">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.3em]">
+            <h4 className="text-[11px] font-black tracking-[0.3em]">
               AI Assistant
             </h4>
             <button onClick={() => setIsOpen(false)}>
@@ -113,3 +113,4 @@ export default function AIChatOverlay() {
     </div>
   );
 }
+

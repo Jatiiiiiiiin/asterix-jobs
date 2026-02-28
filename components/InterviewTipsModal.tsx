@@ -67,10 +67,10 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                             <span className="material-symbols-outlined text-lg" style={{ color: '#10b981' }}>emoji_objects</span>
                         </div>
                         <div>
-                            <p className="text-[7px] font-black uppercase tracking-[0.5em] mb-0.5" style={{ color: '#10b981' }}>
+                            <p className="text-[7px] font-black tracking-[0.5em] mb-0.5" style={{ color: '#10b981' }}>
                                 Interview Ace Protocol
                             </p>
-                            <h2 className="text-base font-black uppercase tracking-tight text-white leading-none truncate max-w-xs lg:max-w-md">
+                            <h2 className="text-base font-black tracking-tight text-white leading-none truncate max-w-xs lg:max-w-md">
                                 {jobTitle}
                             </h2>
                         </div>
@@ -82,7 +82,7 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                             style={{ border: '1px solid rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.05)' }}
                         >
                             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#10b981' }} />
-                            <span className="text-[7px] font-black uppercase tracking-widest" style={{ color: '#10b981' }}>
+                            <span className="text-[7px] font-black tracking-widest" style={{ color: '#10b981' }}>
                                 HuggingFace AI
                             </span>
                         </div>
@@ -109,10 +109,10 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                                 neurology
                             </span>
                             <div className="text-center">
-                                <p className="text-[11px] font-black uppercase tracking-[0.35em] text-white mb-1">
+                                <p className="text-[11px] font-black tracking-[0.35em] text-white mb-1">
                                     Analysing Resume vs JD
                                 </p>
-                                <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                                <p className="text-[8px] font-black tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>
                                     Keyword matching in progress…
                                 </p>
                             </div>
@@ -139,8 +139,8 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                                     >
                                         <span className="material-symbols-outlined text-base" style={{ color: s.color }}>{s.icon}</span>
                                         <div>
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-white">{s.label}</p>
-                                            <p className="text-[7px] font-black uppercase tracking-widest" style={{ color: `${s.color}80` }}>{s.sublabel}</p>
+                                            <p className="text-[9px] font-black tracking-widest text-white">{s.label}</p>
+                                            <p className="text-[7px] font-black tracking-widest" style={{ color: `${s.color}80` }}>{s.sublabel}</p>
                                         </div>
                                         <span className="ml-auto text-[22px] font-black tabular-nums" style={{ color: `${s.color}18` }}>{s.tag}</span>
                                     </div>
@@ -181,7 +181,7 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                         /* Error */
                         <div className="flex flex-col items-center gap-3 py-20 text-white" style={{ opacity: 0.25 }}>
                             <span className="material-symbols-outlined text-4xl">sentiment_dissatisfied</span>
-                            <p className="text-xs font-black uppercase tracking-widest">Could not generate tips</p>
+                            <p className="text-xs font-black tracking-widest">Could not generate tips</p>
                         </div>
 
                     )}
@@ -193,12 +193,12 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                         className="px-6 py-3 shrink-0 flex items-center justify-between"
                         style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.3)' }}
                     >
-                        <p className="text-[7px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                        <p className="text-[7px] font-black tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>
                             Powered by resume ⟷ JD keyword analysis · HuggingFace enriched
                         </p>
                         <button
                             onClick={onClose}
-                            className="px-5 py-2 text-[9px] font-black uppercase tracking-widest text-black transition-opacity hover:opacity-80"
+                            className="px-5 py-2 text-[9px] font-black tracking-widest text-black transition-opacity hover:opacity-80"
                             style={{ background: '#10b981' }}
                         >
                             Got it ✓
@@ -214,3 +214,4 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
         </div>
     );
 }
+

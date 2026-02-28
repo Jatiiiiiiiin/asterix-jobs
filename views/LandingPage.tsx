@@ -101,10 +101,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
       <div className="size-10 md:size-12 border border-black dark:border-white flex items-center justify-center group-hover:bg-white dark:group-hover:bg-black group-hover:text-black dark:group-hover:text-white transition-colors duration-500">
         <span className="material-symbols-outlined text-xl md:text-2xl">{icon}</span>
       </div>
-      <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter group-hover:text-white dark:group-hover:text-black transition-colors duration-500">
+      <h3 className="text-xl md:text-2xl font-black  tracking-tighter group-hover:text-white dark:group-hover:text-black transition-colors duration-500">
         {title}
       </h3>
-      <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-black/50 dark:text-white/50 group-hover:text-white/70 dark:group-hover:text-black/70 leading-relaxed transition-colors duration-500">
+      <p className="text-[10px] md:text-xs font-bold  tracking-widest text-black/50 dark:text-white/50 group-hover:text-white/70 dark:group-hover:text-black/70 leading-relaxed transition-colors duration-500">
         {desc}
       </p>
     </div>
@@ -119,7 +119,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
             <div className="size-9 md:size-12 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black hover:rotate-90 transition-transform duration-500 cursor-pointer">
               <span className="material-symbols-outlined text-xl md:text-3xl font-black">auto_awesome</span>
             </div>
-            <h2 className="text-xl md:text-3xl font-black tracking-tighter uppercase leading-none">Asterix</h2>
+            <h2 className="text-xl md:text-3xl font-black tracking-tighter  leading-none">Asterix</h2>
           </div>
 
           <nav className="hidden lg:flex items-center gap-10 xl:gap-12">
@@ -127,7 +127,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
               <button
                 key={item}
                 onClick={() => scrollToSection(item.toLowerCase())}
-                className="text-[10px] xl:text-[11px] font-black uppercase tracking-[0.25em] hover:opacity-50 transition-opacity"
+                className="text-[10px] xl:text-[11px] font-black  tracking-[0.25em] hover:opacity-50 transition-opacity"
               >
                 {item}
               </button>
@@ -140,7 +140,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
             </button>
             <button
               onClick={handleFreeSignup}
-              className="bg-black dark:bg-white text-white dark:text-black px-5 md:px-10 py-2.5 md:py-4 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl"
+              className="bg-black dark:bg-white text-white dark:text-black px-5 md:px-10 py-2.5 md:py-4 text-[10px] md:text-[11px] font-black  tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl"
             >
               Sign In
             </button>
@@ -167,14 +167,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
               <button
                 key={item}
                 onClick={() => scrollToSection(item.toLowerCase())}
-                className={`text-4xl sm:text-6xl font-black uppercase tracking-tighter text-left border-b border-black/5 dark:border-white/5 pb-4 transform transition-all duration-500 delay-${idx * 100} ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}
+                className={`text-4xl sm:text-6xl font-black  tracking-tighter text-left border-b border-black/5 dark:border-white/5 pb-4 transform transition-all duration-500 delay-${idx * 100} ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}
               >
                 {item}
               </button>
             ))}
             <button
               onClick={handleFreeSignup}
-              className={`text-xl font-black uppercase tracking-widest mt-4 transition-all duration-700 delay-500 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+              className={`text-xl font-black  tracking-widest mt-4 transition-all duration-700 delay-500 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
             >
               Get Started <span className="inline-block animate-bounce-x ml-2">—&gt;</span>
             </button>
@@ -186,30 +186,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         {/* Hero Section */}
         <section className={`relative pt-32 sm:pt-40 md:pt-48 pb-20 sm:pb-32 md:pb-48 transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
-            <div className="inline-flex items-center gap-2 md:gap-3 border border-black/10 dark:border-white/10 px-4 md:px-6 py-2 text-[8px] md:text-[11px] font-black uppercase tracking-[0.4em] mb-8 md:mb-12">
+            <div className="inline-flex items-center gap-2 md:gap-3 border border-black/10 dark:border-white/10 px-4 md:px-6 py-2 text-[8px] md:text-[11px] font-black  tracking-[0.4em] mb-8 md:mb-12">
               <span className="size-1.5 bg-black dark:bg-white animate-ping"></span>
               Neural Protocol Active
             </div>
 
-            <h1 className="text-[11vw] xs:text-[10vw] sm:text-[9vw] md:text-[8vw] lg:text-[7vw] font-black tracking-tighter leading-[1] mb-12 sm:mb-16 uppercase break-words">
+            <h1 className="text-[11vw] xs:text-[10vw] sm:text-[9vw] md:text-[8vw] lg:text-[7vw] font-black tracking-tighter leading-[1] mb-12 sm:mb-16  break-words">
               The <span className="text-black/5 dark:text-white/5 outline-text">Purest</span><br />
               Intelligence Match
             </h1>
 
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 md:gap-12 lg:gap-20">
-              <p className="text-lg sm:text-xl md:text-2xl text-black/50 dark:text-white/40 max-w-xl font-medium uppercase tracking-tight leading-tight">
+              <p className="text-lg sm:text-xl md:text-2xl text-black/50 dark:text-white/40 max-w-xl font-medium  tracking-tight leading-tight">
                 Stop wasting hours on job boards that never reply. Asterix matches you to the right roles based on your actual skills — and applies on your behalf.
               </p>
               <div className="flex flex-col sm:flex-row items-stretch gap-4 md:gap-6 w-full lg:w-auto">
                 <button
                   onClick={handleFreeSignup}
-                  className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black px-10 md:px-16 py-5 md:py-6 text-xs md:text-sm font-black uppercase tracking-[0.25em] hover:invert transition-all text-center cursor-pointer"
+                  className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black px-10 md:px-16 py-5 md:py-6 text-xs md:text-sm font-black  tracking-[0.25em] hover:invert transition-all text-center cursor-pointer"
                 >
                   Find a Job
                 </button>
                 <button
                   onClick={handleFreeSignup}
-                  className="flex-1 sm:flex-none border-2 border-black dark:border-white px-10 md:px-16 py-5 md:py-6 text-xs md:text-sm font-black uppercase tracking-[0.25em] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center cursor-pointer"
+                  className="flex-1 sm:flex-none border-2 border-black dark:border-white px-10 md:px-16 py-5 md:py-6 text-xs md:text-sm font-black  tracking-[0.25em] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center cursor-pointer"
                 >
                   Hire Talent
                 </button>
@@ -222,10 +222,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         <section className="py-10 md:py-20 border-y border-black/5 dark:border-white/5 overflow-hidden bg-black/[0.01] dark:bg-white/[0.01]">
           <div className="flex whitespace-nowrap gap-12 md:gap-24 animate-marquee">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <span key={i} className="text-2xl sm:text-3xl md:text-5xl font-black uppercase tracking-tighter opacity-10 select-none">Partner Company {i}</span>
+              <span key={i} className="text-2xl sm:text-3xl md:text-5xl font-black  tracking-tighter opacity-10 select-none">Partner Company {i}</span>
             ))}
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <span key={i + 'copy'} className="text-2xl sm:text-3xl md:text-5xl font-black uppercase tracking-tighter opacity-10 select-none">Partner Company {i}</span>
+              <span key={i + 'copy'} className="text-2xl sm:text-3xl md:text-5xl font-black  tracking-tighter opacity-10 select-none">Partner Company {i}</span>
             ))}
           </div>
         </section>
@@ -234,8 +234,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         <section id="features" className="py-20 sm:py-32 md:py-40 bg-white dark:bg-background-dark">
           <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
             <div className="flex flex-col lg:flex-row justify-between items-start gap-8 lg:gap-20 mb-16 md:mb-24">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tighter leading-[0.9]">More  Than<br />a  Job  Board</h2>
-              <p className="max-w-xl text-base sm:text-lg font-bold uppercase tracking-widest text-black/50 dark:text-white/50 leading-relaxed">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-black  tracking-tighter leading-[0.9]">More  Than<br />a  Job  Board</h2>
+              <p className="max-w-xl text-base sm:text-lg font-bold  tracking-widest text-black/50 dark:text-white/50 leading-relaxed">
                 Not a Regular job site that just search for keywords in your resume. Asterix actually understands what you're good at — and finds companies where you'll genuinely thrive.
               </p>
             </div>
@@ -269,8 +269,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         <section id="process" className="py-20 sm:py-32 md:py-40 bg-black text-white dark:bg-white dark:text-black">
           <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
             <div className="mb-16 md:mb-24">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none">How It Works</h2>
-              <p className="text-[10px] md:text-sm font-black uppercase tracking-[0.4em] opacity-40 mt-4">Three simple steps to your next role</p>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-black  tracking-tighter leading-none">How It Works</h2>
+              <p className="text-[10px] md:text-sm font-black  tracking-[0.4em] opacity-40 mt-4">Three simple steps to your next role</p>
             </div>
 
             <div className="space-y-16 sm:space-y-24 md:space-y-32">
@@ -282,8 +282,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                 <div key={i} className="flex flex-col md:flex-row items-start gap-8 md:gap-12 border-t border-white/20 dark:border-black/20 pt-8 md:pt-12 group">
                   <span className="text-6xl sm:text-7xl md:text-8xl font-black leading-none opacity-20 group-hover:opacity-100 transition-opacity duration-500">{item.step}</span>
                   <div className="flex-grow max-w-2xl">
-                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4 md:mb-6">{item.title}</h3>
-                    <p className="text-lg sm:text-xl font-medium uppercase tracking-tight opacity-70 leading-relaxed group-hover:opacity-100 transition-opacity duration-500">{item.desc}</p>
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black  tracking-tighter mb-4 md:mb-6">{item.title}</h3>
+                    <p className="text-lg sm:text-xl font-medium  tracking-tight opacity-70 leading-relaxed group-hover:opacity-100 transition-opacity duration-500">{item.desc}</p>
                   </div>
                   <div className="hidden lg:block size-32 xl:size-40 bg-white/5 dark:bg-black/5 border border-white/10 dark:border-black/10 shrink-0 group-hover:bg-white/10 dark:group-hover:bg-black/10 transition-all"></div>
                 </div>
@@ -296,10 +296,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         <section id="pricing" className="py-20 sm:py-32 md:py-40 border-t border-black/5 dark:border-white/10">
           <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
             <div className="flex flex-col items-center text-center mb-16 md:mb-32">
-              <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter mb-6 md:mb-8 leading-none">
+              <h2 className="text-4xl sm:text-5xl md:text-7xl font-black  tracking-tighter mb-6 md:mb-8 leading-none">
                 Pick Your Plan
               </h2>
-              <p className="text-[10px] sm:text-xs md:text-sm text-black/50 dark:text-white/50 font-black uppercase tracking-[0.3em]">
+              <p className="text-[10px] sm:text-xs md:text-sm text-black/50 dark:text-white/50 font-black  tracking-[0.3em]">
                 Simple plans for job seekers and hiring teams
               </p>
             </div>
@@ -309,18 +309,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
               <div className="border border-black dark:border-white/20 p-8 sm:p-12 md:p-16 flex flex-col justify-between hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-500 group">
                 <div className="space-y-8">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tighter">
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black  tracking-tighter">
                       Job Seeker
                     </h3>
-                    <div className="text-[8px] sm:text-[9px] font-black uppercase border border-black/20 dark:border-white/20 group-hover:border-white/30 dark:group-hover:border-black/30 px-3 py-1.5 tracking-[0.25em]">
+                    <div className="text-[8px] sm:text-[9px] font-black  border border-black/20 dark:border-white/20 group-hover:border-white/30 dark:group-hover:border-black/30 px-3 py-1.5 tracking-[0.25em]">
                       Popular
                     </div>
                   </div>
 
-                  <div className="text-6xl sm:text-7xl md:text-8xl font-black leading-none uppercase tracking-tighter">
+                  <div className="text-6xl sm:text-7xl md:text-8xl font-black leading-none  tracking-tighter">
                     ₹99
                   </div>
-                  <p className="text-[8px] font-black uppercase tracking-widest opacity-60">
+                  <p className="text-[8px] font-black  tracking-widest opacity-60">
                     Per Month
                   </p>
 
@@ -337,7 +337,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                     ].map(feature => (
                       <li
                         key={feature}
-                        className="text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-[0.15em] flex items-center gap-3 md:gap-4"
+                        className="text-[9px] sm:text-[10px] md:text-xs font-black  tracking-[0.15em] flex items-center gap-3 md:gap-4"
                       >
                         <span className="size-1.5 md:size-2 bg-black dark:bg-white group-hover:bg-white dark:group-hover:bg-black transition-colors"></span>
                         {feature}
@@ -350,7 +350,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                   {/* Free Button */}
                   <button
                     onClick={handleFreeSignup}
-                    className="block w-full text-center border-2 border-black dark:border-white py-5 md:py-6 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] group-hover:bg-white group-hover:text-black dark:group-hover:bg-black dark:group-hover:text-white transition-all cursor-pointer"
+                    className="block w-full text-center border-2 border-black dark:border-white py-5 md:py-6 text-[10px] md:text-xs font-black  tracking-[0.2em] group-hover:bg-white group-hover:text-black dark:group-hover:bg-black dark:group-hover:text-white transition-all cursor-pointer"
                   >
                     Start for Free
                   </button>
@@ -358,7 +358,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                   {/* Premium Button */}
                   <button
                     onClick={() => handleUpgradePlan('student')}
-                    className="block w-full text-center border-2 border-black dark:border-white py-5 md:py-6 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] group-hover:bg-white group-hover:text-black dark:group-hover:bg-black dark:group-hover:text-white transition-all cursor-pointer flex items-center justify-center gap-2"
+                    className="block w-full text-center border-2 border-black dark:border-white py-5 md:py-6 text-[10px] md:text-xs font-black  tracking-[0.2em] group-hover:bg-white group-hover:text-black dark:group-hover:bg-black dark:group-hover:text-white transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-sm">lock</span>
                     Upgrade to Premium (₹99/mo)
@@ -368,19 +368,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
               {/* Recruiter Plan */}
               <div className="bg-black dark:bg-white text-white dark:text-black p-8 sm:p-12 md:p-16 flex flex-col justify-between relative shadow-2xl md:scale-105 z-10 transition-transform duration-500">
-                <div className="absolute top-6 sm:top-8 right-6 sm:right-8 text-[8px] sm:text-[10px] font-black uppercase border border-white/20 dark:border-black/20 px-3 md:px-4 py-1.5 md:py-2 tracking-[0.25em] bg-white/10 dark:bg-black/10">
+                <div className="absolute top-6 sm:top-8 right-6 sm:right-8 text-[8px] sm:text-[10px] font-black  border border-white/20 dark:border-black/20 px-3 md:px-4 py-1.5 md:py-2 tracking-[0.25em] bg-white/10 dark:bg-black/10">
                   For Teams
                 </div>
 
                 <div className="space-y-8">
-                  <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tighter">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-black  tracking-tighter">
                     Recruiter Pro
                   </h3>
 
-                  <div className="text-5xl sm:text-6xl md:text-7xl font-black leading-none uppercase tracking-tighter">
+                  <div className="text-5xl sm:text-6xl md:text-7xl font-black leading-none  tracking-tighter">
                     ₹1,999
                   </div>
-                  <p className="text-[8px] font-black uppercase tracking-widest opacity-60">
+                  <p className="text-[8px] font-black  tracking-widest opacity-60">
                     Per Month
                   </p>
 
@@ -399,7 +399,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                     ].map(feature => (
                       <li
                         key={feature}
-                        className="text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-[0.15em] flex items-center gap-3 md:gap-4"
+                        className="text-[9px] sm:text-[10px] md:text-xs font-black  tracking-[0.15em] flex items-center gap-3 md:gap-4"
                       >
                         <span className="size-1.5 md:size-2 bg-white dark:bg-black"></span>
                         {feature}
@@ -410,7 +410,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
                 <button
                   onClick={() => handleUpgradePlan('recruiter')}
-                  className="block w-full text-center border-2 border-white dark:border-black py-5 md:py-6 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mt-6 hover:invert transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="block w-full text-center border-2 border-white dark:border-black py-5 md:py-6 text-[10px] md:text-xs font-black  tracking-[0.2em] mt-6 hover:invert transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span className="material-symbols-outlined text-sm">lock</span>
                   Upgrade to Pro (₹1,999/mo)
@@ -420,7 +420,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* Additional Info */}
             <div className="mt-16 md:mt-24 text-center">
-              <p className="text-[9px] sm:text-[10px] md:text-xs text-black/50 dark:text-white/50 font-black uppercase tracking-[0.2em]">
+              <p className="text-[9px] sm:text-[10px] md:text-xs text-black/50 dark:text-white/50 font-black  tracking-[0.2em]">
                 All plans include 24/7 support • Cancel anytime • Payments are secure
               </p>
             </div>
@@ -430,29 +430,29 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         {/* Network Section */}
         <section id="network" className="py-20 sm:py-32 md:py-40 bg-black text-white dark:bg-white dark:text-black">
           <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10 text-center">
-            <h2 className="text-3xl sm:text-5xl md:text-8xl font-black uppercase tracking-tighter mb-12 sm:mb-20 leading-[0.9]">Built for<br />Real Careers</h2>
+            <h2 className="text-3xl sm:text-5xl md:text-8xl font-black  tracking-tighter mb-12 sm:mb-20 leading-[0.9]">Built for<br />Real Careers</h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 md:gap-12 lg:gap-16 mt-12 md:mt-20 border-t border-white/10 dark:border-black/10 pt-12 md:pt-20">
               <div className="space-y-2">
                 <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none whitespace-nowrap">
                   {liveMembers !== null ? `${liveMembers.toLocaleString()}` : '20+'}
                 </p>
-                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Talents Registered</p>
+                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black  tracking-widest opacity-50">Talents Registered</p>
               </div>
               <div className="space-y-2">
                 <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none whitespace-nowrap">
                   98.2%
                 </p>
-                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Match Accuracy</p>
+                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black  tracking-widest opacity-50">Match Accuracy</p>
               </div>
               <div className="space-y-2">
                 <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none whitespace-nowrap">
                   {liveCompanies !== null ? `${liveCompanies.toLocaleString()}` : '1+'}
                 </p>
-                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Hiring Companies</p>
+                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black  tracking-widest opacity-50">Hiring Companies</p>
               </div>
               <div className="space-y-2">
                 <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none">2ms</p>
-                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Match Speed</p>
+                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black  tracking-widest opacity-50">Match Speed</p>
               </div>
             </div>
           </div>
@@ -472,7 +472,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                 <div className="size-9 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
                   <span className="material-symbols-outlined text-xl">auto_awesome</span>
                 </div>
-                <span className="text-xl font-black uppercase tracking-tighter">Asterix</span>
+                <span className="text-xl font-black  tracking-tighter">Asterix</span>
               </div>
               <p className="text-sm text-black/50 dark:text-white/50 leading-relaxed max-w-xs">
                 AI-powered job matching and auto-application platform. We match you to the right roles — and apply on your behalf.
@@ -498,7 +498,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                 ))}
               </div>
               {/* Contact shortcut */}
-              <a href="mailto:hello@asterix-jobs.in" className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white transition-colors">
+              <a href="mailto:hello@asterix-jobs.in" className="inline-flex items-center gap-2 text-[9px] font-black  tracking-widest text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white transition-colors">
                 <span className="material-symbols-outlined text-sm">mail</span>
                 hello@asterix-jobs.in
               </a>
@@ -506,8 +506,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* Product */}
             <div className="space-y-5">
-              <h5 className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 dark:text-white/40">Product</h5>
-              <div className="flex flex-col gap-3 text-[10px] font-black uppercase tracking-widest">
+              <h5 className="text-[9px] font-black  tracking-[0.4em] text-black/40 dark:text-white/40">Product</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-black  tracking-widest">
                 <button onClick={() => scrollToSection('features')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Features</button>
                 <button onClick={() => scrollToSection('process')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">How It Works</button>
                 <button onClick={() => scrollToSection('pricing')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Pricing</button>
@@ -517,8 +517,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* Job Seekers */}
             <div className="space-y-5">
-              <h5 className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 dark:text-white/40">Job Seekers</h5>
-              <div className="flex flex-col gap-3 text-[10px] font-black uppercase tracking-widest">
+              <h5 className="text-[9px] font-black  tracking-[0.4em] text-black/40 dark:text-white/40">Job Seekers</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-black  tracking-widest">
                 <Link to="/signup" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Create Account</Link>
                 <Link to="/signup" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Upload Resume</Link>
                 <Link to="/candidate/jobs" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Browse Jobs</Link>
@@ -529,8 +529,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* Recruiters */}
             <div className="space-y-5">
-              <h5 className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 dark:text-white/40">Recruiters</h5>
-              <div className="flex flex-col gap-3 text-[10px] font-black uppercase tracking-widest">
+              <h5 className="text-[9px] font-black  tracking-[0.4em] text-black/40 dark:text-white/40">Recruiters</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-black  tracking-widest">
                 <Link to="/signup" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Post a Job</Link>
                 <Link to="/recruiter" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Recruiter Portal</Link>
                 <Link to="/recruiter/talent" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Talent Pipeline</Link>
@@ -541,8 +541,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
             {/* Company */}
             <div className="space-y-5">
-              <h5 className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 dark:text-white/40">Company</h5>
-              <div className="flex flex-col gap-3 text-[10px] font-black uppercase tracking-widest">
+              <h5 className="text-[9px] font-black  tracking-[0.4em] text-black/40 dark:text-white/40">Company</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-black  tracking-widest">
                 <Link to="/about" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">About Us</Link>
                 <Link to="/contact" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Contact</Link>
                 <a href="mailto:careers@asterix-jobs.in" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Careers</a>
@@ -560,7 +560,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
               { icon: 'privacy_tip', text: 'GDPR Compliant' },
               { icon: 'https', text: 'SSL Encrypted' },
             ].map(b => (
-              <div key={b.text} className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-black/30 dark:text-white/30">
+              <div key={b.text} className="flex items-center gap-1.5 text-[8px] font-black  tracking-widest text-black/30 dark:text-white/30">
                 <span className="material-symbols-outlined text-xs">{b.icon}</span>
                 {b.text}
               </div>
@@ -569,10 +569,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
           {/* Bottom bar */}
           <div className="py-6 border-t border-black/5 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-[8px] font-black uppercase tracking-[0.4em] text-black/30 dark:text-white/30">
+            <p className="text-[8px] font-black  tracking-[0.4em] text-black/30 dark:text-white/30">
               © {new Date().getFullYear()} Asterix Technologies. All rights reserved.
             </p>
-            <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black uppercase tracking-[0.3em] text-black/30 dark:text-white/30">
+            <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black  tracking-[0.3em] text-black/30 dark:text-white/30">
               <Link to="/privacy" className="hover:text-black dark:hover:text-white transition-colors">Privacy Policy</Link>
               <Link to="/terms" className="hover:text-black dark:hover:text-white transition-colors">Terms of Service</Link>
               <a href="mailto:hello@asterix-jobs.in" className="hover:text-black dark:hover:text-white transition-colors">Contact</a>
