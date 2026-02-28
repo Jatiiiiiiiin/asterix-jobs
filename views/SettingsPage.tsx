@@ -208,7 +208,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
   const aiFeatures = role === 'candidate'
     ? [
       { id: 'publicProfile', label: 'Visible Profile', desc: 'Allow recruiters to discover your node.' },
-      { id: 'aiAssistant', label: 'Career Chatbot', desc: 'Enable AI-driven chat assistance.' },
+
       { id: 'autoApply', label: 'Auto-Pilot', desc: 'Auto-apply to 95%+ fidelity matches.' },
       { id: 'emailNotifications', label: 'Alert Pings', desc: 'Receive match and status notifications.' },
     ]

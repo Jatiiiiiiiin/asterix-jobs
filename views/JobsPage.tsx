@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import JobChatDrawer from '../components/JobChatDrawer';
+
 import { subscribeToActiveJobs } from '../Jobservice';
 import { Job } from '../types';
 import { authService } from '../authService';
 import { usePlan } from '../usePlan.ts';
 import UpgradeModal from '../components/UpgradeModal';
+import { getInterviewTips, InterviewTips } from '../geminiService';
+import InterviewTipsModal from '../components/InterviewTipsModal';
 
 const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = ({ onToggleTheme, isDarkMode }) => {
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
   const [matchThreshold, setMatchThreshold] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [activeChatJob, setActiveChatJob] = useState<Job | null>(null);
+
   const [showFidelityFilter, setShowFidelityFilter] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [dynamicJobs, setDynamicJobs] = useState<Job[]>([]);
@@ -27,6 +29,44 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
   // ── Plan gating ─────────────────────────────────────────────
   const { canManualApply } = usePlan();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // ── Ace Interview States ────────────────────────────────────
+  const [interviewTipsJob, setInterviewTipsJob] = useState<Job | null>(null);
+  const [interviewTips, setInterviewTips] = useState<InterviewTips | null>(null);
+  const [isLoadingTips, setIsLoadingTips] = useState(false);
+
+  const addNotification = (title: string, msg: string, type: 'info' | 'success' | 'alert') => {
+    // Note: JobsPage doesn't have a notification system like CandidateDashboard, 
+    // it uses standard browser alerts or logs for now, or we can add a simple one if needed.
+    // For now, let's just log it to keep it simple unless requested.
+    console.log(`[${type}] ${title}: ${msg}`);
+  };
+
+  const handleAceInterview = async (job: Job) => {
+    const uid = userId;
+    const resumeText = uid ? (localStorage.getItem(`asterix_resume_content_${uid}`) || '') : '';
+
+    if (!resumeText) {
+      alert('Upload your resume in the Dashboard first to get interview tips.');
+      return;
+    }
+
+    const jd = [job.jobSummary || '', ...(Array.isArray(job.responsibilities) ? job.responsibilities : [])].join(' ');
+
+    setInterviewTipsJob(job);
+    setInterviewTips(null);
+    setIsLoadingTips(true);
+
+    try {
+      const tips = await getInterviewTips(resumeText, job.title, jd);
+      setInterviewTips(tips);
+    } catch (err) {
+      console.error('AI Error', err);
+      setInterviewTipsJob(null);
+    } finally {
+      setIsLoadingTips(false);
+    }
+  };
 
   useEffect(() => {
     const initializeJobs = async () => {
@@ -306,7 +346,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                       job={job}
                       isBestFit={true}
                       navigate={navigate}
-                      setActiveChatJob={setActiveChatJob}
+                      onAceInterview={() => handleAceInterview(job)}
                       canManualApply={canManualApply}
                       onLockedClick={() => setShowUpgradeModal(true)}
                     />
@@ -348,7 +388,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                         job={job}
                         isBestFit={false}
                         navigate={navigate}
-                        setActiveChatJob={setActiveChatJob}
+                        onAceInterview={() => { }} // Not used for universe feed
                         canManualApply={canManualApply}
                         onLockedClick={() => setShowUpgradeModal(true)}
                       />
@@ -365,27 +405,34 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
         </div>
       </main>
 
-      {activeChatJob && (
-        <JobChatDrawer job={activeChatJob} onClose={() => setActiveChatJob(null)} />
-      )}
+
 
       {/* UPGRADE MODAL */}
       <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+
+      <InterviewTipsModal
+        isOpen={!!interviewTipsJob}
+        jobTitle={interviewTipsJob?.title || ''}
+        tips={interviewTips}
+        isLoading={isLoadingTips}
+        onClose={() => { setInterviewTipsJob(null); setInterviewTips(null); }}
+      />
     </div>
   );
 };
 
-/* ═══════════════════════════════════════════
-   JOB CARD — now receives plan props
-═══════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   JobCard UI — Specialized for JobsPage
+   Shows different fidelity states for Best Fit vs Universe
+════════════════════════════════════════════════════════ */
 const JobCard: React.FC<{
   job: Job;
   isBestFit: boolean;
   navigate: any;
-  setActiveChatJob: (job: Job) => void;
+  onAceInterview: () => void;
   canManualApply: boolean;
   onLockedClick: () => void;
-}> = ({ job, isBestFit, navigate, setActiveChatJob, canManualApply, onLockedClick }) => {
+}> = ({ job, isBestFit, navigate, onAceInterview, canManualApply, onLockedClick }) => {
   const handleShare = async () => {
     const company = typeof job.company === 'string' ? job.company : job.company?.name || '';
     const url = `${window.location.origin}/job/${job.id}`;
@@ -396,113 +443,114 @@ const JobCard: React.FC<{
     }
   };
 
+  const score = job.matchScore ?? 0;
+  const isApplied = job.applied;
+
   return (
     <div className={`
-    group border-2 border-black dark:border-white/10 p-6 md:p-8 
-    hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black 
-    transition-all duration-500 relative overflow-hidden 
-    bg-white dark:bg-background-dark
-    ${isBestFit ? 'border-l-[8px] border-l-emerald-500 shadow-lg' : ''}
-  `}>
-      <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
-        <div className={`
-        size-20 md:size-24 bg-black dark:bg-white flex items-center justify-center 
-        border-2 border-black/10 dark:border-white/10
-        group-hover:bg-white dark:group-hover:bg-black transition-all shrink-0
-        ${isBestFit ? 'shadow-[0_0_20px_rgba(16,185,129,0.15)]' : ''}
-      `}>
-          <span className="material-symbols-outlined text-4xl md:text-5xl text-white dark:text-black group-hover:text-black dark:group-hover:text-white">
-            corporate_fare
-          </span>
+      relative border-2 transition-all duration-300 overflow-hidden
+      bg-[#0a0a0a] border-[#1a1a1a]
+      ${isBestFit ? 'border-l-[6px] border-l-[#ffb800]' : 'border-l-[2px] border-black/10 dark:border-white/10'}
+    `}>
+      {/* ── HEADER ROW ── */}
+      <div className="flex items-center gap-6 p-6">
+        {/* Company Box */}
+        <div className="size-16 bg-white flex items-center justify-center shrink-0 border border-white/10">
+          <span className="material-symbols-outlined text-3xl text-black">corporate_fare</span>
         </div>
 
-        <div className="flex-grow space-y-4 md:space-y-5 min-w-0">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
-            <div className="flex-1 min-w-0 overflow-hidden">
-              <h2 className="text-xl md:text-3xl font-black  tracking-tighter group-hover:text-white dark:group-hover:text-black transition-colors leading-tight break-words">
-                {job.title ?? 'Untitled Position'}
-              </h2>
-              <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-2">
-                <span className="text-[10px] md:text-sm font-black  tracking-widest opacity-40 group-hover:text-white/60 dark:group-hover:text-black/60">
-                  {typeof job.company === 'string' ? job.company : (job.company?.name ?? 'Unknown Company')}
-                </span>
-                <span className="size-1.5 bg-black/20 dark:bg-white/20 rounded-full group-hover:bg-white/40 dark:group-hover:bg-black/40 shrink-0"></span>
-                <span className="text-[10px] md:text-sm font-black  tracking-widest opacity-40 group-hover:text-white/60 dark:group-hover:text-black/60">
-                  {typeof job.location === 'string' ? job.location : (job.location?.city ?? 'Remote')}
-                </span>
-              </div>
-            </div>
+        {/* Info Cluster */}
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-tight leading-tight">
+            {job.title ?? 'Untitled Position'}
+          </h2>
+          <p className="text-[10px] font-black tracking-widest text-white/40 mt-1 uppercase">
+            {typeof job.company === 'string' ? job.company : (job.company?.name ?? 'Unknown')} · {typeof job.location === 'string' ? job.location : (job.location?.city ?? 'Remote')}
+          </p>
+        </div>
 
-            <div className="text-right flex flex-col items-end shrink-0">
-              <div className={`text-4xl md:text-6xl font-black leading-none transition-colors duration-300 ${isBestFit ? 'text-emerald-500 group-hover:text-emerald-400' : 'group-hover:text-white dark:group-hover:text-black'}`}>
-                {job.matchScore ?? 0}%
-              </div>
-              <div className="text-[8px] font-black  tracking-[0.25em] opacity-30 group-hover:text-white/40 dark:group-hover:text-black/40">FIDELITY</div>
+        {/* Score Cluster (Conditional) */}
+        {isBestFit && (
+          <div className="shrink-0 text-right">
+            <div className="text-3xl md:text-4xl font-black tabular-nums text-[#ffb800] leading-none">
+              {score}%
             </div>
+            <div className="text-[7px] font-black tracking-[0.4em] text-white/30 mt-1 uppercase">Match</div>
           </div>
+        )}
+      </div>
 
-          <div className="flex flex-wrap gap-2">
-            {(job.requiredSkills ?? []).slice(0, 4).map(tag => (
-              <span key={tag} className="px-3 md:px-4 py-1.5 border-2 border-black/10 dark:border-white/10 group-hover:border-white/20 dark:group-hover:border-black/20 text-[9px] md:text-[10px] font-black  tracking-widest group-hover:text-white/80 dark:group-hover:text-black/80 transition-all">
-                {tag}
-              </span>
-            ))}
+      {/* ── META INFO ROW ── */}
+      <div className="flex items-center justify-between px-6 pb-4 border-b border-white/5">
+        {/* Skills */}
+        <div className="flex flex-wrap gap-2">
+          {(job.requiredSkills ?? []).slice(0, 4).map(skill => (
+            <span key={skill} className="px-3 py-1 bg-[#141414] border border-white/5 text-[9px] font-black text-white/60 tracking-wider">
+              {skill}
+            </span>
+          ))}
+        </div>
+
+        {/* Economic / Engagement Meta */}
+        <div className="hidden sm:flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-black text-white/30 tracking-widest uppercase">INR {(job.salaryRange?.min ?? 0)}-{(job.salaryRange?.max ?? 0)}L</span>
           </div>
-
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-5 border-t-2 border-black/5 dark:border-white/5 group-hover:border-white/10 dark:group-hover:border-black/10">
-            <div className="flex flex-wrap gap-x-8 gap-y-3">
-              <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black  tracking-widest opacity-40 group-hover:text-white/40 dark:group-hover:text-black/40">Capital Package</span>
-                <span className="text-xs md:text-base font-black  group-hover:text-white dark:group-hover:text-black">
-                  ₹{(job.salaryRange?.min ?? 0) / 100000}L - ₹{(job.salaryRange?.max ?? 0) / 100000}L
-                </span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black  tracking-widest opacity-40 group-hover:text-white/40 dark:group-hover:text-black/40">Engagement</span>
-                <span className="text-xs md:text-base font-black  group-hover:text-white dark:group-hover:text-black">{job.employmentType ?? 'Position'}</span>
-              </div>
-            </div>
-
-            <div className="flex gap-3 w-full sm:w-auto">
-              {/* Share */}
-              <button
-                onClick={(e) => { e.stopPropagation(); handleShare(); }}
-                title="Share job"
-                className="w-10 h-10 flex items-center justify-center border-2 border-black/15 dark:border-white/15 text-black/40 dark:text-white/40 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white group-hover:border-white/30 group-hover:text-white/60 dark:group-hover:border-black/30 dark:group-hover:text-black/60 transition-all shrink-0"
-              >
-                <span className="material-symbols-outlined text-base">share</span>
-              </button>
-
-              <button
-                onClick={(e) => { e.stopPropagation(); setActiveChatJob(job); }}
-                className="flex items-center justify-center gap-2 border-2 border-black dark:border-white text-black dark:text-white px-5 md:px-8 py-3 md:py-4 text-[9px] md:text-[10px] font-black  tracking-[0.2em] group-hover:bg-white dark:group-hover:bg-black group-hover:text-black dark:group-hover:text-white transition-all"
-              >
-                <span className="material-symbols-outlined text-base md:text-lg">neurology</span>
-                <span className="hidden sm:inline">AI Audit</span>
-              </button>
-
-              {/* ── Plan-gated Initialize ── */}
-              {canManualApply ? (
-                <button
-                  onClick={() => navigate(`/job/${job.id}`, { state: { job } })}
-                  className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black px-8 md:px-12 py-3 md:py-4 text-[9px] md:text-[10px] font-black  tracking-[0.2em] group-hover:bg-white dark:group-hover:bg-black group-hover:text-black dark:group-hover:text-white transition-all shadow-xl"
-                >
-                  Initialize
-                </button>
-              ) : (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onLockedClick(); }}
-                  className="flex-1 sm:flex-none relative px-8 md:px-12 py-3 md:py-4 text-[9px] md:text-[10px] font-black  tracking-[0.2em] border-2 border-black/20 dark:border-white/20 text-black/30 dark:text-white/30 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-sm">lock</span>
-                  Initialize
-                  <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[6px] font-black  tracking-widest px-1.5 py-0.5">
-                    PRO
-                  </span>
-                </button>
-              )}
-            </div>
+          <div className="px-2 py-0.5 border border-white/10 text-[9px] font-black text-white/40 tracking-widest uppercase bg-[#141414]">
+            {job.employmentType ?? 'Full-Time'}
           </div>
+        </div>
+      </div>
+
+      {/* ── PROGRESS BAR (Conditional) ── */}
+      {isBestFit && (
+        <div className="h-[2px] w-full bg-white/5">
+          <div
+            className="h-full bg-[#ffb800] transition-all duration-1000 ease-out"
+            style={{ width: `${score}%` }}
+          />
+        </div>
+      )}
+
+      {/* ── ACTION FOOTER ── */}
+      <div className="flex items-center justify-between p-6 bg-[#0f0f0f]">
+        <div className="flex items-center gap-3">
+          {/* Ace Interview (Conditional) */}
+          {isBestFit && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onAceInterview(); }}
+              className="flex items-center gap-2 px-4 py-2 border border-emerald-500/30 text-emerald-500 text-[10px] font-black tracking-widest hover:bg-emerald-500/10 transition-all uppercase"
+            >
+              <span className="material-symbols-outlined text-sm">emoji_objects</span>
+              Ace Interview
+            </button>
+          )}
+
+          {/* Share */}
+          <button
+            onClick={(e) => { e.stopPropagation(); handleShare(); }}
+            className="size-10 flex items-center justify-center border border-white/10 text-white/40 hover:text-white transition-all"
+          >
+            <span className="material-symbols-outlined text-lg">share</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {isApplied ? (
+            <div className="flex items-center gap-2 px-5 py-2.5 bg-[#00d1a0] text-black text-[10px] font-black tracking-widest uppercase">
+              <span className="material-symbols-outlined text-lg">check_circle</span>
+              Applied
+            </div>
+          ) : (
+            <button
+              onClick={() => canManualApply ? navigate(`/job/${job.id}`, { state: { job } }) : onLockedClick()}
+              className={`flex items-center gap-2 px-8 py-2.5 text-[10px] font-black tracking-widest transition-all uppercase
+                ${canManualApply ? 'bg-white text-black hover:bg-gray-200 shadow-xl' : 'border border-white/20 text-white/40 hover:border-[#ffb800] hover:text-[#ffb800]'}`}
+            >
+              {!canManualApply && <span className="material-symbols-outlined text-base">lock</span>}
+              Initialize
+            </button>
+          )}
         </div>
       </div>
     </div>

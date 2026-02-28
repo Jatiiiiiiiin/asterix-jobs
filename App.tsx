@@ -30,7 +30,7 @@ import TermsPage from "./views/TermsPage";
 import './App.css';
 
 /* Components */
-import AIChatOverlay from "./components/AIChatOverlay";
+
 import PublicRoute from "./views/PublicRoute";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
@@ -293,7 +293,7 @@ const App: React.FC = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      <AIChatOverlay />
+
       <Analytics />
       <SpeedInsights />
     </div>

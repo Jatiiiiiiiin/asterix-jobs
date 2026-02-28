@@ -506,9 +506,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               </div>
 
               <div className="flex gap-3 w-full lg:w-auto">
-                <button className="flex-1 lg:flex-none border border-black dark:border-white px-5 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
-                  Context Chat
-                </button>
+
 
                 {/* ── Plan-gated apply button ── */}
                 {appliedLocally ? (
