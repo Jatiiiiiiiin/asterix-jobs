@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, getCountFromServer, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 interface LandingPageProps {
   onToggleTheme: () => void;
@@ -20,27 +20,29 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
   const [liveCompanies, setLiveCompanies] = useState<number | null>(null);
 
   useEffect(() => {
-    // Fetch real counts once on mount
-    const fetchStats = async () => {
-      try {
-        const [appsSnap, companiesSnap] = await Promise.all([
-          getCountFromServer(collection(db, 'applications')),
-          getDocs(collection(db, 'jobs')),
-        ]);
-        setLiveJobsMatched(appsSnap.data().count);
-        // Count distinct company names
-        const uniqueCompanies = new Set(
-          companiesSnap.docs.map(d => {
+    // Real-time listener: count applications
+    const unsubApps = onSnapshot(
+      collection(db, 'applications'),
+      (snap) => setLiveJobsMatched(snap.size),
+      () => { /* fall back to static */ }
+    );
+
+    // Real-time listener: count distinct companies from jobs
+    const unsubJobs = onSnapshot(
+      collection(db, 'jobs'),
+      (snap) => {
+        const unique = new Set(
+          snap.docs.map(d => {
             const data = d.data();
             return (data.company?.name ?? data.companyName ?? '').toLowerCase().trim();
           }).filter(Boolean)
         );
-        setLiveCompanies(uniqueCompanies.size);
-      } catch {
-        // silently fall back to static values
-      }
-    };
-    fetchStats();
+        setLiveCompanies(unique.size);
+      },
+      () => { /* fall back to static */ }
+    );
+
+    return () => { unsubApps(); unsubJobs(); };
   }, []);
 
   useEffect(() => {

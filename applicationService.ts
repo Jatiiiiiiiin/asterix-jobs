@@ -158,6 +158,10 @@ export async function saveApplication(
     });
 
     tx.set(countRef, { count: increment(1) }, { merge: true });
+
+    // Increment public global counter (readable without auth by landing page)
+    const statsRef = doc(db, "stats", "global");
+    tx.set(statsRef, { applicationCount: increment(1) }, { merge: true });
   });
 
   return docId;
