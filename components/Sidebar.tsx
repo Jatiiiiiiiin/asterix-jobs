@@ -85,11 +85,10 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
     ];
 
   /* ── Plan detection — uses usePlan for accurate Firestore plan string ── */
-  const { plan, canManualApply } = usePlan();
-  // Also check legacy AuthUser flags as a fallback
-  const isPremium = canManualApply || (user?.isPremium ?? false);
-  const isStudent = isPremium && (plan === 'student_premium' || plan === 'premium_student' || (user?.isStudent ?? false));
-  const hasAccess = isPremium || isStudent;
+  const { planLabel, canManualApply } = usePlan();
+  const hasAccess = canManualApply;
+  const isStudent = planLabel === 'Student Plan';
+  const isPremium = planLabel === 'Premium Plan';
 
   /* ════════════════════════════════════════════════════════════════
      SIDEBAR CONTENT
@@ -124,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black tracking-widest text-black/60 dark:text-white/60">
-                  {hasAccess ? (isStudent ? 'Student Plan' : 'Premium') : 'Free Plan'}
+                  {planLabel}
                 </p>
                 {hasAccess && (
                   <p className="text-[8px] font-bold text-black/40 dark:text-white/40 mt-1">₹99 / month</p>

@@ -1,28 +1,25 @@
 import { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from './firebase';
-import { readSessionUid } from './authService';
+import { auth, db } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export type PlanTier = 'free' | 'student_premium' | 'premium_student' | 'premium' | 'enterprise';
 
 interface PlanState {
   plan: PlanTier;
+  planLabel: string;
   isLoading: boolean;
   isPremium: boolean;
   canManualApply: boolean; // premium_student and above
 }
 
-/** All string values that mean "paid student access" */
 const STUDENT_PLANS = new Set(['student_premium', 'premium_student', 'student']);
-/** All string values that mean "paid (non-student) access" */
 const PREMIUM_PLANS = new Set(['premium', 'enterprise', 'pro']);
 
 function resolvePlan(data: any): PlanTier {
-  // 1. Check every possible field location
   const candidates: unknown[] = [
-    data?.plan,                        // top-level:  users/{uid}.plan
-    data?.subscription?.plan,          // nested:     users/{uid}.subscription.plan
-    // Derived from isPremium + isStudent flags
+    data?.plan,
+    data?.subscription?.plan,
     data?.subscription?.status === 'active' && data?.subscription?.isPremium
       ? (data?.subscription?.isStudent ? 'student_premium' : 'premium')
       : null,
@@ -43,12 +40,15 @@ export function usePlan(): PlanState {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPlan = async () => {
-      const uid = readSessionUid();
-      if (!uid) { setIsLoading(false); return; }
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setPlan('free');
+        setIsLoading(false);
+        return;
+      }
 
       try {
-        const snap = await getDoc(doc(db, 'users', uid));
+        const snap = await getDoc(doc(db, 'users', user.uid));
         if (snap.exists()) {
           setPlan(resolvePlan(snap.data()));
         }
@@ -57,9 +57,9 @@ export function usePlan(): PlanState {
       } finally {
         setIsLoading(false);
       }
-    };
+    });
 
-    fetchPlan();
+    return () => unsub();
   }, []);
 
   const isPremium = plan !== 'free';
@@ -70,5 +70,10 @@ export function usePlan(): PlanState {
     plan === 'enterprise'
   );
 
-  return { plan, isLoading, isPremium, canManualApply };
+  let planLabel = 'Free Plan';
+  if (plan === 'student_premium' || plan === 'premium_student') planLabel = 'Student Plan';
+  else if (plan === 'premium') planLabel = 'Premium Plan';
+  else if (plan === 'enterprise') planLabel = 'Enterprise Plan';
+
+  return { plan, planLabel, isLoading, isPremium, canManualApply };
 }

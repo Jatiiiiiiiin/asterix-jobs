@@ -8,7 +8,8 @@ import { authService, readSessionUid } from '../authService';
 import { Job } from '../types';
 import { saveApplication, buildApplicationPayload, hasApplied } from "../applicationService";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { usePlan } from '../usePlan';
 import UpgradeModal from '../components/UpgradeModal';
 import '../App.css';
@@ -75,70 +76,83 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   const [isLoadingTips, setIsLoadingTips] = useState(false);
 
   /* ── Plan ── */
-  const { canManualApply, plan, isLoading: isPlanLoading } = usePlan();
+  const { canManualApply, planLabel, isLoading: isPlanLoading } = usePlan();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   /* ════════════════════════════════════════════════════════
      INIT: load user, restore local state, subscribe to jobs
   ════════════════════════════════════════════════════════ */
   useEffect(() => {
-    const init = async () => {
-      const uid = readSessionUid();
-      if (!uid) return;
+    let unsubJobs: (() => void) | null = null;
 
-      setUserId(uid);
-      mountedUidRef.current = uid;
+    const unsubAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
+        setUserId(uid);
+        mountedUidRef.current = uid;
 
-      // Fetch profile in background to avoid blocking job load
-      getDoc(doc(db, 'profiles', uid)).then(snap => {
-        if (snap.exists()) {
-          const p = snap.data();
-          if (p.resumeUrl) setResumeUrl(p.resumeUrl);
+        // Fetch profile
+        try {
+          const snap = await getDoc(doc(db, 'profiles', uid));
+          if (snap.exists()) {
+            const p = snap.data();
+            if (p.resumeUrl) setResumeUrl(p.resumeUrl);
+          }
+        } catch (err) {
+          console.warn('Profile fetch failed:', err);
         }
-      }).catch(err => console.warn('Profile fetch failed:', err));
 
-      const savedResumeName = localStorage.getItem(`asterix_resume_name_${uid}`);
-      const savedAuto = localStorage.getItem(`asterix_autopilot_${uid}`);
-      const savedJobs = localStorage.getItem(`asterix_jobs_${uid}`);
+        // Restore local settings
+        const savedResumeName = localStorage.getItem(`asterix_resume_name_${uid}`);
+        const savedAuto = localStorage.getItem(`asterix_autopilot_${uid}`);
+        const savedJobs = localStorage.getItem(`asterix_jobs_${uid}`);
 
-      if (savedResumeName) setResumeName(savedResumeName);
+        if (savedResumeName) setResumeName(savedResumeName);
+        const auto = savedAuto === 'true';
+        setIsAutoPilotOn(auto);
+        autoPilotRef.current = auto;
 
-      const auto = savedAuto === 'true';
-      setIsAutoPilotOn(auto);
-      autoPilotRef.current = auto;
+        const jobDataMap = savedJobs ? JSON.parse(savedJobs) : {};
 
-      const jobDataMap = savedJobs ? JSON.parse(savedJobs) : {};
+        // Subscribe to jobs
+        if (unsubJobs) unsubJobs();
+        unsubJobs = subscribeToActiveJobs(
+          (liveJobs) => {
+            const merged: Job[] = liveJobs.map(liveJob => {
+              const saved = Array.isArray(jobDataMap)
+                ? jobDataMap.find((j: any) => j.id === liveJob.id)
+                : jobDataMap[liveJob.id];
+              return {
+                ...liveJob,
+                matchScore: saved?.matchScore ?? 0,
+                applied: saved?.applied ?? false,
+                analyzing: false,
+                matchHighlights: saved?.matchHighlights ?? [],
+                breakdown: saved?.breakdown ?? null,
+              };
+            });
+            jobsRef.current = merged;
+            setDynamicJobs(merged);
+            setIsLoadingJobs(false);
+          },
+          (err) => {
+            console.error('[CandidateDashboard] Jobs subscription error:', err);
+            setIsLoadingJobs(false);
+          }
+        );
+      } else {
+        // User logged out or session expired
+        setUserId(null);
+        mountedUidRef.current = null;
+        if (unsubJobs) unsubJobs();
+        setIsLoadingJobs(true); // Show loading while waiting for auth
+      }
+    });
 
-      const unsub = subscribeToActiveJobs(
-        (liveJobs) => {
-          const merged: Job[] = liveJobs.map(liveJob => {
-            const saved = Array.isArray(jobDataMap)
-              ? jobDataMap.find((j: any) => j.id === liveJob.id)
-              : jobDataMap[liveJob.id];
-            return {
-              ...liveJob,
-              matchScore: saved?.matchScore ?? 0,
-              applied: saved?.applied ?? false,
-              analyzing: false,
-              matchHighlights: saved?.matchHighlights ?? [],
-              breakdown: saved?.breakdown ?? null,
-            };
-          });
-          jobsRef.current = merged;
-          setDynamicJobs(merged);
-          setIsLoadingJobs(false);
-        },
-        (err) => {
-          console.error('[CandidateDashboard] Jobs subscription error:', err);
-          setIsLoadingJobs(false);
-        }
-      );
-
-      return unsub;
+    return () => {
+      unsubAuth();
+      unsubJobs?.();
     };
-
-    const unsubPromise = init();
-    return () => { unsubPromise?.then(unsub => unsub?.()); };
   }, []);
 
   /* ── Persist jobs to localStorage ── */
@@ -291,7 +305,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   ════════════════════════════════════════════════════════ */
   const performSemanticSync = async () => {
     // Priority: Local File Ref > Persisted Text > Restore from Vault
-    const uid = mountedUidRef.current;
+    if (!auth.currentUser) {
+      console.warn("[Asterix] Sync aborted: User not authenticated with Firebase. Session UID:", mountedUidRef.current);
+      return;
+    }
+    const uid = auth.currentUser.uid;
     const persistentKey = uid ? `asterix_resume_content_${uid}` : null;
     let extractedText = persistentKey ? (localStorage.getItem(persistentKey) || "") : "";
 
@@ -916,17 +934,24 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                               Applied
                             </div>
                           ) : (
-                            <button onClick={() => handleInitialize(job)}
-                              className={`relative flex items-center gap-1.5 px-4 py-1.5 text-[8px] font-black tracking-widest transition-all
-                                ${canManualApply
-                                  ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
-                                  : 'border border-black/20 dark:border-white/20 opacity-50 hover:border-emerald-500 hover:text-emerald-500 hover:opacity-100'}`}>
-                              {!canManualApply && <span className="material-symbols-outlined text-xs">lock</span>}
-                              Apply
-                              {!canManualApply && (
-                                <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[6px] font-black px-1 py-0.5">PRO</span>
-                              )}
-                            </button>
+                            (() => {
+                              const threshold = job.matchThreshold ?? 65;
+                              const isEligible = canManualApply && score >= (threshold - 5);
+
+                              return (
+                                <button onClick={() => handleInitialize(job)}
+                                  className={`relative flex items-center gap-1.5 px-4 py-1.5 text-[8px] font-black tracking-widest transition-all
+                                    ${isEligible
+                                      ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
+                                      : 'border border-black/20 dark:border-white/20 opacity-50 hover:border-emerald-500 hover:text-emerald-500 hover:opacity-100'}`}>
+                                  {!isEligible && <span className="material-symbols-outlined text-xs">lock</span>}
+                                  Apply
+                                  {!isEligible && (
+                                    <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[6px] font-black px-1 py-0.5">PRO</span>
+                                  )}
+                                </button>
+                              );
+                            })()
                           )}
                         </div>
                       </div>
@@ -988,7 +1013,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                   </div>
                   <div>
                     <p className={`text-xl font-black tracking-tight ${canManualApply ? 'text-emerald-500' : ''}`}>
-                      {canManualApply ? 'Student Plan' : 'Free Plan'}
+                      {planLabel}
                     </p>
                     <p className="text-[8px] font-black tracking-widest opacity-40 mt-1 leading-relaxed">
                       {canManualApply
