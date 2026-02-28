@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, doc } from 'firebase/firestore';
 
 interface LandingPageProps {
   onToggleTheme: () => void;
@@ -20,14 +20,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
   const [liveCompanies, setLiveCompanies] = useState<number | null>(null);
 
   useEffect(() => {
-    // Real-time listener: count applications
-    const unsubApps = onSnapshot(
-      collection(db, 'applications'),
-      (snap) => setLiveJobsMatched(snap.size),
+    // Real-time listener: read from global stats doc (publicly readable)
+    const unsubStats = onSnapshot(
+      doc(db, 'stats', 'global'),
+      (snap) => {
+        const data = snap.data() as any;
+        if (data && data.applicationCount !== undefined) setLiveJobsMatched(data.applicationCount);
+      },
       () => { /* fall back to static */ }
     );
 
-    // Real-time listener: count distinct companies from jobs
+    // Real-time listener: count distinct companies from jobs (if public)
     const unsubJobs = onSnapshot(
       collection(db, 'jobs'),
       (snap) => {
@@ -37,12 +40,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
             return (data.company?.name ?? data.companyName ?? '').toLowerCase().trim();
           }).filter(Boolean)
         );
-        setLiveCompanies(unique.size);
+        if (unique.size > 0) setLiveCompanies(unique.size);
       },
       () => { /* fall back to static */ }
     );
 
-    return () => { unsubApps(); unsubJobs(); };
+    return () => { unsubStats(); unsubJobs(); };
   }, []);
 
   useEffect(() => {
@@ -424,26 +427,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         <section id="network" className="py-20 sm:py-32 md:py-40 bg-black text-white dark:bg-white dark:text-black">
           <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10 text-center">
             <h2 className="text-3xl sm:text-5xl md:text-8xl font-black uppercase tracking-tighter mb-12 sm:mb-20 leading-[0.9]">Built for<br />Real Careers</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 mt-12 md:mt-20 border-t border-white/10 dark:border-black/10 pt-12 md:pt-20">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 lg:gap-16 mt-12 md:mt-20 border-t border-white/10 dark:border-black/10 pt-12 md:pt-20">
               <div className="space-y-2">
-                <p className="text-4xl sm:text-5xl md:text-7xl font-black leading-none">
-                  {liveJobsMatched !== null ? `${liveJobsMatched.toLocaleString()}` : '10M+'}
+                <p className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none truncate">
+                  {liveJobsMatched !== null ? `${liveJobsMatched.toLocaleString()}${liveJobsMatched < 100 ? '' : '+'}` : '10M+'}
                 </p>
-                <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-50">Jobs Matched</p>
+                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Jobs Matched</p>
               </div>
               <div className="space-y-2">
-                <p className="text-4xl sm:text-5xl md:text-7xl font-black leading-none">98.2%</p>
-                <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-50">Match Accuracy</p>
+                <p className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none">98.2%</p>
+                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Match Accuracy</p>
               </div>
               <div className="space-y-2">
-                <p className="text-4xl sm:text-5xl md:text-7xl font-black leading-none">
-                  {liveCompanies !== null ? `${liveCompanies.toLocaleString()}` : '45K+'}
+                <p className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none truncate">
+                  {liveCompanies !== null ? `${liveCompanies.toLocaleString()}${liveCompanies < 100 ? '' : '+'}` : '45K+'}
                 </p>
-                <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-50">Hiring Companies</p>
+                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Hiring Companies</p>
               </div>
               <div className="space-y-2">
-                <p className="text-4xl sm:text-5xl md:text-7xl font-black leading-none">2ms</p>
-                <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-50">Match Speed</p>
+                <p className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none">2ms</p>
+                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50">Match Speed</p>
               </div>
             </div>
           </div>
