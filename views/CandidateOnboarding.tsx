@@ -47,6 +47,7 @@ export default function CandidateOnboarding({
   const [form, setForm] = useState<FormState>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [customSkillInput, setCustomSkillInput] = useState('');
 
   const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -58,6 +59,18 @@ export default function CandidateOnboarding({
         ? prev.skills.filter(s => s !== skill)
         : [...prev.skills, skill],
     }));
+
+  const addCustomSkill = () => {
+    const trimmed = customSkillInput.trim();
+    if (!trimmed) return;
+    // Avoid duplicates (case-insensitive)
+    if (form.skills.some(s => s.toLowerCase() === trimmed.toLowerCase())) {
+      setCustomSkillInput('');
+      return;
+    }
+    setForm(prev => ({ ...prev, skills: [...prev.skills, trimmed] }));
+    setCustomSkillInput('');
+  };
 
   /* ══════════════════════════════════════════════════════════════════
      FINALIZE ONBOARDING
@@ -198,8 +211,10 @@ export default function CandidateOnboarding({
               <div className="space-y-10">
                 <div className="space-y-2">
                   <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">02 / Neural Stack</h3>
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">Select your core technical competencies.</p>
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">Select your core technical competencies or add your own.</p>
                 </div>
+
+                {/* Predefined skill chips */}
                 <div className="flex flex-wrap gap-4">
                   {SKILLS.map(skill => (
                     <button
@@ -207,14 +222,63 @@ export default function CandidateOnboarding({
                       type="button"
                       onClick={() => toggleSkill(skill)}
                       className={`px-6 py-3 border-2 text-[10px] font-black uppercase tracking-widest transition-all ${form.skills.includes(skill)
-                        ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-xl'
-                        : 'border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
+                          ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-xl'
+                          : 'border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
                         }`}
                     >
                       {skill}
                     </button>
                   ))}
                 </div>
+
+                {/* Custom skill input */}
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest opacity-60">Add Custom Skill</label>
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={customSkillInput}
+                      onChange={e => setCustomSkillInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomSkill(); } }}
+                      className={INPUT + ' flex-1'}
+                      placeholder="E.G. SOLIDITY, FIGMA, RUST..."
+                    />
+                    <button
+                      type="button"
+                      onClick={addCustomSkill}
+                      disabled={!customSkillInput.trim()}
+                      className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-widest hover:invert transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
+                    >
+                      <span className="material-symbols-outlined text-sm">add</span>
+                      Add
+                    </button>
+                  </div>
+                </div>
+
+                {/* Custom-added skills (ones not in the SKILLS preset) */}
+                {form.skills.filter(s => !SKILLS.includes(s)).length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Custom Skills Added</p>
+                    <div className="flex flex-wrap gap-3">
+                      {form.skills.filter(s => !SKILLS.includes(s)).map(skill => (
+                        <span
+                          key={skill}
+                          className="flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black text-[10px] font-black uppercase tracking-widest"
+                        >
+                          {skill}
+                          <button
+                            type="button"
+                            onClick={() => toggleSkill(skill)}
+                            className="hover:opacity-60 transition-opacity leading-none"
+                          >
+                            <span className="material-symbols-outlined text-sm">close</span>
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {form.skills.length > 0 && (
                   <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500">
                     {form.skills.length} skill{form.skills.length !== 1 ? 's' : ''} selected

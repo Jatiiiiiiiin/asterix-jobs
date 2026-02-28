@@ -746,13 +746,13 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                       onClick={() => setSortBy('score')}
                       className={`px-3 py-1 text-[8px] font-black uppercase tracking-tighter transition-all ${sortBy === 'score' ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg' : 'opacity-40 hover:opacity-100'}`}
                     >
-                      Fidelity
+                      Score
                     </button>
                     <button
                       onClick={() => setSortBy('time')}
                       className={`px-3 py-1 text-[8px] font-black uppercase tracking-tighter transition-all ${sortBy === 'time' ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg' : 'opacity-40 hover:opacity-100'}`}
                     >
-                      Recency
+                      Recent
                     </button>
                   </div>
                 </div>
