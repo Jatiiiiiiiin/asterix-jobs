@@ -598,6 +598,22 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     }
   };
 
+  /* ══ SHARE JOB ══ */
+  const handleShareJob = async (job: Job) => {
+    const company = typeof job.company === 'string' ? job.company : job.company?.name || '';
+    const url = `${window.location.origin}/job/${job.id}`;
+    const text = `${job.title} at ${company}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: text, url });
+      } catch { /* user dismissed */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      addNotification('Link Copied', 'Job link copied to clipboard.', 'info');
+    }
+  };
+
   /* ── Sorted jobs ── */
   const sortedJobs = [...dynamicJobs].sort((a, b) => {
     if (sortBy === 'score') {
@@ -875,7 +891,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                         {/* ── ACTION ROW ── */}
                         <div className="flex items-center justify-between px-4 py-2.5 border-t border-black/5 dark:border-white/5">
                           {/* Ace Interview */}
-                          <div>
+                          <div className="flex items-center gap-2">
                             {score > 0 && (
                               <button onClick={() => handleAceInterview(job)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest border border-emerald-500/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
@@ -883,6 +899,14 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                                 Ace Interview
                               </button>
                             )}
+                            {/* Share button */}
+                            <button
+                              onClick={() => handleShareJob(job)}
+                              title="Share job"
+                              className="w-7 h-7 flex items-center justify-center border border-black/15 dark:border-white/15 text-black/40 dark:text-white/40 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-all"
+                            >
+                              <span className="material-symbols-outlined text-sm">share</span>
+                            </button>
                           </div>
 
                           {/* Apply / Applied */}
