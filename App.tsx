@@ -4,6 +4,7 @@ import { onAuthStateChanged } from "firebase/auth";
 
 import { auth } from "./firebase";
 import { authService, AuthUser } from "./authService";
+import { Analytics } from "@vercel/analytics/react"
 
 /* Views */
 import LandingPage from "./views/LandingPage";
@@ -282,6 +283,7 @@ const App: React.FC = () => {
       </Routes>
 
       <AIChatOverlay />
+      <Analytics />
     </div>
   );
 };
