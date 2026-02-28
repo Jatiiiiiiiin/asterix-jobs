@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 const ContactPage: React.FC = () => {
     const [submitted, setSubmitted] = useState(false);
     const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const topics = ['General Inquiry', 'Candidate Support', 'Recruiter / Business', 'Bug Report', 'Partnership', 'Press / Media'];
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -11,10 +14,10 @@ const ContactPage: React.FC = () => {
         setSubmitted(true);
     };
 
-    const field = 'w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-4 py-3 text-sm font-medium focus:outline-none focus:border-black dark:focus:border-white transition-colors';
+    const field = 'w-full bg-black/5 dark:bg-white/10 text-black dark:text-white border border-black/10 dark:border-white/10 px-4 py-3 text-sm font-medium focus:outline-none focus:border-black dark:focus:border-white transition-colors placeholder:text-black/30 dark:placeholder:text-white/30';
 
     return (
-        <div className="min-h-screen bg-white dark:bg-background-dark text-black dark:text-white">
+        <div className="min-h-screen bg-white dark:bg-background-dark text-black dark:text-white" onClick={() => setDropdownOpen(false)}>
             <header className="px-6 md:px-16 py-6 border-b border-black/10 dark:border-white/10 flex items-center justify-between">
                 <Link to="/" className="flex items-center gap-3">
                     <div className="size-9 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
@@ -83,18 +86,38 @@ const ContactPage: React.FC = () => {
                                         <input required type="email" className={field} placeholder="your@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
                                     </div>
                                 </div>
+
+                                {/* Custom dropdown — avoids native OS white popup */}
                                 <div className="space-y-1.5">
                                     <label className="text-[8px] font-black uppercase tracking-widest opacity-50">Subject</label>
-                                    <select required className={field} value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}>
-                                        <option value="">Select a topic</option>
-                                        <option>General Inquiry</option>
-                                        <option>Candidate Support</option>
-                                        <option>Recruiter / Business</option>
-                                        <option>Bug Report</option>
-                                        <option>Partnership</option>
-                                        <option>Press / Media</option>
-                                    </select>
+                                    <div className="relative" onClick={e => e.stopPropagation()}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setDropdownOpen(o => !o)}
+                                            className={`${field} flex items-center justify-between text-left ${!form.subject ? 'opacity-40' : ''}`}
+                                        >
+                                            <span>{form.subject || 'Select a topic'}</span>
+                                            <span className={`material-symbols-outlined text-base transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                                        </button>
+                                        {dropdownOpen && (
+                                            <div className="absolute top-full left-0 right-0 z-50 border border-black/10 dark:border-white/10 bg-white dark:bg-[#111111] divide-y divide-black/5 dark:divide-white/5 shadow-2xl">
+                                                {topics.map(t => (
+                                                    <button
+                                                        key={t}
+                                                        type="button"
+                                                        onClick={() => { setForm(f => ({ ...f, subject: t })); setDropdownOpen(false); }}
+                                                        className={`w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors ${form.subject === t ? 'bg-black text-white dark:bg-white dark:text-black' : ''}`}
+                                                    >
+                                                        {t}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {/* Hidden readable input so form validation works */}
+                                    <input type="text" required value={form.subject} onChange={() => { }} className="sr-only" tabIndex={-1} aria-hidden />
                                 </div>
+
                                 <div className="space-y-1.5">
                                     <label className="text-[8px] font-black uppercase tracking-widest opacity-50">Message</label>
                                     <textarea required rows={6} className={field} placeholder="Tell us what's on your mind..." value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
