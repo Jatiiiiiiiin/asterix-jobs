@@ -69,6 +69,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'score' | 'time'>('score');
+  const [isRestored, setIsRestored] = useState(false);
 
   /* ── Interview Tips ── */
   const [interviewTipsJob, setInterviewTipsJob] = useState<Job | null>(null);
@@ -134,6 +135,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             jobsRef.current = merged;
             setDynamicJobs(merged);
             setIsLoadingJobs(false);
+            setIsRestored(true);
           },
           (err) => {
             console.error('[CandidateDashboard] Jobs subscription error:', err);
@@ -157,23 +159,23 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
   /* ── Persist jobs to localStorage ── */
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !isRestored) return;
     jobsRef.current = dynamicJobs;
     localStorage.setItem(`asterix_jobs_${userId}`, JSON.stringify(dynamicJobs));
-  }, [dynamicJobs, userId]);
+  }, [dynamicJobs, userId, isRestored]);
 
   /* ── Persist auto-pilot flag ── */
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !isRestored) return;
     localStorage.setItem(`asterix_autopilot_${userId}`, String(isAutoPilotOn));
     autoPilotRef.current = isAutoPilotOn;
-  }, [isAutoPilotOn, userId]);
+  }, [isAutoPilotOn, userId, isRestored]);
 
   /* ── Persist resume name ── */
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !isRestored) return;
     localStorage.setItem(`asterix_resume_name_${userId}`, resumeName);
-  }, [resumeName, userId]);
+  }, [resumeName, userId, isRestored]);
 
   /* ── Safety timeout: clear stuck "analyzing" states ── */
   useEffect(() => {
