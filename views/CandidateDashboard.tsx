@@ -839,7 +839,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                     return (
                       <div
                         key={job.id}
-                        className={`relative border dark:border-white/10 transition-all duration-300 overflow-hidden
+                        onClick={() => navigate(`/job/${job.id}`, { state: { job } })}
+                        className={`relative border dark:border-white/10 transition-all duration-300 overflow-hidden cursor-pointer hover:border-black dark:hover:border-white group/card
                           bg-white dark:bg-background-dark
                           ${isApplied ? 'border-emerald-500/60 border-l-4 border-l-emerald-500' : 'border-black/15'}`}
                       >
@@ -915,15 +916,16 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                           {/* Ace Interview */}
                           <div className="flex items-center gap-2">
                             {score > 0 && (
-                              <button onClick={() => handleAceInterview(job)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 text-[8px] font-black tracking-widest border border-emerald-500/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+                              <button onClick={(e) => { e.stopPropagation(); handleAceInterview(job); }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-[8px] font-black tracking-widest border border-emerald-500/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all font-mono"
+                              >
                                 <span className="material-symbols-outlined text-xs">emoji_objects</span>
                                 Ace Interview
                               </button>
                             )}
                             {/* Share button */}
                             <button
-                              onClick={() => handleShareJob(job)}
+                              onClick={(e) => { e.stopPropagation(); handleShareJob(job); }}
                               title="Share job"
                               className="w-7 h-7 flex items-center justify-center border border-black/15 dark:border-white/15 text-black/40 dark:text-white/40 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-all"
                             >
@@ -943,7 +945,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                               const isEligible = canManualApply && score >= (threshold - 5);
 
                               return (
-                                <button onClick={() => handleInitialize(job)}
+                                <button onClick={(e) => { e.stopPropagation(); handleInitialize(job); }}
                                   className={`relative flex items-center gap-1.5 px-4 py-1.5 text-[8px] font-black tracking-widest transition-all
                                     ${isEligible
                                       ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'

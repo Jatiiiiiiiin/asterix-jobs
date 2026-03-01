@@ -153,34 +153,76 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
           </div>
         </div>
 
-        {/* Mobile Nav Overlay */}
-        <div
-          className={`mobile-menu-overlay fixed inset-0 z-[110] lg:hidden ${isMobileMenuOpen ? 'visible' : 'invisible'}`}
-          style={{
-            backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-            backdropFilter: 'none',
-            WebkitBackdropFilter: 'none'
-          }}
-        >
-          <div className={`flex flex-col p-8 sm:p-12 h-full justify-center gap-8 md:gap-12 pt-32 transition-all duration-500 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}>
+      </header>
+
+      {/* Mobile Nav Overlay */}
+      <div
+        className={`fixed inset-0 z-[150] lg:hidden bg-white dark:bg-black transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}
+      >
+        {/* Mobile Menu Header */}
+        <div className="absolute top-0 w-full h-20 md:h-24 flex items-center justify-between px-5 sm:px-6 border-b border-black/5 dark:border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="size-9 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
+              <span className="material-symbols-outlined text-xl font-black">auto_awesome</span>
+            </div>
+            <h2 className="text-xl font-black tracking-tighter leading-none">Asterix</h2>
+          </div>
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="size-10 flex items-center justify-center border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+          >
+            <span className="material-symbols-outlined text-2xl">close</span>
+          </button>
+        </div>
+
+        <div className="flex flex-col p-8 sm:p-12 h-full justify-between pt-32 pb-12 overflow-y-auto">
+          <div className="flex flex-col gap-6 sm:gap-8">
             {['Features', 'Pricing', 'Process', 'Network'].map((item, idx) => (
               <button
                 key={item}
                 onClick={() => scrollToSection(item.toLowerCase())}
-                className={`text-4xl sm:text-6xl font-black  tracking-tighter text-left border-b border-black/5 dark:border-white/5 pb-4 transform transition-all duration-500 delay-${idx * 100} ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}
+                className={`group flex items-end gap-4 text-4xl sm:text-6xl font-black tracking-tighter text-left border-b border-black/5 dark:border-white/5 pb-4 transition-all duration-700 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}
+                style={{ transitionDelay: `${idx * 100}ms` }}
               >
-                {item}
+                <span className="text-black/20 dark:text-white/20 text-lg sm:text-2xl mb-2 sm:mb-4 font-mono">0{idx + 1}</span>
+                <span className="group-hover:translate-x-3 transition-transform duration-500">{item}</span>
               </button>
             ))}
+
             <button
               onClick={handleFreeSignup}
-              className={`text-xl font-black  tracking-widest mt-4 transition-all duration-700 delay-500 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+              className={`inline-flex items-center gap-4 text-xl font-black tracking-[0.2em] mt-8 bg-black dark:bg-white text-white dark:text-black px-8 py-5 transition-all duration-1000 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+              style={{ transitionDelay: '500ms' }}
             >
-              Get Started <span className="inline-block animate-bounce-x ml-2">—&gt;</span>
+              GET STARTED <span className="material-symbols-outlined animate-bounce-x">arrow_forward</span>
             </button>
           </div>
+
+          {/* Mobile Menu Footer */}
+          <div className={`mt-12 pt-8 border-t border-black/5 dark:border-white/5 transition-all duration-1000 delay-700 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+            <p className="text-[10px] font-black tracking-[0.3em] text-black/40 dark:text-white/40 mb-6 uppercase">Connect with us</p>
+            <div className="flex items-center gap-4">
+              {[
+                { icon: 'link', label: 'LinkedIn', href: '#' },
+                { icon: 'code', label: 'GitHub', href: '#' },
+                { icon: 'alternate_email', label: 'Twitter', href: '#' },
+              ].map(s => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  className="size-12 border border-black/10 dark:border-white/10 flex items-center justify-center text-black/60 dark:text-white/60 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+                >
+                  <span className="material-symbols-outlined text-xl">{s.icon}</span>
+                </a>
+              ))}
+            </div>
+            <div className="mt-8 flex flex-col gap-2">
+              <span className="text-[9px] font-black tracking-widest text-black/30 dark:text-white/30 uppercase">Inquiries</span>
+              <a href="mailto:hello@asterix-jobs.in" className="text-sm font-bold hover:opacity-50 transition-opacity">hello@asterix-jobs.in</a>
+            </div>
+          </div>
         </div>
-      </header>
+      </div>
 
       <main className="pt-20 md:pt-24">
         {/* Hero Section */}
@@ -631,13 +673,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         .dark .glass-nav {
           background-color: rgba(0, 0, 0, 0.8) !important;
         }
-        /* Force mobile menu to be solid */
-        .mobile-menu-overlay {
-          background-color: #ffffff !important;
-          opacity: 1 !important;
-        }
-        .dark .mobile-menu-overlay {
-          background-color: #000000 !important;
+        .dark .glass-nav {
+          background-color: rgba(0, 0, 0, 0.8) !important;
         }
       `}</style>
     </div >
