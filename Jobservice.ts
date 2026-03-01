@@ -52,6 +52,9 @@ export interface LiveJob {
   analyzing?: boolean;
   matchHighlights?: string[];
   breakdown?: any;
+
+  isAdminPosted?: boolean;
+  externalUrl?: string;
 }
 
 /* ── Resolvers (safe JSX rendering) ─────────────────────────────────────── */
@@ -95,10 +98,10 @@ export function resolveSalaryCompact(job: Partial<LiveJob>): string {
   const fmt = (n: number, cur: string) => {
     if (cur === 'INR') {
       if (n >= 10_000_000) return `₹${(n / 10_000_000).toFixed(1)}Cr`;
-      if (n >= 100_000)    return `₹${(n / 100_000).toFixed(1)}L`;
+      if (n >= 100_000) return `₹${(n / 100_000).toFixed(1)}L`;
     }
     if (n >= 1_000_000) return `${cur} ${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000)     return `${cur} ${Math.round(n / 1_000)}k`;
+    if (n >= 1_000) return `${cur} ${Math.round(n / 1_000)}k`;
     return `${cur} ${n}`;
   };
   const r = job.salaryRange;

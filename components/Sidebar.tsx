@@ -76,13 +76,19 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
       { name: 'My Applications', icon: 'work_history', path: '/candidate/applications' },
       { name: 'Settings', icon: 'settings', path: '/candidate/settings' },
     ]
-    : [
-      { name: 'Dashboard', icon: 'dashboard', path: '/recruiter' },
-      { name: 'Active Sourcing', icon: 'work', path: '/recruiter/active-jobs' },
-      { name: 'Talent Pipeline', icon: 'groups', path: '/recruiter/talent' },
-      { name: 'Intelligence', icon: 'bar_chart', path: '/recruiter/reports' },
-      { name: 'Settings', icon: 'settings', path: '/recruiter/settings' },
-    ];
+    : role === 'admin'
+      ? [
+        { name: 'Admin Portal', icon: 'admin_panel_settings', path: '/admin' },
+        { name: 'Universe Feed', icon: 'public', path: '/candidate/jobs' },
+        { name: 'Logout', icon: 'logout', path: '/' },
+      ]
+      : [
+        { name: 'Dashboard', icon: 'dashboard', path: '/recruiter' },
+        { name: 'Active Sourcing', icon: 'work', path: '/recruiter/active-jobs' },
+        { name: 'Talent Pipeline', icon: 'groups', path: '/recruiter/talent' },
+        { name: 'Intelligence', icon: 'bar_chart', path: '/recruiter/reports' },
+        { name: 'Settings', icon: 'settings', path: '/recruiter/settings' },
+      ];
 
   /* ── Plan detection — uses usePlan for accurate Firestore plan string ── */
   const { planLabel, canManualApply } = usePlan();
@@ -106,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
             <div className="flex flex-col">
               <h1 className="text-black dark:text-white text-base font-black tracking-tighter">Asterix</h1>
               <p className="text-black/60 dark:text-white/60 text-[10px] font-bold tracking-widest">
-                {role === 'candidate' ? 'Job Seeker' : 'Talent Lead'}
+                {role === 'candidate' ? 'Job Seeker' : role === 'admin' ? 'Administrator' : 'Talent Lead'}
               </p>
             </div>
           </Link>

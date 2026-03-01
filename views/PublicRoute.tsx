@@ -32,6 +32,10 @@ const PublicRoute = ({ children, user, isLoading }: PublicRouteProps) => {
 
 
 
+  if (user.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+
   if (user.role === 'recruiter') {
     return <Navigate to="/recruiter" replace />;
   }

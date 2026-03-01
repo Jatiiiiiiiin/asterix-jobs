@@ -119,19 +119,21 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         if (unsubJobs) unsubJobs();
         unsubJobs = subscribeToActiveJobs(
           (liveJobs) => {
-            const merged: Job[] = liveJobs.map(liveJob => {
-              const saved = Array.isArray(jobDataMap)
-                ? jobDataMap.find((j: any) => j.id === liveJob.id)
-                : jobDataMap[liveJob.id];
-              return {
-                ...liveJob,
-                matchScore: saved?.matchScore ?? 0,
-                applied: saved?.applied ?? false,
-                analyzing: false,
-                matchHighlights: saved?.matchHighlights ?? [],
-                breakdown: saved?.breakdown ?? null,
-              };
-            });
+            const merged: Job[] = liveJobs
+              .filter(liveJob => !liveJob.isAdminPosted)
+              .map(liveJob => {
+                const saved = Array.isArray(jobDataMap)
+                  ? jobDataMap.find((j: any) => j.id === liveJob.id)
+                  : jobDataMap[liveJob.id];
+                return {
+                  ...liveJob,
+                  matchScore: saved?.matchScore ?? 0,
+                  applied: saved?.applied ?? false,
+                  analyzing: false,
+                  matchHighlights: saved?.matchHighlights ?? [],
+                  breakdown: saved?.breakdown ?? null,
+                };
+              });
             jobsRef.current = merged;
             setDynamicJobs(merged);
             setIsLoadingJobs(false);
@@ -534,8 +536,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     setResumeName(file.name);
     setIsUploading(true);
 
-    // Immediate visual feedback: mark all cards as analyzing
-    setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: true })));
+    // Immediate visual feedback: mark all cards as analyzing and RESET scores
+    setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: true, matchScore: 0 })));
 
     const uid = readSessionUid();
     addNotification('Vault Sync', `Archiving ${file.name} to secure vault...`, 'info');
@@ -558,16 +560,22 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
         const base64 = await toBase64(file);
 
+        // Generate a simple fingerprint to detect resume changes
+        const fingerprint = `${file.name}-${file.size}-${file.lastModified}`;
+        localStorage.setItem(`asterix_resume_hash_${uid}`, fingerprint);
+
+        // FIX: Ensure doc creation if it doesn't exist
         await setDoc(doc(db, 'profiles', uid), {
-          resumeUrl: base64, // Keep key 'resumeUrl' for compatibility
-          resumeName: file.name
+          resumeUrl: base64,
+          resumeName: file.name,
+          resumeFingerprint: fingerprint
         }, { merge: true });
 
         setResumeUrl(base64);
         addNotification('Identity Vaulted', 'Resume securely stored in your profile', 'success');
       } catch (err: any) {
         console.error('[Vault Sync] Failed:', err);
-        addNotification('Vault Error', 'Internal storage error. Matches will still work.', 'alert');
+        addNotification('Vault Error', 'Could not sync to cloud vault. Local matching active.', 'alert');
       } finally {
         setIsUploading(false);
       }

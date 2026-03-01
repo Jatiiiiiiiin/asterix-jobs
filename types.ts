@@ -1,5 +1,5 @@
 
-export type UserRole = 'candidate' | 'recruiter' | null;
+export type UserRole = 'candidate' | 'recruiter' | 'admin' | null;
 
 export interface Job {
   id: string;
@@ -51,6 +51,10 @@ export interface Job {
   analyzing?: boolean;
   matchHighlights?: string[];
   breakdown?: any;
+
+  // Admin-specific fields
+  isAdminPosted?: boolean;
+  externalUrl?: string;
 }
 
 

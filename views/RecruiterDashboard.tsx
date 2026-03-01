@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import { readSessionUid } from '../authService';
+import { authService, readSessionUid } from '../authService';
 import { db } from '../firebase';
 import {
   collection,
@@ -97,6 +97,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
   isPremium = false,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const [view, setView] = useState<View>('jobs');
   const [postedJobs, setPostedJobs] = useState<PostedJob[]>([]);
   const [selectedJob, setSelectedJob] = useState<PostedJob | null>(null);
@@ -120,8 +121,16 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
 
   /* ── Auth ──────────────────────────────────────────────────── */
   useEffect(() => {
-    setRecruiterId(readSessionUid());
-  }, []);
+    const checkAuth = async () => {
+      const user = await authService.getCurrentUser();
+      if (user?.role === 'admin') {
+        navigate('/admin', { replace: true });
+        return;
+      }
+      setRecruiterId(readSessionUid());
+    };
+    checkAuth();
+  }, [navigate]);
 
   /* ── Jobs listener ─────────────────────────────────────────── */
   useEffect(() => {

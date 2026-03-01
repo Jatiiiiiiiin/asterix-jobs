@@ -10,6 +10,10 @@ import UpgradeModal from '../components/UpgradeModal';
 import { getInterviewTips, InterviewTips } from '../geminiService';
 import InterviewTipsModal from '../components/InterviewTipsModal';
 
+import { calculateSemanticFidelityBackend, extractResumeText } from '../geminiService';
+import { doc, getDoc } from "firebase/firestore";
+import { db, auth } from "../firebase";
+
 const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = ({ onToggleTheme, isDarkMode }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,6 +29,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
   const [userId, setUserId] = useState<string | null>(null);
   const [dynamicJobs, setDynamicJobs] = useState<Job[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
+  const [isVectorizing, setIsVectorizing] = useState(false);
 
   // ── Plan gating ─────────────────────────────────────────────
   const { canManualApply } = usePlan();
@@ -35,11 +40,107 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
   const [interviewTips, setInterviewTips] = useState<InterviewTips | null>(null);
   const [isLoadingTips, setIsLoadingTips] = useState(false);
 
-  const addNotification = (title: string, msg: string, type: 'info' | 'success' | 'alert') => {
-    // Note: JobsPage doesn't have a notification system like CandidateDashboard, 
-    // it uses standard browser alerts or logs for now, or we can add a simple one if needed.
-    // For now, let's just log it to keep it simple unless requested.
-    console.log(`[${type}] ${title}: ${msg}`);
+  const fetchProfilePayload = async (uid: string) => {
+    try {
+      const snap = await getDoc(doc(db, 'profiles', uid));
+      if (!snap.exists()) return { profileText: '', candidateSkills: [] };
+      const data = snap.data();
+      const candidateSkills = (data.skills ?? []).map((s: any) => ({ skill: (s.s ?? '').toLowerCase().trim(), weight: Number(s.l ?? 0) }));
+      const profileText = [
+        `Name: ${data.profile?.name ?? ''}`,
+        `Title: ${data.profile?.title ?? ''}`,
+        `About: ${data.profile?.manifesto ?? ''}`,
+        `Skills: ${candidateSkills.map((s: any) => s.skill).join(', ')}`,
+        `Experience:\n${(data.deployments ?? []).map((d: any) => `${d.role} at ${d.co} — ${d.desc}`).join('\n')}`,
+        `Education: ${data.education ?? ''}`,
+      ].join('\n');
+      return { profileText, candidateSkills };
+    } catch {
+      return { profileText: '', candidateSkills: [] };
+    }
+  };
+
+  const isSyncingRef = React.useRef(false);
+
+  const performSemanticSync = async (force: boolean = false) => {
+    if (isSyncingRef.current || isVectorizing) return;
+
+    const user = auth.currentUser;
+    if (!user) return;
+    const uid = user.uid;
+    let resumeText = localStorage.getItem(`asterix_resume_content_${uid}`);
+
+    // Sequential lock
+    isSyncingRef.current = true;
+
+    // ── IDENTITY RECOVERY ──
+    let currentFingerprint = localStorage.getItem(`asterix_resume_hash_${uid}`) || '';
+
+    try {
+      const snap = await getDoc(doc(db, 'profiles', uid));
+      const data = snap.data();
+
+      // If Firestore has a newer fingerprint or we don't have resume text, recover
+      if (data?.resumeFingerprint && data.resumeFingerprint !== currentFingerprint) {
+        console.log("[JobsPage] New resume detected in vault. Updating identity...");
+        resumeText = await extractResumeText(data.resumeUrl);
+        localStorage.setItem(`asterix_resume_content_${uid}`, resumeText);
+        localStorage.setItem(`asterix_resume_hash_${uid}`, data.resumeFingerprint);
+        currentFingerprint = data.resumeFingerprint;
+        force = true; // Force re-scan for new resume
+      } else if (!resumeText && data?.resumeUrl) {
+        resumeText = await extractResumeText(data.resumeUrl);
+        localStorage.setItem(`asterix_resume_content_${uid}`, resumeText);
+      }
+    } catch (err) {
+      console.error("Vault recovery failed:", err);
+    }
+
+    if (!resumeText) {
+      console.warn("[JobsPage] Sync aborted: No resume found.");
+      isSyncingRef.current = false;
+      return;
+    }
+
+    setIsVectorizing(true);
+    const { profileText, candidateSkills } = await fetchProfilePayload(uid);
+
+    // Filter jobs: skip if they have a score UNLESS we are forcing a re-scan
+    const jobsToScore = force
+      ? dynamicJobs
+      : dynamicJobs.filter(j => !j.matchScore || j.matchScore === 0);
+
+    if (jobsToScore.length === 0) {
+      console.log("[JobsPage] No new jobs to score.");
+      setIsVectorizing(false);
+      isSyncingRef.current = false;
+      return;
+    }
+
+    // Set "analyzing" only for those we are actually processing
+    setDynamicJobs(prev => prev.map(j =>
+      jobsToScore.some(ts => ts.id === j.id) ? { ...j, analyzing: true, matchScore: force ? 0 : j.matchScore } : j
+    ));
+
+    // Process SEQUENTIALLY to minimize load
+    for (const job of jobsToScore) {
+      try {
+        const audit = await calculateSemanticFidelityBackend(null, job, profileText, candidateSkills, resumeText!);
+        setDynamicJobs(prev => prev.map(j => j.id === job.id ? {
+          ...j,
+          matchScore: audit.fidelityScore,
+          matchHighlights: audit.matchHighlights,
+          breakdown: audit.breakdown,
+          analyzing: false
+        } : j));
+      } catch (err) {
+        console.error('Job sync failed:', job.id, err);
+        setDynamicJobs(prev => prev.map(j => j.id === job.id ? { ...j, analyzing: false } : j));
+      }
+    }
+
+    setIsVectorizing(false);
+    isSyncingRef.current = false;
   };
 
   const handleAceInterview = async (job: Job) => {
@@ -67,6 +168,18 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
       setIsLoadingTips(false);
     }
   };
+
+  const handleInitializeAutoPilot = () => {
+    setIsAutoPilotActive(true);
+    performSemanticSync();
+  };
+
+  useEffect(() => {
+    if (isAutoPilotActive && !isLoadingJobs && dynamicJobs.length > 0 && !isVectorizing) {
+      const anyUnscored = dynamicJobs.some(j => (j.matchScore ?? 0) === 0);
+      if (anyUnscored) performSemanticSync();
+    }
+  }, [isAutoPilotActive, isLoadingJobs, dynamicJobs.length]);
 
   useEffect(() => {
     const initializeJobs = async () => {
@@ -118,6 +231,12 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
   }, []);
 
   useEffect(() => {
+    if (userId && dynamicJobs.length > 0) {
+      localStorage.setItem(`asterix_jobs_${userId}`, JSON.stringify(dynamicJobs));
+    }
+  }, [dynamicJobs, userId]);
+
+  useEffect(() => {
     localStorage.setItem('asterix_autopilot', String(isAutoPilotActive));
   }, [isAutoPilotActive]);
 
@@ -129,7 +248,10 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const filteredJobs = useMemo(() => {
+  // ── FILTERED JOBS ──────────────────────────────────────────
+  // This is the source for both sections. 
+  // We apply search, type, and threshold filters here.
+  const baseFilteredJobs = useMemo(() => {
     return dynamicJobs.filter(job => {
       const q = searchQuery.toLowerCase().trim();
       const matchesText = !q ||
@@ -148,20 +270,25 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
       });
 
       const matchesThreshold = (job.matchScore ?? 0) >= matchThreshold;
+
       return matchesText && matchesType && matchesThreshold;
     });
   }, [dynamicJobs, searchQuery, selectedTypes, matchThreshold]);
 
-  // Universe Feed: Show all jobs
+  // Universe Feed: ONLY Admin Posted Jobs
   const universeJobs = useMemo(() => {
-    return filteredJobs;
-  }, [filteredJobs]);
+    return baseFilteredJobs.filter(j => !!j.isAdminPosted);
+  }, [baseFilteredJobs]);
 
+  // Neural Synergy (Best Fit): ONLY Recruiter Jobs (Not Admin)
   const bestFitJobs = useMemo(() => {
-    return filteredJobs
-      .filter(j => (j.matchScore ?? 0) > 45)
+    return baseFilteredJobs
+      .filter(j => !j.isAdminPosted && (j.matchScore ?? 0) > 45)
       .sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
-  }, [filteredJobs]);
+  }, [baseFilteredJobs]);
+
+  // Compatibility for UI which uses filteredJobs as the universe feed source
+  const filteredJobs = universeJobs;
 
   const toggleType = (type: string) => {
     setSelectedTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
@@ -319,7 +446,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                   Identity is synchronized. Application routing is 98.2% calibrated.
                 </p>
                 <button
-                  onClick={() => setIsAutoPilotActive(!isAutoPilotActive)}
+                  onClick={handleInitializeAutoPilot}
                   className={`w-full py-3 text-[9px] font-black  tracking-widest border-2 border-white transition-all ${isAutoPilotActive ? 'bg-white text-emerald-500' : 'hover:bg-white hover:text-emerald-500'}`}
                 >
                   {isAutoPilotActive ? '✓ System Active' : 'Initialize'}
@@ -329,6 +456,11 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
           </aside>
 
           <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-16 custom-scrollbar">
+            {isVectorizing && (
+              <div className="fixed top-[73px] left-0 right-0 h-1 bg-black/5 dark:bg-white/5 z-20">
+                <div className="absolute inset-0 bg-emerald-500 animate-marquee" style={{ width: '30%' }} />
+              </div>
+            )}
 
             {/* Elite Neural Syncs */}
             <section id="best-fit" className="space-y-8 scroll-mt-4">
@@ -374,8 +506,19 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                   <h2 className="text-2xl md:text-4xl font-black  tracking-tighter opacity-40">Universe Feed</h2>
                   <p className="text-[9px] font-black  tracking-widest opacity-20">Full market inventory matching logic</p>
                 </div>
-                <div className="text-[9px] font-black  tracking-widest opacity-30">
-                  {isLoadingJobs ? '...' : `${filteredJobs.length} Positions Vetted`}
+                <div className="flex items-center gap-4">
+                  <div className="text-[9px] font-black  tracking-widest opacity-30">
+                    {isLoadingJobs ? '...' : `${filteredJobs.length} Positions Vetted`}
+                  </div>
+                  {!isLoadingJobs && filteredJobs.some(j => (j.matchScore ?? 0) === 0) && (
+                    <button
+                      onClick={() => performSemanticSync(true)}
+                      disabled={isVectorizing}
+                      className="px-3 py-1 border border-black/20 dark:border-white/20 text-[8px] font-black tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all uppercase"
+                    >
+                      {isVectorizing ? 'Syncing...' : 'Recalibrate'}
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -474,13 +617,19 @@ const JobCard: React.FC<{
           </p>
         </div>
 
-        {/* Score Cluster (Conditional) */}
-        {isBestFit && (
+        {/* Score Cluster (Always show if available or analyzing) */}
+        {(isBestFit || score > 0 || job.analyzing) && (
           <div className="shrink-0 text-right">
-            <div className="text-3xl md:text-4xl font-black tabular-nums text-[#ffb800] leading-none">
-              {score}%
-            </div>
-            <div className="text-[7px] font-black tracking-[0.4em] text-white/30 mt-1 uppercase">Match</div>
+            {job.analyzing ? (
+              <div className="text-xl md:text-2xl font-black text-[#ffb800] animate-pulse">Scanning...</div>
+            ) : (
+              <>
+                <div className="text-3xl md:text-4xl font-black tabular-nums text-[#ffb800] leading-none">
+                  {score}%
+                </div>
+                <div className="text-[7px] font-black tracking-[0.4em] text-white/30 mt-1 uppercase">Match</div>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -507,12 +656,12 @@ const JobCard: React.FC<{
         </div>
       </div>
 
-      {/* ── PROGRESS BAR (Conditional) ── */}
-      {isBestFit && (
+      {/* ── PROGRESS BAR ── */}
+      {(isBestFit || score > 0 || job.analyzing) && (
         <div className="h-[2px] w-full bg-white/5">
           <div
-            className="h-full bg-[#ffb800] transition-all duration-1000 ease-out"
-            style={{ width: `${score}%` }}
+            className={`h-full transition-all duration-1000 ease-out ${job.analyzing ? 'bg-emerald-500 animate-marquee' : 'bg-[#ffb800]'}`}
+            style={{ width: job.analyzing ? '30%' : `${score}%` }}
           />
         </div>
       )}
@@ -553,7 +702,7 @@ const JobCard: React.FC<{
                 ${canManualApply ? 'bg-white text-black hover:bg-gray-200 shadow-xl' : 'border border-white/20 text-white/40 hover:border-[#ffb800] hover:text-[#ffb800]'}`}
             >
               {!canManualApply && <span className="material-symbols-outlined text-base">lock</span>}
-              Initialize
+              View Protocol
             </button>
           )}
         </div>

@@ -18,8 +18,11 @@ import re
 import os
 import hmac
 import hashlib
+import requests
+import time
 from functools import lru_cache
 from io import BytesIO
+from huggingface_hub import InferenceClient
 import resend
 from cashfree_pg.models.create_order_request import CreateOrderRequest
 from cashfree_pg.api_client import Cashfree
@@ -67,51 +70,47 @@ app.add_middleware(
 
 # ================= LIGHTWEIGHT EMBEDDER =================
 
-class FastEmbedder:
-    """Memory-efficient hash-based embedder"""
+HF_API_KEY = os.getenv("HF_API_KEY")
+HF_MODEL_ID = "sentence-transformers/all-MiniLM-L6-v2"
+
+class HFEmbedder:
+    """Cloud-based neural embedder via Hugging Face InferenceClient"""
     
-    def __init__(self, dim: int = 96):
-        self.dim = dim
-        
+    def __init__(self, api_key: str):
+        self.client = InferenceClient(token=api_key)
+        self.model_id = HF_MODEL_ID
+        self.dim = 384 # all-MiniLM-L6-v2 standard
+        print(f"[Neural] InferenceClient Initialized for: {self.model_id}")
+
     @lru_cache(maxsize=1024)
     def encode(self, text: str, normalize: bool = True) -> np.ndarray:
-        """Generate lightweight embeddings"""
-        tokens = self._extract_tokens(text)
-        
-        vec = np.zeros(self.dim, dtype=np.float32)
-        for token in tokens:
-            idx = hash(token) % self.dim
-            vec[idx] += 1.0
-        
-        if normalize and np.linalg.norm(vec) > 0:
-            vec = vec / np.linalg.norm(vec)
+        """Fetch dense vectors using InferenceClient with auto-retries"""
+        try:
+            # InferenceClient handles retries and 503s internally
+            vec_list = self.client.feature_extraction(
+                text[:1500],
+                model=self.model_id
+            )
             
-        return vec
-    
-    def _extract_tokens(self, text: str) -> Set[str]:
-        """Extract meaningful tokens"""
-        STOPWORDS = {
-            "the", "and", "for", "with", "this", "that", "are", "was",
-            "you", "will", "have", "from", "your", "not", "can", "but",
-            "work", "role", "team", "job", "been", "what", "which", "also"
-        }
-        
-        words = re.findall(r'\b[a-z][a-z0-9+#.\-]{1,}\b', text.lower())
-        return {w for w in words if len(w) >= 2 and w not in STOPWORDS}
-
-
-# ================= GLOBALS =================
-
-embedder: FastEmbedder | None = None
-
-
-# ================= STARTUP =================
+            vec = np.array(vec_list, dtype=np.float32)
+            
+            # Handle nested lists if returned
+            if len(vec.shape) > 1:
+                vec = np.mean(vec, axis=0)
+            
+            if normalize and np.linalg.norm(vec) > 0:
+                vec = vec / np.linalg.norm(vec)
+            return vec
+            
+        except Exception as e:
+            print(f"[Neural ERROR] InferenceClient failed: {e}")
+            return np.zeros(self.dim, dtype=np.float32)
 
 @app.on_event("startup")
 def initialize():
     global embedder
-    embedder = FastEmbedder(dim=96)
-    print("[Startup] Lightweight embedder initialized")
+    embedder = HFEmbedder(api_key=HF_API_KEY)
+    print("[Startup] Cloud Neural Engine initialized")
     print(f"[Startup] CORS Allowed Origins: {ALLOWED_ORIGINS}")
 
 # ================= EMAIL CONFIGURATION =================
@@ -211,6 +210,47 @@ def extract_content(file: UploadFile) -> str:
         return ""
 
 
+# ================= DOCUMENT VALIDATION =================
+
+def is_authentic_resume(text: str) -> bool:
+    """Heuristic check to see if a document is actually a professional resume"""
+    if not text or len(text) < 300:
+        return False
+        
+    text_lower = text.lower()
+    
+    # Positive markers: Essential resume sections
+    # Resumes almost always contain at least 2 of these
+    POSITIVE_MARKERS = [
+        "experience", "education", "skills", "projects", "work history",
+        "employment", "achievements", "summary", "objective", "certifications",
+        "university", "college", "institue", "bachelor", "master", "phd"
+    ]
+    
+    # Negative markers: Indicators of non-resume documents (e.g. academic papers)
+    # If these are highly dominant, it might be a false positive
+    NEGATIVE_MARKERS = [
+        "abstract", "introduction", "methodology", "conclusion", "references",
+        "figure 1", "table 1", "et al.", "1st class", "paper code", "roll no"
+    ]
+    
+    positive_hits = sum(1 for m in POSITIVE_MARKERS if m in text_lower)
+    negative_hits = sum(1 for m in NEGATIVE_MARKERS if m in text_lower)
+    
+    # Guard logic:
+    # 1. Must have at least 2 professional/educational sections
+    # 2. Rejection markers must not outweigh positive markers significantly
+    if positive_hits < 2:
+        print(f"[Guard] LOW POSITIVE MARKERS: {positive_hits}. Likely not a resume.")
+        return False
+        
+    if negative_hits > positive_hits:
+        print(f"[Guard] HIGH NEGATIVE MARKERS: {negative_hits} vs {positive_hits}. Likely a paper/doc.")
+        return False
+        
+    return True
+
+
 # ================= TEXT PROCESSING =================
 
 def tokenize(text: str) -> Set[str]:
@@ -242,7 +282,7 @@ def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
 
 # ================= SCORING FUNCTIONS =================
 
-def compute_semantic_score(text: str, job_text: str) -> float:
+def compute_semantic_score(text: str, job_text: str, min_ratio: float = 0.07) -> float:
     """Compute semantic similarity between text and job"""
     
     if not text or len(text) < 30:
@@ -265,8 +305,8 @@ def compute_semantic_score(text: str, job_text: str) -> float:
     print(f"[Score] Overlap: {overlap_count} tokens ({keyword_ratio:.1%})")
     
     # If very low overlap, skip expensive embedding computation
-    if keyword_ratio < 0.03:
-        print(f"[Score] Keyword ratio too low, returning 0")
+    if keyword_ratio < min_ratio:
+        print(f"[Score] Keyword ratio too low ({keyword_ratio:.1%}/{min_ratio:.1%}), returning 0")
         return 0.0
     
     # Step 2: Embedding similarity
@@ -278,8 +318,9 @@ def compute_semantic_score(text: str, job_text: str) -> float:
         print(f"[Score] Cosine similarity: {cosine:.3f}")
         
         # Normalize: typical range is 0.1-0.5 for real matches
-        BASELINE = 0.12
-        CEILING = 0.55
+        # Normalize: broaden the range for better distribution
+        BASELINE = 0.18 # Higher baseline to filter noise
+        CEILING = 0.75  # Higher ceiling
         
         if cosine < BASELINE:
             return 0.0
@@ -296,40 +337,40 @@ def compute_semantic_score(text: str, job_text: str) -> float:
 
 
 def compute_skill_match(skills: List[dict], job_text: str) -> float:
-    """Calculate weighted skill overlap"""
-    if not skills:
-        print("[Skills] No skills provided")
-        return 0.0
-    
+    """
+    Coverage-based skill matching. 
+    Instead of 'relevance', we score based on 'Saturation'.
+    Matching ~4-5 key skills = 100% score. Extra skills are ignored.
+    """
     job_tokens = tokenize(job_text)
-    
-    total_weight = 0
     matched_weight = 0
     matched_skills = []
     
+    # Target saturation: ~35-40 points for 100% score.
+    # 40 points = exactly 8 skills (weight 5) or 4 high-weight skills (weight 10).
+    TARGET_SATURATION = 40 
+    
     for skill_obj in skills:
         skill_name = (skill_obj.get("skill") or "").strip().lower()
-        weight = max(int(skill_obj.get("weight") or 1), 1)
+        # Default weight 5 for tags, 10 if highlighted
+        weight = max(int(skill_obj.get("weight") or 5), 5) 
         
         if not skill_name:
             continue
-        
-        total_weight += weight
+            
         skill_tokens = tokenize(skill_name)
         
         if skill_tokens & job_tokens:
             matched_weight += weight
             matched_skills.append(skill_name)
     
-    if total_weight == 0:
-        return 0.0
-    
-    match_ratio = matched_weight / total_weight
+    # Calculate coverage score
+    coverage_ratio = min(matched_weight / TARGET_SATURATION, 1.0)
     
     print(f"[Skills] Matched: {matched_skills[:5]}")
-    print(f"[Skills] Score: {matched_weight}/{total_weight} ({match_ratio:.1%})")
+    print(f"[Skills] Coverage: {matched_weight}/{TARGET_SATURATION} ({coverage_ratio:.1%})")
     
-    return match_ratio
+    return coverage_ratio
 
 
 def compute_profile_quality(profile_text: str, skills: List[dict]) -> float:
@@ -502,6 +543,17 @@ async def match_resume(
             "breakdown": {"resume": 0, "profile": 0, "completeness": 0, "skills": 0}
         }
     
+    # Step 0: Quick Authenticity Guard
+    if not is_authentic_resume(resume_text):
+        print("[Guard] Document failed authenticity check. Rejecting.")
+        return {
+            "matchScore": 0,
+            "fidelityScore": 0,
+            "skillAudit": [],
+            "matchHighlights": ["Document does not appear to be a professional resume (missing key sections or academic/paper markers detected)"],
+            "breakdown": {"resume": 0, "profile": 0, "completeness": 0, "skills": 0}
+        }
+    
     # Prepare inputs
     job_text = f"Role: {jobTitle}\n\n{jobDescription[:2000]}".strip()
     profile_text = profileText[:1500]
@@ -526,7 +578,7 @@ async def match_resume(
     resume_score = compute_semantic_score(resume_text, job_text)
     
     print(f"\n[SCORING] Computing profile match...")
-    profile_score = compute_semantic_score(profile_text, job_text)
+    profile_score = compute_semantic_score(profile_text, job_text, min_ratio=0.03)
     
     print(f"\n[SCORING] Computing skill overlap...")
     skill_score = compute_skill_match(skills, job_text)
@@ -534,16 +586,25 @@ async def match_resume(
     print(f"\n[SCORING] Computing profile quality...")
     quality_score = compute_profile_quality(profile_text, skills)
     
-    # Final weighted score
+    # Final weighted score: Skills and Resume are equal drivers (40% each)
     raw_score = (
-        0.45 * resume_score +
-        0.30 * profile_score * quality_score +
-        0.25 * skill_score
+        0.40 * resume_score +
+        0.40 * skill_score +
+        0.20 * (profile_score * 0.7 + quality_score * 0.3)
     )
     
-    # Apply exponential scaling for better distribution
-    final_score = 1.0 - math.exp(-3.5 * raw_score)
-    final_score_pct = round(final_score * 100)
+    # Linear-Polynomial scaling with penalty for low scores
+    if raw_score < 0.15:
+        final_score_pct = 0
+    else:
+        # 1.25x power ensures good separation without crushing viable candidates
+        distributed_score = raw_score ** 1.25
+        final_score_pct = round(distributed_score * 100)
+    
+    # Ensure variety: add a tiny deterministic offset based on job title to break ties
+    if final_score_pct > 0:
+        tie_breaker = (hash(jobTitle) % 3) - 1
+        final_score_pct = max(0, min(100, final_score_pct + tie_breaker))
     
     print(f"\n[RESULT] Raw: {raw_score:.3f} → Final: {final_score_pct}%")
     print(f"[BREAKDOWN] Resume: {resume_score:.2%}, Profile: {profile_score:.2%}, Skills: {skill_score:.2%}, Quality: {quality_score:.2%}")

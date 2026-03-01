@@ -16,7 +16,7 @@ import { doc, setDoc, getDoc, increment, runTransaction } from "firebase/firesto
 export interface AuthUser {
   uid: string;
   email: string | null;
-  role: "candidate" | "recruiter";
+  role: "candidate" | "recruiter" | "admin";
   isOnboarded: boolean;
   isPremium?: boolean;
   isStudent?: boolean;
@@ -55,7 +55,7 @@ export const authService = {
   async signupWithEmail(
     email: string,
     password: string,
-    role: "candidate" | "recruiter"
+    role: "candidate" | "recruiter" | "admin"
   ): Promise<AuthUser> {
     const res = await createUserWithEmailAndPassword(auth, email, password);
 
@@ -125,7 +125,16 @@ export const authService = {
     }
 
     const data = (await getDoc(userRef)).data();
-    const role = data?.role || "candidate";
+    let role = data?.role || "candidate";
+
+    // HARDCODED ADMIN CHECK
+    if (email === "asterixadmin@gmail.com") {
+      role = "admin";
+      // Update firestore if not already admin
+      if (data?.role !== "admin") {
+        await setDoc(userRef, { role: "admin" }, { merge: true });
+      }
+    }
 
     writeSession(res.user.uid, res.user.email, role);
 
@@ -215,7 +224,7 @@ export const authService = {
     return {
       uid,
       email: data.email ?? firebaseUser?.email ?? null,
-      role: data.role,
+      role: (data.role === 'admin' || data.email === 'asterixadmin@gmail.com' || firebaseUser?.email === 'asterixadmin@gmail.com') ? 'admin' : data.role,
       isOnboarded: data.isOnboarded || false,
       isPremium: data.subscription?.isPremium || false,
       isStudent: data.subscription?.isStudent || false,

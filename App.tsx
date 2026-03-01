@@ -27,6 +27,7 @@ import AboutPage from "./views/AboutPage";
 import ContactPage from "./views/ContactPage";
 import PrivacyPage from "./views/PrivacyPage";
 import TermsPage from "./views/TermsPage";
+import AdminPortal from "./views/AdminPortal";
 import './App.css';
 
 /* Components */
@@ -98,6 +99,11 @@ const App: React.FC = () => {
     // Only redirect to email verification for brand-new registrations
     if (isNewSignup && !authUser.emailVerified) {
       navigate("/verify-email", { replace: true });
+      return;
+    }
+
+    if (authUser.role === "admin") {
+      navigate("/admin", { replace: true });
       return;
     }
 
@@ -194,13 +200,19 @@ const App: React.FC = () => {
 
   const RequireCandidate = ({ children }: { children: ReactNode }) => {
     if (!user) return <Navigate to="/signup" replace />;
-    if (user.role !== "candidate") return <Navigate to="/signup" replace />;
+    if (user.role !== "candidate" && user.role !== "admin") return <Navigate to="/signup" replace />;
     return <>{children}</>;
   };
 
   const RequireRecruiter = ({ children }: { children: ReactNode }) => {
     if (!user) return <Navigate to="/signup" replace />;
     if (user.role !== "recruiter") return <Navigate to="/signup" replace />;
+    return <>{children}</>;
+  };
+
+  const RequireAdmin = ({ children }: { children: ReactNode }) => {
+    if (!user) return <Navigate to="/signup" replace />;
+    if (user.role !== "admin") return <Navigate to="/signup" replace />;
     return <>{children}</>;
   };
 
@@ -279,6 +291,9 @@ const App: React.FC = () => {
         <Route path="/recruiter/reports" element={<RequireRecruiter><RecruiterReportsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireRecruiter>} />
         <Route path="/recruiter/settings" element={<RequireRecruiter><SettingsPage role="recruiter" onToggleTheme={toggleTheme} isDarkMode={isDarkMode} onLogout={handleLogout} /></RequireRecruiter>} />
         <Route path="/post-job" element={<RequireRecruiter><PostJobPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isPremium={user?.isPremium ?? false} /></RequireRecruiter>} />
+
+        {/* ADMIN */}
+        <Route path="/admin" element={<RequireAdmin><AdminPortal onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireAdmin>} />
 
         {/* SHARED */}
         <Route path="/job/:id" element={<JobDetailsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />} />

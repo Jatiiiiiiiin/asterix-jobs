@@ -147,6 +147,14 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
     }
 
     if (appliedLocally || isApplying) return;
+
+    // ── External Admin Job Handling ──
+    if (job.isAdminPosted && job.externalUrl) {
+      window.open(job.externalUrl, '_blank');
+      setAppliedLocally(true);
+      return;
+    }
+
     setIsApplying(true);
     setApplyError(null);
 
@@ -523,9 +531,14 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                   >
                     <span className="material-symbols-outlined text-sm">lock</span>
                     Initialize
-                    <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[6px] font-black tracking-widest px-1.5 py-0.5">
-                      PRO
-                    </span>
+                  </button>
+                ) : job.isAdminPosted && job.externalUrl ? (
+                  <button
+                    onClick={handleApply}
+                    className="flex-1 lg:flex-none px-12 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider bg-indigo-600 text-white hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    <span className="material-symbols-outlined text-sm">external_link</span>
+                    Apply on External Site
                   </button>
                 ) : (
                   <button
