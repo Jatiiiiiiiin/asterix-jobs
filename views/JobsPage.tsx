@@ -70,77 +70,80 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
     const uid = user.uid;
     let resumeText = localStorage.getItem(`asterix_resume_content_${uid}`);
 
-    // Sequential lock
-    isSyncingRef.current = true;
-
-    // ── IDENTITY RECOVERY ──
-    let currentFingerprint = localStorage.getItem(`asterix_resume_hash_${uid}`) || '';
-
     try {
-      const snap = await getDoc(doc(db, 'profiles', uid));
-      const data = snap.data();
+      isSyncingRef.current = true;
+      setIsVectorizing(true);
 
-      // If Firestore has a newer fingerprint or we don't have resume text, recover
-      if (data?.resumeFingerprint && data.resumeFingerprint !== currentFingerprint) {
-        console.log("[JobsPage] New resume detected in vault. Updating identity...");
-        resumeText = await extractResumeText(data.resumeUrl);
-        localStorage.setItem(`asterix_resume_content_${uid}`, resumeText);
-        localStorage.setItem(`asterix_resume_hash_${uid}`, data.resumeFingerprint);
-        currentFingerprint = data.resumeFingerprint;
-        force = true; // Force re-scan for new resume
-      } else if (!resumeText && data?.resumeUrl) {
-        resumeText = await extractResumeText(data.resumeUrl);
-        localStorage.setItem(`asterix_resume_content_${uid}`, resumeText);
+      // ── IDENTITY RECOVERY ──
+      let currentFingerprint = localStorage.getItem(`asterix_resume_hash_${uid}`) || '';
+
+      try {
+        const snap = await getDoc(doc(db, 'profiles', uid));
+        const data = snap.data();
+
+        if (data?.resumeFingerprint && data.resumeFingerprint !== currentFingerprint) {
+          console.log("[JobsPage] New resume detected in vault. Updating identity...");
+          resumeText = await extractResumeText(data.resumeUrl);
+          localStorage.setItem(`asterix_resume_content_${uid}`, resumeText);
+          localStorage.setItem(`asterix_resume_hash_${uid}`, data.resumeFingerprint);
+          currentFingerprint = data.resumeFingerprint;
+          force = true;
+        } else if (!resumeText && data?.resumeUrl) {
+          resumeText = await extractResumeText(data.resumeUrl);
+          localStorage.setItem(`asterix_resume_content_${uid}`, resumeText);
+        }
+      } catch (err) {
+        console.error("Vault recovery failed:", err);
       }
+
+      if (!resumeText) {
+        console.warn("[JobsPage] Sync aborted: No resume found.");
+        return;
+      }
+
+      const { profileText, candidateSkills } = await fetchProfilePayload(uid);
+
+      const jobsToScore = force
+        ? dynamicJobs
+        : dynamicJobs.filter(j => !j.matchScore || j.matchScore === 0);
+
+      if (jobsToScore.length === 0) {
+        console.log("[JobsPage] No new jobs to score.");
+        return;
+      }
+
+      setDynamicJobs(prev => prev.map(j =>
+        jobsToScore.some(ts => ts.id === j.id) ? { ...j, analyzing: true, matchScore: force ? 0 : j.matchScore } : j
+      ));
+
+      const CONCURRENCY_LIMIT = 3;
+      const processJob = async (job: Job) => {
+        try {
+          const audit = await calculateSemanticFidelityBackend(null, job, profileText, candidateSkills, resumeText!);
+          setDynamicJobs(prev => prev.map(j => j.id === job.id ? {
+            ...j,
+            matchScore: audit.fidelityScore,
+            matchHighlights: audit.matchHighlights,
+            breakdown: audit.breakdown,
+            analyzing: false
+          } : j));
+        } catch (err) {
+          console.error('Job sync failed:', job.id, err);
+          setDynamicJobs(prev => prev.map(j => j.id === job.id ? { ...j, analyzing: false } : j));
+        }
+      };
+
+      for (let i = 0; i < jobsToScore.length; i += CONCURRENCY_LIMIT) {
+        const batch = jobsToScore.slice(i, i + CONCURRENCY_LIMIT).map(job => processJob(job));
+        await Promise.all(batch);
+      }
+
     } catch (err) {
-      console.error("Vault recovery failed:", err);
-    }
-
-    if (!resumeText) {
-      console.warn("[JobsPage] Sync aborted: No resume found.");
-      isSyncingRef.current = false;
-      return;
-    }
-
-    setIsVectorizing(true);
-    const { profileText, candidateSkills } = await fetchProfilePayload(uid);
-
-    // Filter jobs: skip if they have a score UNLESS we are forcing a re-scan
-    const jobsToScore = force
-      ? dynamicJobs
-      : dynamicJobs.filter(j => !j.matchScore || j.matchScore === 0);
-
-    if (jobsToScore.length === 0) {
-      console.log("[JobsPage] No new jobs to score.");
+      console.error("[JobsPage] Global sync error:", err);
+    } finally {
       setIsVectorizing(false);
       isSyncingRef.current = false;
-      return;
     }
-
-    // Set "analyzing" only for those we are actually processing
-    setDynamicJobs(prev => prev.map(j =>
-      jobsToScore.some(ts => ts.id === j.id) ? { ...j, analyzing: true, matchScore: force ? 0 : j.matchScore } : j
-    ));
-
-    // Process SEQUENTIALLY to minimize load
-    for (const job of jobsToScore) {
-      try {
-        const audit = await calculateSemanticFidelityBackend(null, job, profileText, candidateSkills, resumeText!);
-        setDynamicJobs(prev => prev.map(j => j.id === job.id ? {
-          ...j,
-          matchScore: audit.fidelityScore,
-          matchHighlights: audit.matchHighlights,
-          breakdown: audit.breakdown,
-          analyzing: false
-        } : j));
-      } catch (err) {
-        console.error('Job sync failed:', job.id, err);
-        setDynamicJobs(prev => prev.map(j => j.id === job.id ? { ...j, analyzing: false } : j));
-      }
-    }
-
-    setIsVectorizing(false);
-    isSyncingRef.current = false;
   };
 
   const handleAceInterview = async (job: Job) => {
@@ -269,7 +272,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
         return empTypeStr.includes(type);
       });
 
-      const matchesThreshold = (job.matchScore ?? 0) >= matchThreshold;
+      const matchesThreshold = job.analyzing || (job.matchScore ?? 0) >= matchThreshold;
 
       return matchesText && matchesType && matchesThreshold;
     });
