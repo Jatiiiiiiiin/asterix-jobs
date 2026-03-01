@@ -437,15 +437,16 @@ def generate_highlights(
     """Generate contextual match insights"""
     highlights = []
     
-    # Find matched skills
+    # Find matched skills (Audit the full list, not just top 8)
     matched_skills = []
-    for skill_obj in skills[:8]:
+    for skill_obj in skills:
         skill_name = (skill_obj.get("skill") or "").strip().lower()
         if skill_name and tokenize(skill_name) & job_tokens:
             matched_skills.append(skill_name.title())
     
     if matched_skills:
-        highlights.append(f"Matched skills: {', '.join(matched_skills[:4])}")
+        # Show up to 6 matches for better transparency
+        highlights.append(f"Matched skills: {', '.join(matched_skills[:6])}")
     
     # Experience check
     has_exp = any(m in profile_text.lower() for m in [" at ", "years", "experience"])
