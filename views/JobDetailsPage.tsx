@@ -520,9 +520,11 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                 {appliedLocally ? (
                   <button
                     disabled
-                    className="flex-1 lg:flex-none px-6 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider bg-emerald-500 text-white cursor-default shadow-lg"
+                    className={`flex-1 lg:flex-none px-8 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider text-white cursor-default shadow-lg flex items-center justify-center gap-2
+                      ${job.isAdminPosted ? 'bg-indigo-600' : 'bg-emerald-500'}`}
                   >
-                    ✓ Synced
+                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                    {job.isAdminPosted ? 'Applied' : 'Synced'}
                   </button>
                 ) : !canManualApply ? (
                   <button

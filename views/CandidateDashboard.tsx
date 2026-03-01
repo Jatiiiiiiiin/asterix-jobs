@@ -392,7 +392,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         const score = audit.fidelityScore;
         let shouldAutoApply = false;
 
-        if (autoPilotRef.current && score >= (job.matchThreshold ?? 65) && uid) {
+        if (autoPilotRef.current && !job.isAdminPosted && score >= (job.matchThreshold ?? 65) && uid) {
           const alreadyApplied = await hasApplied(uid, job.id);
           if (!alreadyApplied) {
             const payload = buildApplicationPayload(uid, job, score, true, resumeUrl || undefined);

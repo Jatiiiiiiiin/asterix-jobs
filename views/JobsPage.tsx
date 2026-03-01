@@ -691,7 +691,8 @@ const JobCard: React.FC<{
 
         <div className="flex items-center gap-3">
           {isApplied ? (
-            <div className="flex items-center gap-2 px-5 py-2.5 bg-[#00d1a0] text-black text-[10px] font-black tracking-widest uppercase">
+            <div className={`flex items-center gap-2 px-5 py-2.5 text-[10px] font-black tracking-widest uppercase
+              ${job.isAdminPosted ? 'bg-indigo-600 text-white' : 'bg-[#00d1a0] text-black'}`}>
               <span className="material-symbols-outlined text-lg">check_circle</span>
               Applied
             </div>
