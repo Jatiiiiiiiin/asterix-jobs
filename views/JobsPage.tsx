@@ -510,7 +510,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                   <div className="text-[9px] font-black  tracking-widest opacity-30">
                     {isLoadingJobs ? '...' : `${filteredJobs.length} Positions Vetted`}
                   </div>
-                  {!isLoadingJobs && filteredJobs.some(j => (j.matchScore ?? 0) === 0) && (
+                  {!isLoadingJobs && (
                     <button
                       onClick={() => performSemanticSync(true)}
                       disabled={isVectorizing}

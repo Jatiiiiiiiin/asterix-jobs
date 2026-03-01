@@ -313,7 +313,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   /* ════════════════════════════════════════════════════════
      SEMANTIC SYNC  — scores every job against resume
   ════════════════════════════════════════════════════════ */
-  const performSemanticSync = async () => {
+  const performSemanticSync = async (force: boolean = false) => {
     // Priority: Local File Ref > Persisted Text > Restore from Vault
     if (!auth.currentUser) {
       console.warn("[Asterix] Sync aborted: User not authenticated with Firebase. Session UID:", mountedUidRef.current);
@@ -323,7 +323,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     const persistentKey = uid ? `asterix_resume_content_${uid}` : null;
     let extractedText = persistentKey ? (localStorage.getItem(persistentKey) || "") : "";
 
-    if (vectorizingRef.current) return;
+    if (vectorizingRef.current && !force) return;
 
     // If no file and no extracted text, we can't sync
     if (!resumeFileRef.current && !extractedText) {
@@ -372,10 +372,22 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
     let autoAppliedCount = 0;
     const CONCURRENCY_LIMIT = 3;
-    const jobPool = [...jobsRef.current];
 
-    // Mark all jobs as analyzing immediately
-    setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: true })));
+    // If force is true, we process all jobs. Otherwise, we skip if they already have a score.
+    const jobPool = force
+      ? [...jobsRef.current]
+      : jobsRef.current.filter(j => (j.matchScore ?? 0) === 0 || j.analyzing);
+
+    if (jobPool.length === 0 && !force) {
+      setIsVectorizing(false);
+      vectorizingRef.current = false;
+      return;
+    }
+
+    // Mark specific jobs as analyzing
+    setDynamicJobs(prev => prev.map(j =>
+      jobPool.some(pj => pj.id === j.id) ? { ...j, analyzing: true, matchScore: force ? 0 : j.matchScore } : j
+    ));
 
     const processJob = async (job: Job, index: number) => {
       try {
@@ -754,6 +766,17 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
               )}
               {isUploading ? 'Archiving...' : isVectorizing ? 'Scanning...' : 'Sync Identity'}
             </button>
+
+            {/* Recalibrate */}
+            {(resumeName !== 'Resume.pdf' || (resumeUrl && resumeUrl.length > 100)) && (
+              <button onClick={() => performSemanticSync(true)}
+                disabled={isUploading || isVectorizing}
+                className="flex items-center gap-2 px-4 py-1.5 border border-black/10 dark:border-white/10 text-[8px] font-black tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all uppercase"
+              >
+                <span className="material-symbols-outlined text-xs">refresh</span>
+                Recalibrate
+              </button>
+            )}
 
             {/* Resume preview */}
             {canViewResume && (
