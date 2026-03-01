@@ -254,8 +254,11 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
   // ── FILTERED JOBS ──────────────────────────────────────────
   // This is the source for both sections. 
   // We apply search, type, and threshold filters here.
-  const baseFilteredJobs = useMemo(() => {
+  // Universe Feed: ONLY Admin Posted Jobs
+  const filteredJobs = useMemo(() => {
     return dynamicJobs.filter(job => {
+      if (!job.isAdminPosted) return false;
+
       const q = searchQuery.toLowerCase().trim();
       const matchesText = !q ||
         (job.title ?? "").toLowerCase().includes(q) ||
@@ -277,21 +280,6 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
       return matchesText && matchesType && matchesThreshold;
     });
   }, [dynamicJobs, searchQuery, selectedTypes, matchThreshold]);
-
-  // Universe Feed: ONLY Admin Posted Jobs
-  const universeJobs = useMemo(() => {
-    return baseFilteredJobs.filter(j => !!j.isAdminPosted);
-  }, [baseFilteredJobs]);
-
-  // Neural Synergy (Best Fit): ONLY Recruiter Jobs (Not Admin)
-  const bestFitJobs = useMemo(() => {
-    return baseFilteredJobs
-      .filter(j => !j.isAdminPosted && (j.matchScore ?? 0) > 45)
-      .sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
-  }, [baseFilteredJobs]);
-
-  // Compatibility for UI which uses filteredJobs as the universe feed source
-  const filteredJobs = universeJobs;
 
   const toggleType = (type: string) => {
     setSelectedTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
@@ -431,10 +419,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               <div className="pt-6 border-t border-black/5 dark:border-white/5">
                 <h3 className="text-[9px] font-black  tracking-[0.3em] opacity-40 mb-4">Market View</h3>
                 <div className="flex flex-col gap-2">
-                  <button onClick={() => scrollToSection('best-fit')} className="text-[9px] font-black  tracking-[0.25em] px-4 py-3 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center">
-                    Neural Syncs ({bestFitJobs.length})
-                  </button>
-                  <button onClick={() => scrollToSection('all-jobs')} className="text-[9px] font-black  tracking-[0.25em] px-4 py-3 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center opacity-40 hover:opacity-100">
+                  <button onClick={() => scrollToSection('all-jobs')} className="text-[9px] font-black  tracking-[0.25em] px-4 py-3 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center">
                     Universe Feed ({filteredJobs.length})
                   </button>
                 </div>
@@ -465,42 +450,6 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               </div>
             )}
 
-            {/* Elite Neural Syncs */}
-            <section id="best-fit" className="space-y-8 scroll-mt-4">
-              <div className="flex justify-between items-center border-b-2 border-black dark:border-white pb-6">
-                <div className="space-y-1">
-                  <h2 className="text-2xl md:text-4xl font-black  tracking-tighter">Neural Synergy</h2>
-                  <p className="text-[9px] font-black  tracking-widest opacity-40">Top-tier calibrated missions</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[9px] font-black  tracking-widest opacity-30">{bestFitJobs.length} SYNCED</span>
-                  <div className="size-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                </div>
-              </div>
-
-              <div className="grid gap-6">
-                {bestFitJobs.length > 0 ? (
-                  bestFitJobs.map((job) => (
-                    <JobCard
-                      key={job.id}
-                      job={job}
-                      isBestFit={true}
-                      navigate={navigate}
-                      onAceInterview={() => handleAceInterview(job)}
-                      canManualApply={canManualApply}
-                      onLockedClick={() => setShowUpgradeModal(true)}
-                    />
-                  ))
-                ) : (
-                  <div className="py-20 border-4 border-dashed border-black/10 dark:border-white/10 text-center space-y-4 opacity-30">
-                    <span className="material-symbols-outlined text-5xl">sync_problem</span>
-                    <p className="text-[10px] font-black  tracking-widest leading-relaxed px-4">
-                      No high-fidelity syncs found.<br />Optimize parameters for elite view.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </section>
 
             {/* General Market Feed */}
             <section id="all-jobs" className="space-y-8 pb-32 scroll-mt-4">
@@ -578,12 +527,11 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
 ════════════════════════════════════════════════════════ */
 const JobCard: React.FC<{
   job: Job;
-  isBestFit: boolean;
   navigate: any;
   onAceInterview: () => void;
   canManualApply: boolean;
   onLockedClick: () => void;
-}> = ({ job, isBestFit, navigate, onAceInterview, canManualApply, onLockedClick }) => {
+}> = ({ job, navigate, onAceInterview, canManualApply, onLockedClick }) => {
   const handleShare = async () => {
     const company = typeof job.company === 'string' ? job.company : job.company?.name || '';
     const url = `${window.location.origin}/job/${job.id}`;
@@ -600,34 +548,34 @@ const JobCard: React.FC<{
   return (
     <div className={`
       relative border-2 transition-all duration-300 overflow-hidden
-      bg-[#0a0a0a] border-[#1a1a1a]
-      ${isBestFit ? 'border-l-[6px] border-l-[#ffb800]' : 'border-l-[2px] border-black/10 dark:border-white/10'}
+      bg-[#0a0a0a] border-[#1a1a1a] border-l-[2px] border-black/10 dark:border-white/10
     `}>
       {/* ── HEADER ROW ── */}
-      <div className="flex items-center gap-6 p-6">
-        {/* Company Box */}
-        <div className="size-16 bg-white flex items-center justify-center shrink-0 border border-white/10">
-          <span className="material-symbols-outlined text-3xl text-black">corporate_fare</span>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 p-4 sm:p-6">
+        {/* Company Box & Title Cluster */}
+        <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
+          <div className="size-12 sm:size-16 bg-white flex items-center justify-center shrink-0 border border-white/10">
+            <span className="material-symbols-outlined text-2xl sm:text-3xl text-black">corporate_fare</span>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base sm:text-xl font-black text-white uppercase tracking-tight leading-tight truncate">
+              {job.title ?? 'Untitled Position'}
+            </h2>
+            <p className="text-[9px] sm:text-[10px] font-black tracking-widest text-white/40 mt-1 uppercase truncate">
+              {typeof job.company === 'string' ? job.company : (job.company?.name ?? 'Unknown')} · {typeof job.location === 'string' ? job.location : (job.location?.city ?? 'Remote')}
+            </p>
+          </div>
         </div>
 
-        {/* Info Cluster */}
-        <div className="flex-1 min-w-0">
-          <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-tight leading-tight">
-            {job.title ?? 'Untitled Position'}
-          </h2>
-          <p className="text-[10px] font-black tracking-widest text-white/40 mt-1 uppercase">
-            {typeof job.company === 'string' ? job.company : (job.company?.name ?? 'Unknown')} · {typeof job.location === 'string' ? job.location : (job.location?.city ?? 'Remote')}
-          </p>
-        </div>
-
-        {/* Score Cluster (Always show if available or analyzing) */}
-        {(isBestFit || score > 0 || job.analyzing) && (
-          <div className="shrink-0 text-right">
+        {/* Score Cluster */}
+        {(score > 0 || job.analyzing) && (
+          <div className="shrink-0 flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 w-full sm:w-auto pt-2 sm:pt-0 border-t border-white/5 sm:border-0">
             {job.analyzing ? (
-              <div className="text-xl md:text-2xl font-black text-[#ffb800] animate-pulse">Scanning...</div>
+              <div className="text-lg sm:text-2xl font-black text-[#ffb800] animate-pulse">Scanning...</div>
             ) : (
               <>
-                <div className="text-3xl md:text-4xl font-black tabular-nums text-[#ffb800] leading-none">
+                <div className="text-2xl sm:text-4xl font-black tabular-nums text-[#ffb800] leading-none">
                   {score}%
                 </div>
                 <div className="text-[7px] font-black tracking-[0.4em] text-white/30 mt-1 uppercase">Match</div>
@@ -638,29 +586,31 @@ const JobCard: React.FC<{
       </div>
 
       {/* ── META INFO ROW ── */}
-      <div className="flex items-center justify-between px-6 pb-4 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 pb-4 border-b border-white/5 gap-4">
         {/* Skills */}
         <div className="flex flex-wrap gap-2">
           {(job.requiredSkills ?? []).slice(0, 4).map(skill => (
-            <span key={skill} className="px-3 py-1 bg-[#141414] border border-white/5 text-[9px] font-black text-white/60 tracking-wider">
+            <span key={skill} className="px-2 sm:px-3 py-1 bg-[#141414] border border-white/5 text-[8px] sm:text-[9px] font-black text-white/60 tracking-wider">
               {skill}
             </span>
           ))}
         </div>
 
         {/* Economic / Engagement Meta */}
-        <div className="hidden sm:flex items-center gap-6">
+        <div className="flex items-center gap-4 sm:gap-6">
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-black text-white/30 tracking-widest uppercase">INR {(job.salaryRange?.min ?? 0)}-{(job.salaryRange?.max ?? 0)}L</span>
+            <span className="text-[8px] sm:text-[9px] font-black text-white/30 tracking-widest uppercase truncate max-w-[120px] sm:max-w-none">
+              INR {(job.salaryRange?.min ?? 0)}-{(job.salaryRange?.max ?? 0)}L
+            </span>
           </div>
-          <div className="px-2 py-0.5 border border-white/10 text-[9px] font-black text-white/40 tracking-widest uppercase bg-[#141414]">
+          <div className="px-2 py-0.5 border border-white/10 text-[8px] sm:text-[9px] font-black text-white/40 tracking-widest uppercase bg-[#141414] whitespace-nowrap">
             {job.employmentType ?? 'Full-Time'}
           </div>
         </div>
       </div>
 
       {/* ── PROGRESS BAR ── */}
-      {(isBestFit || score > 0 || job.analyzing) && (
+      {(score > 0 || job.analyzing) && (
         <div className="h-[2px] w-full bg-white/5">
           <div
             className={`h-full transition-all duration-1000 ease-out ${job.analyzing ? 'bg-emerald-500 animate-marquee' : 'bg-[#ffb800]'}`}
@@ -670,31 +620,20 @@ const JobCard: React.FC<{
       )}
 
       {/* ── ACTION FOOTER ── */}
-      <div className="flex items-center justify-between p-6 bg-[#0f0f0f]">
-        <div className="flex items-center gap-3">
-          {/* Ace Interview (Conditional) */}
-          {isBestFit && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onAceInterview(); }}
-              className="flex items-center gap-2 px-4 py-2 border border-emerald-500/30 text-emerald-500 text-[10px] font-black tracking-widest hover:bg-emerald-500/10 transition-all uppercase"
-            >
-              <span className="material-symbols-outlined text-sm">emoji_objects</span>
-              Ace Interview
-            </button>
-          )}
-
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 bg-[#0f0f0f] gap-4">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           {/* Share */}
           <button
             onClick={(e) => { e.stopPropagation(); handleShare(); }}
-            className="size-10 flex items-center justify-center border border-white/10 text-white/40 hover:text-white transition-all"
+            className="size-10 sm:size-11 flex items-center justify-center border border-white/10 text-white/40 hover:text-white transition-all bg-[#0a0a0a]"
           >
             <span className="material-symbols-outlined text-lg">share</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           {isApplied ? (
-            <div className={`flex items-center gap-2 px-5 py-2.5 text-[10px] font-black tracking-widest uppercase
+            <div className={`flex items-center gap-2 justify-center px-5 py-3 sm:py-2.5 text-[9px] sm:text-[10px] font-black tracking-widest uppercase w-full sm:w-auto
               ${job.isAdminPosted ? 'bg-indigo-600 text-white' : 'bg-[#00d1a0] text-black'}`}>
               <span className="material-symbols-outlined text-lg">check_circle</span>
               Applied
@@ -702,7 +641,7 @@ const JobCard: React.FC<{
           ) : (
             <button
               onClick={() => canManualApply ? navigate(`/job/${job.id}`, { state: { job } }) : onLockedClick()}
-              className={`flex items-center gap-2 px-8 py-2.5 text-[10px] font-black tracking-widest transition-all uppercase
+              className={`flex items-center gap-2 justify-center px-6 sm:px-8 py-3 sm:py-2.5 text-[9px] sm:text-[10px] font-black tracking-widest transition-all uppercase w-full sm:w-auto
                 ${canManualApply ? 'bg-white text-black hover:bg-gray-200 shadow-xl' : 'border border-white/20 text-white/40 hover:border-[#ffb800] hover:text-[#ffb800]'}`}
             >
               {!canManualApply && <span className="material-symbols-outlined text-base">lock</span>}
