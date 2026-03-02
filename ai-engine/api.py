@@ -28,6 +28,8 @@ from cashfree_pg.models.create_order_request import CreateOrderRequest
 from cashfree_pg.api_client import Cashfree
 from cashfree_pg.models.customer_details import CustomerDetails
 from cashfree_pg.models.order_meta import OrderMeta
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
 import os
@@ -80,9 +82,10 @@ class HFEmbedder:
         self.client = InferenceClient(token=api_key)
         self.model_id = HF_MODEL_ID
         self.dim = 384 # all-MiniLM-L6-v2 standard
+        self._executor = ThreadPoolExecutor(max_workers=10)
         print(f"[Neural] InferenceClient Initialized for: {self.model_id}")
 
-    @lru_cache(maxsize=1024)
+    @lru_cache(maxsize=2048)
     def encode(self, text: str, normalize: bool = True) -> np.ndarray:
         """Fetch dense vectors using InferenceClient with auto-retries"""
         try:
@@ -110,7 +113,10 @@ class HFEmbedder:
 def initialize():
     global embedder
     embedder = HFEmbedder(api_key=HF_API_KEY)
+    global job_cache
+    job_cache = {} # Job text hash -> Embedding vector
     print("[Startup] Cloud Neural Engine initialized")
+    print(f"[Startup] Job Cache initialized")
     print(f"[Startup] CORS Allowed Origins: {ALLOWED_ORIGINS}")
 
 # ================= EMAIL CONFIGURATION =================
@@ -309,10 +315,21 @@ def compute_semantic_score(text: str, job_text: str, min_ratio: float = 0.07) ->
         print(f"[Score] Keyword ratio too low ({keyword_ratio:.1%}/{min_ratio:.1%}), returning 0")
         return 0.0
     
+    # This function is now intended to be called via asyncio.to_thread or similar
+    # if high concurrency is needed, but we'll optimize the calling side.
+    
     # Step 2: Embedding similarity
     try:
+        # Check cache for job embedding
+        job_hash = hash(job_text[:2000])
+        if job_hash in job_cache:
+            job_vec = job_cache[job_hash]
+            print("[Score] Using cached job embedding")
+        else:
+            job_vec = embedder.encode(job_text[:2000], normalize=True)
+            job_cache[job_hash] = job_vec
+            
         text_vec = embedder.encode(text[:2000], normalize=True)
-        job_vec = embedder.encode(job_text[:2000], normalize=True)
         
         cosine = cosine_similarity(text_vec, job_vec)
         print(f"[Score] Cosine similarity: {cosine:.3f}")
@@ -575,11 +592,22 @@ async def match_resume(
     profile_tokens = tokenize(profile_text)
     
     # Compute scores
-    print(f"\n[SCORING] Computing resume match...")
-    resume_score = compute_semantic_score(resume_text, job_text)
+    print(f"\n[SCORING] Computing scores concurrently...")
     
-    print(f"\n[SCORING] Computing profile match...")
-    profile_score = compute_semantic_score(profile_text, job_text, min_ratio=0.03)
+    # Optimization: Fetch embeddings and compute scores in parallel where possible
+    # We'll use a thread pool for the blocking embedding calls
+    loop = asyncio.get_event_loop()
+    
+    async def get_scores():
+        # Step 1: Compute resume score and profile score concurrently
+        # Note: compute_semantic_score internally handles job_cache now
+        resume_task = loop.run_in_executor(None, compute_semantic_score, resume_text, job_text)
+        profile_task = loop.run_in_executor(None, compute_semantic_score, profile_text, job_text, 0.03)
+        
+        res_score, prof_score = await asyncio.gather(resume_task, profile_task)
+        return res_score, prof_score
+
+    resume_score, profile_score = await get_scores()
     
     print(f"\n[SCORING] Computing skill overlap...")
     skill_score = compute_skill_match(skills, job_text)
