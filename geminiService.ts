@@ -10,6 +10,48 @@ if (typeof window !== 'undefined' && 'Worker' in window) {
  * Asterix Neural Protocol: Local AI Version
  */
 
+/* ================= CACHING UTILITIES ================= */
+
+function getCacheKey(prefix: string, payload: any): string {
+  const str = JSON.stringify(payload);
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) & 0xffffffff;
+  }
+  return `asterix_ai_cache_${prefix}_${Math.abs(hash)}`;
+}
+
+function getFromCache<T>(key: string): T | null {
+  try {
+    const item = localStorage.getItem(key);
+    if (!item) return null;
+    const { data, timestamp } = JSON.parse(item);
+    // Cache expiry: 24 hours
+    if (Date.now() - timestamp > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function setInCache(key: string, data: any) {
+  try {
+    localStorage.setItem(key, JSON.stringify({
+      data,
+      timestamp: Date.now()
+    }));
+  } catch (e) {
+    // If quota exceeded, clear old cache items
+    console.warn("[Cache] Quota exceeded, clearing AI cache");
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('asterix_ai_cache_')) localStorage.removeItem(k);
+    });
+  }
+}
+
 /* ================= EMBEDDING PIPELINE ================= */
 
 let embedderPromise: Promise<any> | null = null;
@@ -553,11 +595,22 @@ export async function sendAutoApplyEmail(payload: {
 
 export const getAIInsights = async (
   candidateName: string,
-  jobTitle: string
+  jobTitle: string,
+  jobDescription: string = "",
+  resumeText: string = "",
+  forceRefresh: boolean = false
 ) => {
+  const cacheKey = getCacheKey('insights', { candidateName, jobTitle, jobDescription, resumeText });
+  if (!forceRefresh) {
+    const cached = getFromCache<string[]>(cacheKey);
+    if (cached) return cached;
+  }
+
   const form = new FormData();
   form.append("candidateName", candidateName);
   form.append("jobTitle", jobTitle);
+  form.append("jobDescription", jobDescription);
+  form.append("resumeText", resumeText);
 
   try {
     const res = await fetch(`${API_BASE}/insights`, {
@@ -569,7 +622,10 @@ export const getAIInsights = async (
       return ["Technical Stack Overlap", "Role Alignment", "Project Relevance"];
     }
 
-    return (await res.json()).points || [];
+    const data = await res.json();
+    const points = data.points || [];
+    if (points.length > 0) setInCache(cacheKey, points);
+    return points;
   } catch {
     return ["Technical Stack Overlap", "Role Alignment", "Project Relevance"];
   }
@@ -578,6 +634,10 @@ export const getAIInsights = async (
 /* ================= JOB SUMMARY ================= */
 
 export const getMatchingSummary = async (jobDescription: string) => {
+  const cacheKey = getCacheKey('summary', { jobDescription });
+  const cached = getFromCache<any>(cacheKey);
+  if (cached) return cached;
+
   const form = new FormData();
   form.append("jobDescription", jobDescription);
 
@@ -591,7 +651,9 @@ export const getMatchingSummary = async (jobDescription: string) => {
       return { requirements: ["Core Engineering"], estimatedMatchPool: 10 };
     }
 
-    return res.json();
+    const data = await res.json();
+    setInCache(cacheKey, data);
+    return data;
   } catch {
     return { requirements: ["Core Engineering"], estimatedMatchPool: 10 };
   }
@@ -601,32 +663,28 @@ export const getMatchingSummary = async (jobDescription: string) => {
 
 export async function queryJobContext(
   job: Job,
-  userQuestion: string
+  userQuestion: string,
+  history: any[] = []
 ): Promise<string> {
-  const prompt = `Objective: Answer the candidate's question based on the job context.
-  Question: ${userQuestion}
-  Job: ${job.title}
-  Context: ${job.jobSummary || ""}`;
+  const payload = {
+    jobTitle: job.title,
+    jobDescription: job.jobSummary || "",
+    question: userQuestion,
+    history: history
+  };
 
   try {
-    const res = await fetch(
-      "https://api-inference.huggingface.co/models/google/flan-t5-base",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_HF_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: { max_new_tokens: 300, temperature: 0.2 },
-        }),
-      }
-    );
+    const res = await fetch(`${API_BASE}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
+    if (!res.ok) throw new Error("Chat service failed");
     const data = await res.json();
-    return data?.[0]?.generated_text || "No response generated.";
-  } catch {
+    return data.answer || "No response generated.";
+  } catch (err) {
+    console.error("[Asterix] Chat failed:", err);
     return "AI service temporarily unavailable.";
   }
 }
@@ -707,32 +765,37 @@ function buildTips(resumeText: string, jobTitle: string, jobDescription: string)
 export async function getInterviewTips(
   resumeText: string,
   jobTitle: string,
-  jobDescription: string
+  jobDescription: string,
+  forceRefresh: boolean = false
 ): Promise<InterviewTips> {
+  const cacheKey = getCacheKey('tips', { resumeText, jobTitle, jobDescription });
+  if (!forceRefresh) {
+    const cached = getFromCache<InterviewTips>(cacheKey);
+    if (cached) return cached;
+  }
+
   const tips = buildTips(resumeText, jobTitle, jobDescription);
 
   try {
-    const hfKey = import.meta.env.VITE_HF_KEY;
-    if (hfKey) {
-      const res = await fetch(
-        "https://api-inference.huggingface.co/models/google/flan-t5-base",
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${hfKey}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            inputs: `What is one unique interview tip for a ${jobTitle} candidate? Answer in one sentence.`,
-            parameters: { max_new_tokens: 80, temperature: 0.4 },
-          }),
-        }
-      );
+    const form = new FormData();
+    form.append("jobTitle", jobTitle);
+    form.append("jobDescription", jobDescription);
+    form.append("resumeText", resumeText);
+
+    const res = await fetch(`${API_BASE}/tips`, {
+      method: "POST",
+      body: form,
+    });
+
+    if (res.ok) {
       const data = await res.json();
-      const hfTip = (data?.[0]?.generated_text || "").trim();
-      if (hfTip.length > 20 && hfTip.split(" ").length > 4) {
-        tips.powerTips[0] = toTitle(hfTip.replace(/^["']|["']$/g, ""));
+      if (data && data.strengths) {
+        setInCache(cacheKey, data);
+        return data; // Return AI tips if successful
       }
     }
-  } catch {
-    // Silent — fallback tips already set
+  } catch (err) {
+    console.error("[Asterix] Failed to fetch AI tips:", err);
   }
 
   return tips;

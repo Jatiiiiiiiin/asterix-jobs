@@ -83,7 +83,7 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                         >
                             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#10b981' }} />
                             <span className="text-[7px] font-black tracking-widest" style={{ color: '#10b981' }}>
-                                HuggingFace AI
+                                Llama 3.3 (Groq)
                             </span>
                         </div>
                         <button
@@ -113,7 +113,7 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                                     Analysing Resume vs JD
                                 </p>
                                 <p className="text-[8px] font-black tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                                    Keyword matching in progress…
+                                    Groq LPU™ acceleration active…
                                 </p>
                             </div>
                             <div
@@ -189,7 +189,7 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                         style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.3)' }}
                     >
                         <p className="text-[6px] md:text-[7px] font-black tracking-widest text-center sm:text-left opacity-30">
-                            Powered by resume ⟷ JD keyword analysis · HuggingFace enriched
+                            Powered by Llama 3.3 · Groq LPU™ Accelerated
                         </p>
                         <button
                             onClick={onClose}

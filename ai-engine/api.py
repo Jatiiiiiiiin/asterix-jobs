@@ -33,13 +33,43 @@ from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
 import os
+from groq import Groq
+import google.generativeai as genai
+
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path=env_path)
+
+# Initialize AI Clients
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
+    gemini_model = genai.GenerativeModel('gemini-2.0-flash')
+else:
+    gemini_model = None
+
+print(f"[Startup] Groq Initialized: {bool(GROQ_API_KEY)}")
+print(f"[Startup] Gemini Initialized: {bool(GOOGLE_API_KEY)}")
 print(f"[Startup] Loading .env from: {env_path}")
 
 # ================= APP =================
 
 app = FastAPI()
+
+# ================= AI RESPONSE CACHE =================
+# Simple in-memory cache to prevent redundant LLM calls for the same payload
+AI_RESPONSE_CACHE = {}
+
+def get_cache_key_backend(prefix: str, **kwargs):
+    # Create a stable key from the input arguments
+    items = sorted(kwargs.items())
+    key_base = f"{prefix}:{str(items)}"
+    return hashlib_mdsafe_hex(key_base)
+
+def hashlib_mdsafe_hex(s: str):
+    return hashlib.md5(s.encode()).hexdigest()
 
 # ================= CORS CONFIGURATION =================
 # Allow both localhost (dev) and production domains
@@ -696,24 +726,125 @@ async def match_resume(
 # ================= INSIGHTS =================
 
 @app.post("/insights")
-async def insights(candidateName: str = Form(...), jobTitle: str = Form(...)):
-    """Generate role-specific insights"""
+async def insights(candidateName: str = Form(...), jobTitle: str = Form(...), jobDescription: str = Form(""), resumeText: str = Form("")):
+    """Generate role-specific insights using Groq"""
     
+    # Check Cache
+    cache_key = f"insights:{jobTitle}:{hashlib.md5(resumeText[:500].encode()).hexdigest()}"
+    if cache_key in AI_RESPONSE_CACHE:
+        return AI_RESPONSE_CACHE[cache_key]
+
+    if groq_client and jobDescription and resumeText:
+        try:
+            prompt = f"""
+            Candidate: {candidateName}
+            Job Title: {jobTitle}
+            Job Description: {jobDescription[:1000]}
+            Resume Content: {resumeText[:2000]}
+            
+            Generate 3 short, punchy, professional insights (one sentence each) about why this candidate is a good match for this specific role. 
+            Focus on technical alignment and experience. Return ONLY a JSON list of strings.
+            """
+            
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            
+            import json
+            res = json.loads(completion.choices[0].message.content)
+            points = res.get("insights") or res.get("points") or list(res.values())[0]
+            if isinstance(points, list):
+                result = {"points": points[:3]}
+                AI_RESPONSE_CACHE[cache_key] = result
+                return result
+        except Exception as e:
+            print(f"[Insights Error] {e}")
+
+    # Fallback
     insights_list = [
         f"Technical competencies align with {jobTitle} requirements",
         "Profile demonstrates relevant domain experience",
         "Skills portfolio matches role expectations"
     ]
-    
     return {"points": insights_list}
+
+
+@app.post("/tips")
+async def tips(jobTitle: str = Form(...), jobDescription: str = Form(...), resumeText: str = Form(...)):
+    """Generate personalized interview tips using Groq"""
+    
+    # Check Cache
+    cache_key = f"tips:{jobTitle}:{hashlib.md5(resumeText[:500].encode()).hexdigest()}"
+    if cache_key in AI_RESPONSE_CACHE:
+        return AI_RESPONSE_CACHE[cache_key]
+
+    if groq_client:
+        try:
+            prompt = f"""
+            Job: {jobTitle}
+            JD: {jobDescription[:1000]}
+            Resume: {resumeText[:2000]}
+            
+            Generate personalized interview tips for this candidate.
+            Provide:
+            1. 3 Strengths based on their resume matching the JD.
+            2. 3 Gap areas they should prepare for.
+            3. 3 "Power Tips" for the interview.
+            
+            Return ONLY a JSON object with: {{"strengths": [], "gapAreas": [], "powerTips": []}}
+            """
+            
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            
+            import json
+            res = json.loads(completion.choices[0].message.content)
+            AI_RESPONSE_CACHE[cache_key] = res
+            return res
+        except Exception as e:
+            print(f"[Tips Error] {e}")
+
+    return None
 
 
 # ================= SUMMARY =================
 
 @app.post("/summary")
 async def summary(jobDescription: str = Form(...)):
-    """Extract key requirements from job description"""
+    """Extract key requirements and generate a professional summary using Gemini/Groq"""
     
+    # Check Cache
+    cache_key = f"summary:{hashlib.md5(jobDescription[:500].encode()).hexdigest()}"
+    if cache_key in AI_RESPONSE_CACHE:
+        return AI_RESPONSE_CACHE[cache_key]
+
+    requirements = ["Technical Skills", "Communication", "Problem Solving"]
+    
+    if groq_client:
+        try:
+            prompt = f"Analyze this job description and extract the top 4 technical requirements as short phrases. Also provide a 1-sentence professional summary of the role. Return as JSON: {{\"requirements\": [], \"summary\": \"\"}}\n\nJD: {jobDescription[:2000]}"
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            import json
+            res = json.loads(completion.choices[0].message.content)
+            result = {
+                "requirements": res.get("requirements", requirements)[:4],
+                "summary": res.get("summary", "")
+            }
+            AI_RESPONSE_CACHE[cache_key] = result
+            return result
+        except Exception as e:
+            print(f"[Summary Error] {e}")
+
+    # Fallback to keyword extraction
     tech_keywords = [
         "python", "javascript", "typescript", "java", "react", "angular", "vue",
         "node", "express", "django", "flask", "sql", "mongodb", "postgresql",
@@ -721,12 +852,12 @@ async def summary(jobDescription: str = Form(...)):
         "api", "rest", "graphql", "frontend", "backend", "fullstack",
         "machine learning", "data", "ai", "cloud", "devops"
     ]
-    
     desc_lower = jobDescription.lower()
     found = [kw.title() for kw in tech_keywords if kw in desc_lower]
     
     return {
-        "requirements": found[:4] if found else ["Technical Skills", "Communication", "Problem Solving"]
+        "requirements": found[:4] if found else requirements,
+        "summary": "This role focuses on delivering high-quality technical solutions within a dynamic team environment."
     }
 
 
@@ -741,10 +872,41 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat(req: ChatRequest):
-    """Simple Q&A about job roles"""
+    """Dynamic AI Chat using Groq"""
     
+    if groq_client:
+        try:
+            # Build context-aware system message
+            system_msg = f"""
+            You are an AI Job Assistant for Asterix-Jobs. 
+            Answer questions about this job role based on the following context:
+            Job Title: {req.jobTitle}
+            Job Description: {req.jobDescription[:2000]}
+            
+            Be professional, helpful, and concise. If you don't know something, suggest they ask during the interview.
+            """
+            
+            # Convert history to Groq format
+            messages = [{"role": "system", "content": system_msg}]
+            for msg in req.history[-5:]: # Last 5 messages for context
+                # Assuming history is list of {"role": "user/assistant", "content": "..."}
+                messages.append(msg)
+            
+            messages.append({"role": "user", "content": req.question})
+            
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=messages,
+                temperature=0.5,
+                max_tokens=500
+            )
+            
+            return {"answer": completion.choices[0].message.content}
+        except Exception as e:
+            print(f"[Chat Error] {e}")
+
+    # Fallback to simple keyword logic
     q = req.question.lower()
-    
     if "salary" in q or "pay" in q or "compensation" in q:
         answer = "Compensation details are typically discussed during the interview process. Focus on demonstrating your value first."
     elif "skill" in q or "requirement" in q or "qualification" in q:
