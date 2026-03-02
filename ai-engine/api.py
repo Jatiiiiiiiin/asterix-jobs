@@ -355,21 +355,18 @@ def compute_semantic_score(text: str, job_text: str, min_ratio: float = 0.07) ->
 
 def compute_skill_match(skills: List[dict], job_text: str) -> float:
     """
-    Coverage-based skill matching. 
-    Instead of 'relevance', we score based on 'Saturation'.
-    Matching ~4-5 key skills = 100% score. Extra skills are ignored.
+    Coverage-based skill matching with MUST-HAVE penalty.
     """
     job_tokens = tokenize(job_text)
+    job_text_lower = job_text.lower()
     matched_weight = 0
     matched_skills = []
     
     # Target saturation: ~35-40 points for 100% score.
-    # 40 points = exactly 8 skills (weight 5) or 4 high-weight skills (weight 10).
     TARGET_SATURATION = 40 
     
     for skill_obj in skills:
         skill_name = (skill_obj.get("skill") or "").strip().lower()
-        # Default weight 5 for tags, 10 if highlighted
         weight = max(int(skill_obj.get("weight") or 5), 5) 
         
         if not skill_name:
@@ -384,10 +381,35 @@ def compute_skill_match(skills: List[dict], job_text: str) -> float:
     # Calculate coverage score
     coverage_ratio = min(matched_weight / TARGET_SATURATION, 1.0)
     
-    print(f"[Skills] Matched: {matched_skills[:5]}")
-    print(f"[Skills] Coverage: {matched_weight}/{TARGET_SATURATION} ({coverage_ratio:.1%})")
+    # --- STRATEGIC PENALTY SYSTEM ---
+    # Identify explicit "Required" keywords in the JD
+    # If these are missing, we apply a significant multiplier penalty
+    REQUIRED_KEYWORDS = ["azure", "aws", "gcp", "devops", "kubernetes", "docker", "cloud", "terraform", "jenkins", "ci/cd"]
+    missing_critical = []
     
-    return coverage_ratio
+    for kw in REQUIRED_KEYWORDS:
+        # Check if the JD mentions it as a requirement (simple heuristic)
+        if re.search(r'\b' + re.escape(kw) + r'\b', job_text_lower):
+            # Check if candidate has it
+            candidate_has = any(kw in (s.get("skill") or "").lower() for s in skills) or \
+                            any(kw in t for t in matched_skills)
+            
+            if not candidate_has:
+                missing_critical.append(kw)
+    
+    # Penalty multiplier: 0.8^n where n is the number of missing critical skills
+    # This prevents total skill gaps from getting high scores
+    penalty = 1.0
+    if missing_critical:
+        penalty = 0.8 ** min(len(missing_critical), 4)
+        print(f"[Skills] MISSING CRITICAL: {missing_critical}, Penalty: {penalty:.2f}")
+    
+    final_skill_score = coverage_ratio * penalty
+    
+    print(f"[Skills] Matched: {matched_skills[:5]}")
+    print(f"[Skills] Final Score: {final_skill_score:.2%} (Coverage={coverage_ratio:.1%}, Penalty={penalty:.2f})")
+    
+    return final_skill_score
 
 
 def compute_profile_quality(profile_text: str, skills: List[dict]) -> float:
@@ -615,10 +637,10 @@ async def match_resume(
     print(f"\n[SCORING] Computing profile quality...")
     quality_score = compute_profile_quality(profile_text, skills)
     
-    # Final weighted score: Skills and Resume are equal drivers (40% each)
+    # Final weighted score: Prioritize Skills (50%) over generic Resume match (30%)
     raw_score = (
-        0.40 * resume_score +
-        0.40 * skill_score +
+        0.30 * resume_score +
+        0.50 * skill_score +
         0.20 * (profile_score * 0.7 + quality_score * 0.3)
     )
     

@@ -211,8 +211,10 @@ function computeSkillMatchLocal(
   jobText: string
 ): number {
   const jobTokens = tokenize(jobText);
+  const jobTextLower = jobText.toLowerCase();
   let matchedWeight = 0;
-  const TARGET_SATURATION = 60;  // was 40
+  const matchedSkills: string[] = [];
+  const TARGET_SATURATION = 40;  // synced with api.py
 
   for (const s of skills) {
     const skillName = s.skill.toLowerCase();
@@ -229,10 +231,39 @@ function computeSkillMatchLocal(
 
     if (hasMatch) {
       matchedWeight += weight;
+      matchedSkills.push(skillName);
     }
   }
 
-  return Math.min(matchedWeight / TARGET_SATURATION, 1.0);
+  const coverageRatio = Math.min(matchedWeight / TARGET_SATURATION, 1.0);
+
+  // --- STRATEGIC PENALTY SYSTEM (Synced with api.py) ---
+  const REQUIRED_KEYWORDS = ["azure", "aws", "gcp", "devops", "kubernetes", "docker", "cloud", "terraform", "jenkins", "ci/cd"];
+  const missingCritical: string[] = [];
+
+  for (const kw of REQUIRED_KEYWORDS) {
+    // Simple word boundary check
+    const regex = new RegExp(`\\b${kw}\\b`, 'i');
+    if (regex.test(jobTextLower)) {
+      const candidateHas = skills.some(s => s.skill.toLowerCase().includes(kw)) ||
+        matchedSkills.some(s => s.includes(kw));
+
+      if (!candidateHas) {
+        missingCritical.push(kw);
+      }
+    }
+  }
+
+  let penalty = 1.0;
+  if (missingCritical.length > 0) {
+    penalty = Math.pow(0.8, Math.min(missingCritical.length, 4));
+    console.log(`[Neural] MISSING CRITICAL: ${missingCritical.join(", ")}, Penalty: ${penalty.toFixed(2)}`);
+  }
+
+  const finalScore = coverageRatio * penalty;
+  console.log(`[Neural] Skill Match: ${(finalScore * 100).toFixed(1)}% (Coverage=${(coverageRatio * 100).toFixed(1)}%, Penalty=${penalty.toFixed(2)})`);
+
+  return finalScore;
 }
 
 function computeProfileQualityLocal(profileText: string, skills: any[]): number {
@@ -394,9 +425,10 @@ export async function calculateSemanticFidelityBackend(
       const skillScore = computeSkillMatchLocal(candidateSkills, jobDescription);
       const qualityScore = computeProfileQualityLocal(profileText, candidateSkills);
 
+      // Prioritize Skills (50%) over generic Resume match (30%)
       const rawScore = (
-        0.40 * resScore +
-        0.40 * skillScore +
+        0.30 * resScore +
+        0.50 * skillScore +
         0.20 * (profMatchScore * 0.7 + qualityScore * 0.3)
       );
 
