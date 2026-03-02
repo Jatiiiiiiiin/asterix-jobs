@@ -20,6 +20,7 @@
     "firebase-admin": "^13.7.0",
     "long": "5.2.3",
     "lucide-react": "^0.575.0",
+    "pdfjs-dist": "^4.10.38",
     "process": "0.11.10",
     "razorpay": "^2.9.6",
     "react": "^19.2.4",

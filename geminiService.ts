@@ -1,7 +1,13 @@
 import { Job } from "./types";
+import * as pdfjs from 'pdfjs-dist';
+
+// Configure PDF.js worker
+if (typeof window !== 'undefined' && 'Worker' in window) {
+  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+}
 
 /**
- * Asterix Neural Protocol: Local Dev Version
+ * Asterix Neural Protocol: Local AI Version
  */
 
 /* ================= EMBEDDING PIPELINE ================= */
@@ -38,19 +44,42 @@ async function getEmbedder() {
   return embedderPromise;
 }
 
+/* ================= PDF EXTRACTION (CLIENT) ================= */
+
+export async function extractTextFromPDFClient(file: File | Blob): Promise<string> {
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
+    const pdf = await loadingTask.promise;
+
+    let fullText = "";
+    const numPages = Math.min(pdf.numPages, 3);
+
+    for (let i = 1; i <= numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(" ");
+      fullText += pageText + " ";
+
+      if (fullText.length > 3000) break;
+    }
+
+    return preprocess(fullText).slice(0, 3000);
+  } catch (err) {
+    console.error("[PDF Client] Extraction failed:", err);
+    throw err;
+  }
+}
+
 /* ================= UTILITIES ================= */
 
 function preprocess(text: unknown): string {
   if (typeof text !== "string") return "";
-
   return text
     .trim()
-    .toLowerCase()
     .replace(/\s+/g, " ")
-    .replace(/[^\w\s\.\#\+\-]/gi, " ")
-    .split(" ")
-    .filter((word) => word.length > 1)
-    .join(" ")
     .slice(0, 3000);
 }
 
@@ -69,6 +98,194 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
   return mag === 0 ? 0 : dot / mag;
 }
 
+function isAuthenticResume(text: string): boolean {
+  if (!text || text.length < 300) return false;
+
+  const textLower = text.toLowerCase();
+
+  const POSITIVE_MARKERS = [
+    "experience", "education", "skills", "projects", "work history",
+    "employment", "achievements", "summary", "objective", "certifications",
+    "university", "college", "institue", "bachelor", "master", "phd"
+  ];
+
+  const NEGATIVE_MARKERS = [
+    "abstract", "introduction", "methodology", "conclusion", "references",
+    "figure 1", "table 1", "et al.", "1st class", "paper code", "roll no"
+  ];
+
+  const positiveHits = POSITIVE_MARKERS.filter(m => textLower.includes(m)).length;
+  const negativeHits = NEGATIVE_MARKERS.filter(m => textLower.includes(m)).length;
+
+  if (positiveHits < 2) {
+    console.warn("[Asterix] Document rejected: Low positive markers", positiveHits);
+    return false;
+  }
+
+  if (negativeHits > positiveHits) {
+    console.warn("[Asterix] Document rejected: High negative markers", negativeHits, "vs", positiveHits);
+    return false;
+  }
+
+  return true;
+}
+
+/* ================= DETERMINISTIC HASH ================= */
+
+/**
+ * FIX 1: Deterministic skill audit score — replaces Math.random()
+ * Produces a stable score in [12, 95] based on skill name + job text hash.
+ */
+function stableScore(seed: string, min: number, max: number): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) & 0xffffffff;
+  }
+  const norm = Math.abs(hash) / 0xffffffff;
+  return Math.floor(min + norm * (max - min));
+}
+
+/* ================= LOCAL AI SCORING ENGINE ================= */
+
+const jobEmbeddingCache: Record<string, number[]> = {};
+
+/**
+ * FIX 2: Lowered minRatio from 0.07 → 0.03
+ * The 7% threshold was too aggressive and caused valid semantic matches
+ * to be skipped entirely, returning 0 unfairly.
+ */
+async function computeSemanticScoreLocal(
+  text: string,
+  jobText: string,
+  minRatio: number = 0.03  // was 0.07
+): Promise<number> {
+  const embedder = await getEmbedder();
+  if (!embedder) return 0;
+
+  const textTokens = tokenize(text);
+  const jobTokens = tokenize(jobText);
+
+  if (jobTokens.size === 0) return 0;
+
+  const overlap = [...textTokens].filter(t => jobTokens.has(t)).length;
+  const keywordRatio = overlap / jobTokens.size;
+
+  if (keywordRatio < minRatio) {
+    console.log(`[Neural] Keyword ratio too low (${(keywordRatio * 100).toFixed(1)}%), skipping embedding.`);
+    return 0;
+  }
+
+  const jobHash = jobText.slice(0, 500);
+  let jobVec: number[];
+
+  if (jobEmbeddingCache[jobHash]) {
+    jobVec = jobEmbeddingCache[jobHash];
+  } else {
+    const jobOut = await embedder(jobText.slice(0, 2000), { pooling: "mean", normalize: true });
+    jobVec = Array.from(jobOut.data || jobOut[0]?.data || jobOut) as number[];
+    jobEmbeddingCache[jobHash] = jobVec;
+  }
+
+  const textOut = await embedder(text.slice(0, 2000), { pooling: "mean", normalize: true });
+  const textVec = Array.from(textOut.data || textOut[0]?.data || textOut) as number[];
+
+  const sim = cosineSimilarity(textVec, jobVec);
+
+  const BASELINE = 0.18;
+  const CEILING = 0.75;
+
+  if (sim < BASELINE) return 0;
+
+  const normalized = (sim - BASELINE) / (CEILING - BASELINE);
+  return Math.min(1.0, Math.max(0.0, normalized));
+}
+
+/**
+ * FIX 3: Raised TARGET_SATURATION from 40 → 60
+ * With the old value, even a sparse skill list could hit the cap easily,
+ * compressing the score range and making low-weight skills look better than they are.
+ * 60 gives a more honest spread across strong vs. weak skill matches.
+ */
+function computeSkillMatchLocal(
+  skills: Array<{ skill: string; weight: number }>,
+  jobText: string
+): number {
+  const jobTokens = tokenize(jobText);
+  let matchedWeight = 0;
+  const TARGET_SATURATION = 60;  // was 40
+
+  for (const s of skills) {
+    const skillName = s.skill.toLowerCase();
+    const weight = Math.max(s.weight, 5);
+    const skillTokens = tokenize(skillName);
+
+    let hasMatch = false;
+    for (const t of skillTokens) {
+      if (jobTokens.has(t)) {
+        hasMatch = true;
+        break;
+      }
+    }
+
+    if (hasMatch) {
+      matchedWeight += weight;
+    }
+  }
+
+  return Math.min(matchedWeight / TARGET_SATURATION, 1.0);
+}
+
+function computeProfileQualityLocal(profileText: string, skills: any[]): number {
+  let score = 0;
+
+  const words = profileText.split(/\s+/).filter(w => w.length > 3);
+  const wordScore = Math.min(words.length / 40.0, 1.0);
+  score += wordScore * 0.4;
+
+  const skillScore = Math.min(skills.length / 5.0, 1.0);
+  score += skillScore * 0.4;
+
+  const expMarkers = [" at ", " in ", "years", "experience", "worked"];
+  const hasExp = expMarkers.some(m => profileText.toLowerCase().includes(m));
+  score += hasExp ? 0.2 : 0;
+
+  return Math.max(0.3, Math.min(1.0, score));
+}
+
+function generateHighlightsLocal(
+  resumeText: string,
+  jobText: string,
+  skills: any[],
+  score: number
+): string[] {
+  const highlights: string[] = [];
+  const rTokens = tokenize(resumeText);
+  const jTokens = tokenize(jobText);
+
+  const matchedSkills = skills
+    .filter(s => {
+      const sTokens = tokenize(s.skill);
+      for (const t of sTokens) if (jTokens.has(t)) return true;
+      return false;
+    })
+    .map(s => s.skill);
+
+  if (matchedSkills.length > 0) {
+    highlights.push(`Matched skills: ${matchedSkills.slice(0, 6).join(", ")}`);
+  }
+
+  if (score >= 75) highlights.push("Excellent alignment with role requirements");
+  else if (score >= 60) highlights.push("Strong match for this position");
+  else if (score >= 40) highlights.push("Moderate fit with development areas");
+  else highlights.push("Skills gap identified - focus on key requirements");
+
+  const overlap = [...rTokens].filter(t => jTokens.has(t)).length;
+  if (overlap > 20) highlights.push("High technical vocabulary match");
+  else if (overlap > 10) highlights.push("Good keyword alignment");
+
+  return highlights.slice(0, 3);
+}
+
 /* ================= SKILL AUDIT ================= */
 
 export async function getDetailedSkillAudit(
@@ -79,73 +296,32 @@ export async function getDetailedSkillAudit(
 
   return tags.map((tag) => {
     const isVerified = rText.includes(tag.toLowerCase());
+
+    // FIX 1 APPLIED: Use stableScore instead of Math.random()
+    // Verified skills score 82–97, unverified 12–31 — consistent across renders
     const score = isVerified
-      ? Math.floor(Math.random() * 16) + 82
-      : Math.floor(Math.random() * 20) + 12;
+      ? stableScore(tag + resumeText.slice(0, 50), 82, 97)
+      : stableScore(tag + resumeText.slice(0, 50), 12, 31);
 
     return { tag, score };
   });
 }
 
-/* ================= TECH MATCH (LOCAL HF) ================= */
-
-export async function getTechnicalMatch(
-  resumeText: string,
-  jobDescription: string
-): Promise<number> {
-  const rText = preprocess(resumeText);
-  const jText = preprocess(jobDescription);
-
-  if (!rText || rText.length < 15) return 0;
-
-  const rWords = new Set(rText.split(" "));
-  const jWords = jText.split(" ").filter((w) => w.length > 3);
-
-  const overlap = jWords.filter((w) => rWords.has(w)).length;
-
-  const keywordScore = Math.min(
-    100,
-    (overlap / Math.max(1, Math.min(15, jWords.length))) * 100
-  );
-
-  let neuralScore = 0;
-
-  try {
-    const embedder = await getEmbedder();
-
-    if (embedder) {
-      const rOut = await embedder(rText, { pooling: "mean", normalize: true });
-      const jOut = await embedder(jText, { pooling: "mean", normalize: true });
-
-      const rVec = Array.from(rOut.data || rOut[0]?.data || rOut) as number[];
-      const jVec = Array.from(jOut.data || jOut[0]?.data || jOut) as number[];
-
-      const sim = cosineSimilarity(rVec, jVec);
-
-      if (sim >= 0.25) {
-        const norm = (sim - 0.25) / (0.6 - 0.25);
-        neuralScore = Math.pow(Math.max(0, Math.min(1, norm)), 0.8) * 100;
-      }
-    }
-  } catch {
-    console.warn("Neural fallback engaged");
-  }
-
-  const finalScore =
-    neuralScore > 0
-      ? Math.round(neuralScore * 0.7 + keywordScore * 0.3)
-      : Math.round(keywordScore * 0.65);
-
-  return Math.max(0, Math.min(100, finalScore));
-}
-
 /* ================= BACKEND MATCH ================= */
 
 export async function extractResumeText(resumeSource: File | string): Promise<string> {
+  if (resumeSource instanceof File && resumeSource.type === 'application/pdf') {
+    try {
+      console.log("[Asterix] Attempting client-side PDF extraction...");
+      return await extractTextFromPDFClient(resumeSource);
+    } catch (e) {
+      console.warn("[Asterix] Client-side extraction failed, falling back to backend:", e);
+    }
+  }
+
   const formData = new FormData();
 
   if (typeof resumeSource === 'string') {
-    // Convert base64 Data URL to Blob
     try {
       const arr = resumeSource.split(',');
       const mimeMatch = arr[0].match(/:(.*?);/);
@@ -186,10 +362,74 @@ export async function calculateSemanticFidelityBackend(
   file: File | null,
   job: any,
   profileText: string,
-  // Skills passed explicitly from the dashboard's buildProfilePayload().
   candidateSkills: Array<{ skill: string; weight: number }> = [],
   resumeText?: string
 ) {
+  const finalResumeText = resumeText || (file ? await extractResumeText(file) : "");
+
+  if (finalResumeText.length > 100) {
+    // Authenticity Guard (Ported from api.py)
+    if (!isAuthenticResume(finalResumeText)) {
+      console.warn("[Asterix] Document failed authenticity check. Returning zero score.");
+      return {
+        fidelityScore: 0,
+        skillAudit: [],
+        matchHighlights: ["Document does not appear to be a professional resume (missing key sections or academic/paper markers detected)"],
+        breakdown: { resume: 0, profile: 0, completeness: 0, skills: 0 }
+      };
+    }
+
+    try {
+      console.log(`[Asterix] Orchestrating local neural match for: ${job.title}`);
+
+      const jobDescription = `Role: ${job.title}\n\n` + [
+        job.jobSummary || "",
+        Array.isArray(job.responsibilities) ? job.responsibilities.join("\n") : "",
+        Array.isArray(job.requiredSkills) ? "Required: " + job.requiredSkills.join(", ") : "",
+        Array.isArray(job.techStack) ? "Tech: " + job.techStack.join(", ") : ""
+      ].filter(Boolean).join("\n\n").trim();
+
+      const resScore = await computeSemanticScoreLocal(finalResumeText, jobDescription);
+      const profMatchScore = await computeSemanticScoreLocal(profileText, jobDescription, 0.03);
+      const skillScore = computeSkillMatchLocal(candidateSkills, jobDescription);
+      const qualityScore = computeProfileQualityLocal(profileText, candidateSkills);
+
+      const rawScore = (
+        0.40 * resScore +
+        0.40 * skillScore +
+        0.20 * (profMatchScore * 0.7 + qualityScore * 0.3)
+      );
+
+      let finalScorePct = 0;
+      if (rawScore >= 0.15) {
+        finalScorePct = Math.round(Math.pow(rawScore, 1.25) * 100);
+      }
+
+      const highlights = generateHighlightsLocal(finalResumeText, jobDescription, candidateSkills, finalScorePct);
+
+      // FIX 1 APPLIED: Deterministic skill audit scores
+      const skillAudit = candidateSkills.slice(0, 12).map(s => ({
+        skill: s.skill.toUpperCase(),
+        score: stableScore(s.skill + jobDescription.slice(0, 100), 50, 89)
+      }));
+
+      return {
+        fidelityScore: finalScorePct,
+        skillAudit,
+        matchHighlights: highlights,
+        breakdown: {
+          resume: Math.round(resScore * 100),
+          profile: Math.round(profMatchScore * 100),
+          completeness: Math.round(qualityScore * 100),
+          skills: Math.round(skillScore * 100)
+        }
+      };
+    } catch (localErr) {
+      console.warn("[Asterix] Local matching failed, falling back to backend:", localErr);
+    }
+  }
+
+  // Fallback to Backend
   const formData = new FormData();
 
   if (resumeText) {
@@ -202,7 +442,7 @@ export async function calculateSemanticFidelityBackend(
 
   formData.append("jobTitle", job.title);
 
-  const safeSummary = job.jobSummary || job.description || "";
+  const safeSummary = job.jobSummary || "";
   const safeResponsibilities = Array.isArray(job.responsibilities)
     ? job.responsibilities.join("\n")
     : "";
@@ -218,32 +458,18 @@ export async function calculateSemanticFidelityBackend(
 
   formData.append(
     "jobDescription",
-    [
-      safeSummary,
-      safeResponsibilities,
-      safeRequiredSkills,
-      safePreferredSkills,
-      safeTechStack
-    ].filter(Boolean).join("\n\n")
+    [safeSummary, safeResponsibilities, safeRequiredSkills, safePreferredSkills, safeTechStack]
+      .filter(Boolean).join("\n\n")
   );
 
-  // FIX: use the candidateSkills argument instead of the global localStorage key.
-  // The old code always read from "asterix_profile_skills" which was last written
-  // by whichever account saved their profile most recently — so both accounts
-  // were scored against the same skill set.
   formData.append("candidateSkills", JSON.stringify(candidateSkills));
-
   formData.append("profileText", profileText);
 
-  // FIX: auditSkills was never sent before — backend always returned skillAudit=[].
-  // Now we derive the skill name list from the same candidateSkills array.
   const auditSkills = candidateSkills.map(s => s.skill);
   formData.append("auditSkills", JSON.stringify(auditSkills));
 
-  // Diagnostic: log the exact payload sent and score received for each job.
-
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   try {
     const res = await fetch(`${API_BASE}/match`, {
@@ -301,16 +527,20 @@ export const getAIInsights = async (
   form.append("candidateName", candidateName);
   form.append("jobTitle", jobTitle);
 
-  const res = await fetch(`${API_BASE}/insights`, {
-    method: "POST",
-    body: form,
-  });
+  try {
+    const res = await fetch(`${API_BASE}/insights`, {
+      method: "POST",
+      body: form,
+    });
 
-  if (!res.ok) {
+    if (!res.ok) {
+      return ["Technical Stack Overlap", "Role Alignment", "Project Relevance"];
+    }
+
+    return (await res.json()).points || [];
+  } catch {
     return ["Technical Stack Overlap", "Role Alignment", "Project Relevance"];
   }
-
-  return (await res.json()).points || [];
 };
 
 /* ================= JOB SUMMARY ================= */
@@ -319,16 +549,20 @@ export const getMatchingSummary = async (jobDescription: string) => {
   const form = new FormData();
   form.append("jobDescription", jobDescription);
 
-  const res = await fetch(`${API_BASE}/summary`, {
-    method: "POST",
-    body: form,
-  });
+  try {
+    const res = await fetch(`${API_BASE}/summary`, {
+      method: "POST",
+      body: form,
+    });
 
-  if (!res.ok) {
+    if (!res.ok) {
+      return { requirements: ["Core Engineering"], estimatedMatchPool: 10 };
+    }
+
+    return res.json();
+  } catch {
     return { requirements: ["Core Engineering"], estimatedMatchPool: 10 };
   }
-
-  return res.json();
 };
 
 /* ================= CHAT CONTEXT ================= */
@@ -337,7 +571,10 @@ export async function queryJobContext(
   job: Job,
   userQuestion: string
 ): Promise<string> {
-  const prompt = `...`; // unchanged
+  const prompt = `Objective: Answer the candidate's question based on the job context.
+  Question: ${userQuestion}
+  Job: ${job.title}
+  Context: ${job.jobSummary || ""}`;
 
   try {
     const res = await fetch(
@@ -370,14 +607,12 @@ export interface InterviewTips {
   powerTips: string[];
 }
 
-/* Simple tokeniser — reuse same logic as backend */
 function tokenize(text: string): Set<string> {
   const STOP = new Set([
-    "the", "and", "for", "with", "this", "that", "are", "was", "you", "will", "have",
-    "from", "your", "not", "can", "but", "work", "role", "team", "job", "been",
-    "what", "which", "also", "more", "their", "into", "about", "other", "our",
-    "all", "use", "used", "using", "able", "based", "good", "new", "key", "must",
-    "well", "via", "per", "inc", "llc", "etc", "co", "ltd"
+    "the", "and", "for", "with", "this", "that", "are", "was",
+    "you", "will", "have", "from", "your", "not", "can", "but",
+    "work", "role", "team", "job", "been", "what", "which", "also",
+    "more", "their", "into", "through", "about", "other"
   ]);
   return new Set(
     (text.toLowerCase().match(/\b[a-z][a-z0-9+#.\-]{1,}\b/g) || [])
@@ -389,17 +624,13 @@ function toTitle(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-/* Derive structured tips from keyword overlap */
 function buildTips(resumeText: string, jobTitle: string, jobDescription: string): InterviewTips {
   const rTokens = tokenize(resumeText);
   const jTokens = tokenize(jobDescription);
 
-  // Skills present in BOTH resume and JD → strengths
   const matched = [...jTokens].filter(t => rTokens.has(t) && t.length > 3);
-  // Skills in JD but NOT in resume → gaps
   const missing = [...jTokens].filter(t => !rTokens.has(t) && t.length > 3);
 
-  /* ── STRENGTHS ── */
   const strengths: string[] = [];
   if (matched.length > 0) {
     strengths.push(`Showcase your hands-on experience with ${matched.slice(0, 3).map(toTitle).join(', ')} — these directly match the JD`);
@@ -415,7 +646,6 @@ function buildTips(resumeText: string, jobTitle: string, jobDescription: string)
     strengths.push(`Prepare a concise 2-minute narrative linking your background directly to the ${jobTitle} role`);
   }
 
-  /* ── GAP AREAS ── */
   const gapAreas: string[] = [];
   if (missing.length > 0) {
     gapAreas.push(`Brush up on ${missing.slice(0, 2).map(toTitle).join(' and ')} — mentioned in the JD but not evident in your resume`);
@@ -429,7 +659,6 @@ function buildTips(resumeText: string, jobTitle: string, jobDescription: string)
   }
   gapAreas.push(`Study system design concepts relevant to the ${jobTitle} level — typically asked in technical rounds`);
 
-  /* ── POWER TIPS ── */
   const powerTips: string[] = [
     `Use the STAR method (Situation → Task → Action → Result) for every behavioural question`,
     `Ask the interviewer: "What does success look like in the first 90 days?" — shows initiative`,
@@ -448,10 +677,8 @@ export async function getInterviewTips(
   jobTitle: string,
   jobDescription: string
 ): Promise<InterviewTips> {
-  // Always build deterministic tips first — instant & always structured
   const tips = buildTips(resumeText, jobTitle, jobDescription);
 
-  // Optionally enrich powerTips[0] with a HF-generated role-specific tip
   try {
     const hfKey = import.meta.env.VITE_HF_KEY;
     if (hfKey) {
@@ -468,7 +695,6 @@ export async function getInterviewTips(
       );
       const data = await res.json();
       const hfTip = (data?.[0]?.generated_text || "").trim();
-      // Only use if HF returned something meaningful (> 20 chars, looks like a sentence)
       if (hfTip.length > 20 && hfTip.split(" ").length > 4) {
         tips.powerTips[0] = toTitle(hfTip.replace(/^["']|["']$/g, ""));
       }
@@ -479,4 +705,3 @@ export async function getInterviewTips(
 
   return tips;
 }
-

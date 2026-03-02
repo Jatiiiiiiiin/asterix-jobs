@@ -1078,7 +1078,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                     IDENTITY_SYNCED
                   </span>
                   <span className="text-[7px] font-black tracking-widest px-2 py-0.5 border inline-block border-white/20 text-white/40 dark:border-black/20 dark:text-black/40 ml-2">
-                    SESSION_ONLY
+                    LOCAL_NEURAL_PROCESSING
                   </span>
                 </div>
               </div>
