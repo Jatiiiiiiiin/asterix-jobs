@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Job } from '../types';
-import { queryJobContextHF } from '../huggingfaceService';
+import { queryJobContext } from '../geminiService';
 
 interface JobChatDrawerProps {
   job: Job;
@@ -43,9 +43,10 @@ const JobChatDrawer: React.FC<JobChatDrawerProps> = ({ job, onClose }) => {
     setIsTyping(true);
 
     try {
-      const response = await queryJobContextHF(
+      const response = await queryJobContext(
         job,
-        userMessage
+        userMessage,
+        messages.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }))
       );
 
       setMessages(prev => [
@@ -103,16 +104,14 @@ const JobChatDrawer: React.FC<JobChatDrawerProps> = ({ job, onClose }) => {
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`flex ${
-                msg.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}
             >
               <div
-                className={`max-w-[80%] px-4 py-3 text-sm font-semibold rounded-lg ${
-                  msg.role === 'user'
-                    ? 'bg-black text-white dark:bg-white dark:text-black'
-                    : 'bg-gray-100 dark:bg-white/5 text-black dark:text-white'
-                }`}
+                className={`max-w-[80%] px-4 py-3 text-sm font-semibold rounded-lg ${msg.role === 'user'
+                  ? 'bg-black text-white dark:bg-white dark:text-black'
+                  : 'bg-gray-100 dark:bg-white/5 text-black dark:text-white'
+                  }`}
               >
                 {msg.text}
               </div>

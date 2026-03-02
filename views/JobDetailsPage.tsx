@@ -107,13 +107,15 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
   const resumeContent = uid ? (localStorage.getItem(`asterix_resume_content_${uid}`) || localStorage.getItem('asterix_resume_content') || '') : (localStorage.getItem('asterix_resume_content') || '');
 
   useEffect(() => {
-    const fetchAuditData = async () => {
+    const fetchAuditData = async (force: boolean = false) => {
       if (job) {
         setIsLoadingPrep(true);
         try {
           const skillsToAudit = (job.techStack ?? job.requiredSkills ?? []) || [];
+          const jobDesc = `${job.title}\n\n${job.jobSummary || job.description || ''}`;
+          // Pass forceRefresh parameter to getAIInsights
           const [insights, detailedAudit] = await Promise.all([
-            getAIInsights(resumeName, job.title ?? 'Position'),
+            getAIInsights(resumeName, job.title ?? 'Position', jobDesc, resumeContent, force),
             getDetailedSkillAudit(resumeContent, skillsToAudit)
           ]);
           setInterviewPrep(insights);
