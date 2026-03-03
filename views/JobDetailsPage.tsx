@@ -143,10 +143,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
 
   const handleApply = async () => {
     // ── Plan check first ──
-    if (!canManualApply) {
-      setShowUpgradeModal(true);
-      return;
-    }
+    // Plan check usually goes here, but we are keeping it open on this page
 
     if (appliedLocally || isApplying) return;
 
@@ -248,15 +245,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                     {job?.employmentType ?? 'Full-time'} • {job?.experienceRequired ?? '0-2 Years'}
                   </span>
                   {/* Plan badge in hero */}
-                  {!isPlanLoading && !canManualApply && (
-                    <span
-                      onClick={() => setShowUpgradeModal(true)}
-                      className="flex items-center gap-1 px-2 py-0.5 border border-black/20 dark:border-white/20 cursor-pointer hover:border-emerald-500 transition-colors group"
-                    >
-                      <span className="material-symbols-outlined text-[10px] opacity-40 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">lock</span>
-                      <span className="text-[7px] font-black tracking-widest opacity-40 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">Free Plan</span>
-                    </span>
-                  )}
+                  {/* Hero badge removed to keep view clean for open applications */}
                 </div>
                 <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter leading-[0.85] break-words">
                   {job?.title ?? 'Position'}
@@ -474,22 +463,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
             )}
 
             {/* Free plan banner */}
-            {!isPlanLoading && !canManualApply && !appliedLocally && (
-              <div
-                onClick={() => setShowUpgradeModal(true)}
-                className="mb-4 px-4 py-3 bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 hover:border-emerald-500 transition-all cursor-pointer flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-sm opacity-40 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">lock</span>
-                  <span className="text-[9px] font-black tracking-widest opacity-40 group-hover:opacity-100 transition-all">
-                    Manual applications require Premium Student Plan
-                  </span>
-                </div>
-                <span className="text-[8px] font-black tracking-widest text-emerald-500 opacity-0 group-hover:opacity-100 transition-all">
-                  Upgrade →
-                </span>
-              </div>
-            )}
+            {/* Manual apply is open on this page */}
 
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 md:gap-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-6 flex-1 min-w-0">
@@ -527,14 +501,6 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                   >
                     <span className="material-symbols-outlined text-sm">check_circle</span>
                     {job.isAdminPosted ? 'Applied' : 'Synced'}
-                  </button>
-                ) : !canManualApply ? (
-                  <button
-                    onClick={() => setShowUpgradeModal(true)}
-                    className="flex-1 lg:flex-none px-6 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider border-2 border-black/20 dark:border-white/20 text-black/30 dark:text-white/30 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-2 relative group shadow-lg"
-                  >
-                    <span className="material-symbols-outlined text-sm">lock</span>
-                    Initialize
                   </button>
                 ) : job.isAdminPosted && job.externalUrl ? (
                   <button

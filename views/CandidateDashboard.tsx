@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { subscribeToActiveJobs } from '../Jobservice';
 import Sidebar from '../components/Sidebar';
-import { calculateSemanticFidelityBackend, extractResumeText, sendAutoApplyEmail, getInterviewTips, InterviewTips } from '../geminiService';
+import { calculateSemanticFidelityBackend, extractResumeText, sendAutoApplyEmail, getInterviewTips, InterviewTips, embedResumeBackend } from '../geminiService';
 import InterviewTipsModal from '../components/InterviewTipsModal';
 import { authService, readSessionUid } from '../authService';
 import { Job } from '../types';
@@ -295,7 +295,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
       return;
     }
 
-    addNotification('Resume Missing', 'Please upload your resume to sync your identity.', 'alert');
+    addNotification('Resume Missing', 'Please upload your resume to embed your details.', 'alert');
   };
 
   const closeResumeViewer = () => {
@@ -358,6 +358,61 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         extractedText = await extractResumeText(resumeFileRef.current);
         if (uid) localStorage.setItem(`asterix_resume_content_${uid}`, extractedText);
         addNotification('Neural Link', 'Identity re-mapped', 'success');
+
+        // NEW: Extract structured identity and update profile if UID exists
+        if (uid) {
+          try {
+            addNotification('Neural Link', 'Synchronizing profile...', 'info');
+            const identity = await embedResumeBackend(extractedText);
+
+            if (identity && identity.skills) {
+              const profileRef = doc(db, 'profiles', uid);
+              const profileSnap = await getDoc(profileRef);
+              const existingData = profileSnap.exists() ? profileSnap.data() : {};
+
+              const existingProfile = existingData.profile || {};
+              const existingSkills = existingData.skills || [];
+              const existingDeployments = existingData.deployments || [];
+
+              // 1. Merge Profile Header (Name, Title, Manifesto) - Only if empty
+              const mergedProfile = {
+                name: existingProfile.name || identity.name,
+                title: existingProfile.title || identity.title,
+                manifesto: existingProfile.manifesto || identity.manifesto
+              };
+
+              // 2. Merge Skills - Append new ones, avoiding duplicates
+              const currentSkillNames = new Set(existingSkills.map((s: any) => s.s.toLowerCase().trim()));
+              const newSkills = identity.skills
+                .filter((s: any) => !currentSkillNames.has(s.skill.toLowerCase().trim()))
+                .map((s: any) => ({
+                  id: Date.now() + Math.random(),
+                  s: s.skill,
+                  l: s.weight
+                }));
+
+              const mergedSkills = [...existingSkills, ...newSkills];
+
+              // 3. Merge Deployments
+              const mergedDeployments = existingDeployments.length > 0 ? existingDeployments : identity.deployments.map((d: any) => ({
+                id: Date.now() + Math.random(),
+                ...d,
+                date: 'Extracted'
+              }));
+
+              await setDoc(profileRef, {
+                profile: mergedProfile,
+                skills: mergedSkills,
+                education: existingData.education || identity.education,
+                deployments: mergedDeployments
+              }, { merge: true });
+
+              addNotification('Identity Synced', `Added ${newSkills.length} new skills to your profile`, 'success');
+            }
+          } catch (syncErr) {
+            console.warn('[Asterix] Profile sync failed:', syncErr);
+          }
+        }
       } catch (err) {
         console.warn('[Asterix] Direct extraction failed, falling back to existing text:', err);
       }
@@ -764,7 +819,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
               {(isUploading || isVectorizing) && (
                 <span className="material-symbols-outlined text-xs animate-circular-spin">progress_activity</span>
               )}
-              {isUploading ? 'Archiving...' : isVectorizing ? 'Scanning...' : 'Sync Identity'}
+              {isUploading ? 'Archiving...' : isVectorizing ? 'Scanning...' : 'Embed Resume'}
             </button>
 
             {/* Recalibrate */}

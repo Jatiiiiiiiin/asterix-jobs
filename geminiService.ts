@@ -431,6 +431,24 @@ export async function extractResumeText(resumeSource: File | string): Promise<st
   }
 }
 
+export async function embedResumeBackend(resumeText: string) {
+  const formData = new FormData();
+  formData.append("resumeText", resumeText);
+
+  try {
+    const res = await fetch(`${API_BASE}/embed-resume`, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!res.ok) throw new Error("Embedding service failed");
+    return await res.json();
+  } catch (err: any) {
+    console.error("[Asterix] Resume embedding failed:", err);
+    throw err;
+  }
+}
+
 export async function calculateSemanticFidelityBackend(
   file: File | null,
   job: any,

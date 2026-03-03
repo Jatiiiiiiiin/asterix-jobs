@@ -91,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
       ];
 
   /* ── Plan detection — uses usePlan for accurate Firestore plan string ── */
-  const { planLabel, canManualApply } = usePlan();
+  const { plan, planLabel, canManualApply } = usePlan();
   const hasAccess = canManualApply;
   const isStudent = planLabel === 'Student Plan';
   const isPremium = planLabel === 'Premium Plan';
@@ -131,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
                 <p className="text-[10px] font-black tracking-widest text-black/60 dark:text-white/60">
                   {planLabel}
                 </p>
-                {hasAccess && (
+                {hasAccess && (plan === 'student_premium' || plan === 'premium_student') && (
                   <p className="text-[8px] font-bold text-black/40 dark:text-white/40 mt-1">₹99 / month</p>
                 )}
               </div>
@@ -157,10 +157,16 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
               </button>
             )}
 
-            {hasAccess && (
+            {hasAccess && plan !== 'free' && (
               <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <span className="material-symbols-outlined text-sm">check_circle</span>
                 <span className="text-[9px] font-black tracking-widest">Full access active</span>
+              </div>
+            )}
+            {hasAccess && plan === 'free' && (
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                <span className="material-symbols-outlined text-sm">public</span>
+                <span className="text-[9px] font-black tracking-widest">Open Market Access</span>
               </div>
             )}
           </div>

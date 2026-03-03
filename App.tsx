@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ReactNode } from "react";
+import React, { useEffect, useState, ReactNode, useCallback } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -68,7 +68,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async firebaseUser => {
-
       if (!firebaseUser) {
         setUser(null);
         setIsLoading(false);
@@ -78,6 +77,20 @@ const App: React.FC = () => {
       try {
         const fullUser = await authService.getCurrentUser();
         setUser(fullUser);
+
+        // --- HYDRATION REDIRECTION ---
+        // If user is logged in but hasn't completed specific steps, redirect them
+        if (fullUser) {
+          const path = window.location.pathname;
+
+          if (!fullUser.emailVerified && path !== '/verify-email') {
+            console.log("[Auth] Redirecting to verification (hydration)...");
+            navigate("/verify-email", { replace: true });
+          } else if (fullUser.emailVerified && !fullUser.isOnboarded && fullUser.role === 'candidate' && path !== '/candidate/onboarding') {
+            console.log("[Auth] Redirecting to onboarding (hydration)...");
+            navigate("/candidate/onboarding", { replace: true });
+          }
+        }
       } catch (error) {
         console.error('[❌ App] Error hydrating user:', error);
         setUser(null);
@@ -87,21 +100,30 @@ const App: React.FC = () => {
     });
 
     return unsub;
-  }, []);
+  }, [navigate]);
 
   /* ───────────────── POST SIGNUP ───────────────── */
 
-  const handlePostSignup = (authUser: AuthUser, isNewSignup = false) => {
+  const handlePostSignup = useCallback((authUser: AuthUser, isNewSignup = false) => {
     setUser(authUser);
 
     const intent = localStorage.getItem("auth_intent");
 
-    // Only redirect to email verification for brand-new registrations
-    if (isNewSignup && !authUser.emailVerified) {
+    // 1. Verification First
+    if (!authUser.emailVerified) {
+      console.log("[Auth] Redirecting to verification...");
       navigate("/verify-email", { replace: true });
       return;
     }
 
+    // 2. Onboarding Second (for Candidates)
+    if (authUser.role === "candidate" && !authUser.isOnboarded) {
+      console.log("[Auth] Redirecting to onboarding...");
+      navigate("/candidate/onboarding", { replace: true });
+      return;
+    }
+
+    // 3. Role-based Dashboards
     if (authUser.role === "admin") {
       navigate("/admin", { replace: true });
       return;
@@ -118,16 +140,13 @@ const App: React.FC = () => {
       return;
     }
 
-    if (!authUser.isOnboarded) {
-      navigate("/candidate/onboarding", { replace: true });
-    } else {
-      navigate("/candidate", { replace: true });
-    }
-  };
+    // Default Dashboard
+    navigate("/candidate", { replace: true });
+  }, [navigate]);
 
   /* ───────────────── POST PAYMENT ───────────────── */
 
-  const handlePaymentSuccess = async () => {
+  const handlePaymentSuccess = useCallback(async () => {
     try {
       const updatedUser = await authService.getCurrentUser();
       setUser(updatedUser);
@@ -148,25 +167,25 @@ const App: React.FC = () => {
     } catch (err) {
       console.error("[POST-PAYMENT]", err);
     }
-  };
+  }, [navigate]);
 
   /* ───────────────── POST ONBOARDING ───────────────── */
 
-  const handleOnboardingSuccess = async () => {
+  const handleOnboardingSuccess = useCallback(async () => {
     const updatedUser = await authService.getCurrentUser();
     setUser(updatedUser);
     navigate("/candidate", { replace: true });
-  };
+  }, [navigate]);
 
   /* ───────────────── POST VERIFICATION ───────────────── */
 
-  const handleVerificationSuccess = async () => {
+  const handleVerificationSuccess = useCallback(async () => {
     const updatedUser = await authService.getCurrentUser();
     setUser(updatedUser);
     if (updatedUser) {
       handlePostSignup(updatedUser);
     }
-  };
+  }, [handlePostSignup]);
 
   const handleLogout = async () => {
     await authService.logout();

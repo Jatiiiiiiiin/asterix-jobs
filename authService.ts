@@ -247,6 +247,7 @@ export const authService = {
   /* ========= REFRESH USER STATUS ========= */
   async refreshUserStatus(): Promise<void> {
     if (auth.currentUser) {
+      console.log("[AuthService] Refreshing user status for:", auth.currentUser.email);
       await auth.currentUser.reload();
     }
   },
@@ -254,7 +255,11 @@ export const authService = {
   /* ========= RESEND VERIFICATION ========= */
   async resendVerificationEmail() {
     if (auth.currentUser) {
+      console.log("[AuthService] Resending verification email to:", auth.currentUser.email);
       await sendEmailVerification(auth.currentUser);
+    } else {
+      console.warn("[AuthService] Resend failed: No current user authenticated.");
+      throw new Error("User session not found. Please log in again.");
     }
   },
 

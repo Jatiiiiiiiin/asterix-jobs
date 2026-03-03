@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../authService';
 import { auth } from '../firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 interface VerifyEmailPageProps {
     onVerified?: () => void;
@@ -17,37 +18,42 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerified }) => {
     const [userEmail, setUserEmail] = useState<string | null>(null);
 
     useEffect(() => {
-        // Get email from firebase auth directly or authService
-        const user = auth.currentUser;
-        if (user) {
-            setUserEmail(user.email);
-        }
+        let pollInterval: NodeJS.Timeout;
 
-        // --- AUTOMATIC POLLING ---
-        // Check verification status every 3 seconds
-        const pollInterval = setInterval(async () => {
-            const currentUser = auth.currentUser;
-            if (!currentUser) return;
+        const unsub = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("[Verification] User Hydrated:", user.email);
+                setUserEmail(user.email);
 
-            try {
-                // Force reload user data from Firebase servers
-                await currentUser.reload();
+                // --- AUTOMATIC POLLING ---
+                // Start/Restart interval when user is found
+                if (pollInterval) clearInterval(pollInterval);
 
-                if (currentUser.emailVerified) {
-                    console.log("[Verification] Email verified! Redirecting...");
-                    clearInterval(pollInterval);
-                    if (onVerified) {
-                        onVerified();
-                    } else {
-                        window.location.reload();
+                pollInterval = setInterval(async () => {
+                    try {
+                        // Force reload user data from Firebase servers
+                        await user.reload();
+
+                        if (user.emailVerified) {
+                            console.log("[Verification] Email verified! Triggering success...");
+                            clearInterval(pollInterval);
+                            if (onVerified) {
+                                onVerified();
+                            } else {
+                                window.location.reload();
+                            }
+                        }
+                    } catch (err) {
+                        console.error("[Verification] Polling error:", err);
                     }
-                }
-            } catch (err) {
-                console.error("[Verification] Polling error:", err);
+                }, 3000);
             }
-        }, 3000);
+        });
 
-        return () => clearInterval(pollInterval);
+        return () => {
+            unsub();
+            if (pollInterval) clearInterval(pollInterval);
+        };
     }, [onVerified]);
 
     const handleRefresh = async () => {

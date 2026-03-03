@@ -571,6 +571,74 @@ async def extract_resume(resume: UploadFile = File(...)):
     return {"status": "success", "text": text}
 
 
+@app.post("/embed-resume")
+async def embed_resume(resumeText: str = Form(...)):
+    """Extract structured identity and skills from resume text using Groq/Gemini"""
+    print(f"\n[EMBED] Processing identity extraction for text len: {len(resumeText)}")
+    
+    # Check Cache
+    cache_key = f"embed:{hashlib.md5(resumeText[:1000].encode()).hexdigest()}"
+    if cache_key in AI_RESPONSE_CACHE:
+        return AI_RESPONSE_CACHE[cache_key]
+
+    default_result = {
+        "name": "",
+        "title": "",
+        "manifesto": "",
+        "skills": [],
+        "deployments": [],
+        "education": ""
+    }
+
+    if groq_client:
+        try:
+            prompt = f"""
+            Analyze the following resume text and extract structured information.
+            Return ONLY a JSON object with this exact structure:
+            {{
+                "name": "Full Name",
+                "title": "Current/Most Recent Job Title",
+                "manifesto": "A 1-2 sentence professional bio or summary",
+                "skills": [
+                    {{"skill": "Skill Name", "weight": 1-100 score based on proficiency}}
+                ],
+                "deployments": [
+                    {{"role": "Job Title", "co": "Company Name", "desc": "Brief description of achievements"}}
+                ],
+                "education": "Degree and University info"
+            }}
+
+            Resume Text:
+            {resumeText[:3500]}
+            """
+            
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            
+            import json
+            res = json.loads(completion.choices[0].message.content)
+            
+            # Sanitation
+            result = {
+                "name": res.get("name", ""),
+                "title": res.get("title", ""),
+                "manifesto": res.get("manifesto", ""),
+                "skills": res.get("skills", [])[:15],  # Limit to top 15 skills
+                "deployments": res.get("deployments", [])[:5], # Limit to 5 most recent
+                "education": res.get("education", "")
+            }
+            
+            AI_RESPONSE_CACHE[cache_key] = result
+            return result
+        except Exception as e:
+            print(f"[Embed Error] LLM fallback: {e}")
+
+    return default_result
+
+
 # ================= MATCH ENDPOINT =================
 
 @app.post("/match")

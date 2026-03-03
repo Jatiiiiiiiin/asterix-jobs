@@ -489,7 +489,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                         isBestFit={false}
                         navigate={navigate}
                         onAceInterview={() => { }} // Not used for universe feed
-                        canManualApply={canManualApply}
+                        canManualApply={true}
                         onLockedClick={() => setShowUpgradeModal(true)}
                       />
                     ))
