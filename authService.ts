@@ -64,19 +64,24 @@ export const authService = {
     const globalStatsRef = doc(db, "jobApplicationCounts", "global");
 
     await runTransaction(db, async (transaction) => {
+      const isRecruiter = role === 'recruiter';
+      const now = new Date();
+      const twoMonthsFromNow = new Date();
+      twoMonthsFromNow.setMonth(now.getMonth() + 2);
+
       transaction.set(userRef, {
         email: res.user.email,
         role,
         isOnboarded: false,
         subscription: {
-          plan: "free",
+          plan: isRecruiter ? "premium" : "free",
           status: "active",
-          isPremium: false,
+          isPremium: isRecruiter,
           isStudent: false,
-          startDate: new Date(),
-          endDate: null,
+          startDate: now,
+          endDate: isRecruiter ? twoMonthsFromNow : null,
         },
-        createdAt: new Date()
+        createdAt: now
       });
       transaction.set(globalStatsRef, { memberCount: increment(1) }, { merge: true });
     });
@@ -91,7 +96,7 @@ export const authService = {
       email: res.user.email,
       role,
       isOnboarded: false,
-      isPremium: false,
+      isPremium: role === 'recruiter',
       isStudent: false,
       emailVerified: res.user.emailVerified,
     };
@@ -167,19 +172,24 @@ export const authService = {
       const globalStatsRef = doc(db, "jobApplicationCounts", "global");
 
       await runTransaction(db, async (transaction) => {
+        const isRecruiter = role === 'recruiter';
+        const now = new Date();
+        const twoMonthsFromNow = new Date();
+        twoMonthsFromNow.setMonth(now.getMonth() + 2);
+
         transaction.set(userRef, {
           email: res.user.email,
           role: role || "candidate",
           isOnboarded: false,
           subscription: {
-            plan: "free",
+            plan: isRecruiter ? "premium" : "free",
             status: "active",
-            isPremium: false,
+            isPremium: isRecruiter,
             isStudent: false,
-            startDate: new Date(),
-            endDate: null,
+            startDate: now,
+            endDate: isRecruiter ? twoMonthsFromNow : null,
           },
-          createdAt: new Date()
+          createdAt: now
         });
         transaction.set(globalStatsRef, { memberCount: increment(1) }, { merge: true });
       });
