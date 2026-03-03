@@ -122,16 +122,16 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             const merged: Job[] = liveJobs
               .filter(liveJob => !liveJob.isAdminPosted)
               .map(liveJob => {
-                const saved = Array.isArray(jobDataMap)
+                const savedData = Array.isArray(jobDataMap)
                   ? jobDataMap.find((j: any) => j.id === liveJob.id)
                   : jobDataMap[liveJob.id];
                 return {
                   ...liveJob,
-                  matchScore: saved?.matchScore ?? 0,
-                  applied: saved?.applied ?? false,
-                  analyzing: false,
-                  matchHighlights: saved?.matchHighlights ?? [],
-                  breakdown: saved?.breakdown ?? null,
+                  matchScore: savedData?.matchScore !== undefined ? savedData.matchScore : undefined,
+                  applied: savedData?.applied ?? false,
+                  analyzing: savedData?.analyzing ?? false,
+                  matchHighlights: savedData?.matchHighlights ?? [],
+                  breakdown: savedData?.breakdown ?? null,
                 };
               });
             jobsRef.current = merged;
@@ -429,11 +429,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     const CONCURRENCY_LIMIT = 3;
 
     // If force is true, we process all jobs. Otherwise, we skip if they already have a score.
-    const jobPool = force
-      ? [...jobsRef.current]
-      : jobsRef.current.filter(j => (j.matchScore ?? 0) === 0 || j.analyzing);
+    const jobsToScore = force
+      ? dynamicJobs
+      : dynamicJobs.filter(j => j.matchScore === undefined || j.analyzing);
 
-    if (jobPool.length === 0 && !force) {
+    if (jobsToScore.length === 0 && !force) {
       setIsVectorizing(false);
       vectorizingRef.current = false;
       return;
@@ -441,7 +441,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
     // Mark specific jobs as analyzing
     setDynamicJobs(prev => prev.map(j =>
-      jobPool.some(pj => pj.id === j.id) ? { ...j, analyzing: true, matchScore: force ? 0 : j.matchScore } : j
+      jobsToScore.some(pj => pj.id === j.id) ? { ...j, analyzing: true, matchScore: force ? undefined : j.matchScore } : j
     ));
 
     const processJob = async (job: Job, index: number) => {
@@ -502,7 +502,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
           const updated = [...prev];
           const jobIndex = updated.findIndex(j => j.id === job.id);
           if (jobIndex !== -1) {
-            updated[jobIndex] = { ...updated[jobIndex], analyzing: false, matchScore: 0 };
+            updated[jobIndex] = { ...updated[jobIndex], analyzing: false, matchScore: undefined };
           }
           return updated;
         });
@@ -511,8 +511,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
     try {
       // Parallel execution with batches
-      for (let i = 0; i < jobPool.length; i += CONCURRENCY_LIMIT) {
-        const batch = jobPool.slice(i, i + CONCURRENCY_LIMIT).map((job, idx) => processJob(job, i + idx));
+      for (let i = 0; i < jobsToScore.length; i += CONCURRENCY_LIMIT) {
+        const batch = jobsToScore.slice(i, i + CONCURRENCY_LIMIT).map((job, idx) => processJob(job, i + idx));
         await Promise.all(batch);
       }
     } catch (err) {
@@ -604,7 +604,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     setIsUploading(true);
 
     // Immediate visual feedback: mark all cards as analyzing and RESET scores
-    setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: true, matchScore: 0 })));
+    setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: true, matchScore: undefined })));
 
     const uid = readSessionUid();
     addNotification('Vault Sync', `Archiving ${file.name} to secure vault...`, 'info');
@@ -654,6 +654,13 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     // Start matching immediately using the local file memory (Zero Lag)
     performSemanticSync();
   };
+
+  useEffect(() => {
+    if (isAutoPilotOn && !isLoadingJobs && dynamicJobs.length > 0 && !isVectorizing) {
+      const anyUnscored = dynamicJobs.some(j => j.matchScore === undefined);
+      if (anyUnscored) performSemanticSync();
+    }
+  }, [isAutoPilotOn, isLoadingJobs, dynamicJobs, isVectorizing]);
 
   /* ════════════════════════════════════════════════════════
      MANUAL INITIALIZE  — premium only

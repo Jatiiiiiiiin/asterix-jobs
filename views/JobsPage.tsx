@@ -109,7 +109,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
 
       const jobsToScore = force
         ? dynamicJobs
-        : dynamicJobs.filter(j => !j.matchScore || j.matchScore === 0);
+        : dynamicJobs.filter(j => j.matchScore === undefined || j.analyzing);
 
       if (jobsToScore.length === 0) {
         console.log("[JobsPage] No new jobs to score.");
@@ -183,7 +183,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
 
   useEffect(() => {
     if (isAutoPilotActive && !isLoadingJobs && dynamicJobs.length > 0 && !isVectorizing) {
-      const anyUnscored = dynamicJobs.some(j => (j.matchScore ?? 0) === 0);
+      const anyUnscored = dynamicJobs.some(j => j.matchScore === undefined);
       if (anyUnscored) performSemanticSync();
     }
   }, [isAutoPilotActive, isLoadingJobs, dynamicJobs.length]);
@@ -206,7 +206,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
 
                 return {
                   ...liveJob,
-                  matchScore: savedData?.matchScore ?? 0,
+                  matchScore: savedData?.matchScore !== undefined ? savedData.matchScore : undefined,
                   applied: savedData?.applied ?? false,
                   analyzing: savedData?.analyzing ?? false,
                   matchHighlights: savedData?.matchHighlights ?? [],
@@ -579,7 +579,7 @@ const JobCard: React.FC<{
         </div>
 
         {/* Score Cluster */}
-        {(score > 0 || job.analyzing) && (
+        {(job.matchScore !== undefined || job.analyzing) && (
           <div className="shrink-0 flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 w-full sm:w-auto pt-2 sm:pt-0 border-t border-black/5 dark:border-white/5 sm:border-0">
             {job.analyzing ? (
               <div className="text-lg sm:text-2xl font-black text-[#ffb800] animate-pulse">Scanning...</div>
@@ -620,7 +620,7 @@ const JobCard: React.FC<{
       </div>
 
       {/* ── PROGRESS BAR ── */}
-      {(score > 0 || job.analyzing) && (
+      {(job.matchScore !== undefined || job.analyzing) && (
         <div className="h-[2px] w-full bg-black/5 dark:bg-white/5">
           <div
             className={`h-full transition-all duration-1000 ease-out ${job.analyzing ? 'bg-emerald-500 animate-marquee' : 'bg-[#ffb800]'}`}

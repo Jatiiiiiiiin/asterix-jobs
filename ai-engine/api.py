@@ -318,6 +318,28 @@ def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
 
 # ================= SCORING FUNCTIONS =================
 
+def detect_soft_skill_environment(job_text: str) -> bool:
+    """Detect if the job primarily values soft skills (communication, leadership, etc) over pure technical skills"""
+    SOFT_SKILL_KEYWORDS = [
+        "communication", "interpersonal", "leadership", "teamwork", "adaptability",
+        "problem-solving", "critical thinking", "collaboration", "client-facing",
+        "presentation", "negotiation", "empathy", "talking", "public speaking",
+        "stakeholder management", "relationship building", "conflict resolution"
+    ]
+    TECH_SKILL_KEYWORDS = [
+        "python", "javascript", "typescript", "java", "c++", "c#", "rust", "golang",
+        "fullstack", "frontend", "backend", "devops", "cloud", "aws", "azure", "gcp",
+        "docker", "kubernetes", "sql", "react", "node", "html", "css", "web development"
+    ]
+    
+    jt_lower = job_text.lower()
+    soft_hits = sum(1 for k in SOFT_SKILL_KEYWORDS if k in jt_lower)
+    tech_hits = sum(1 for k in TECH_SKILL_KEYWORDS if k in jt_lower)
+    
+    # Environment is considered soft-skill heavy if soft skills outnumber tech skills 
+    # OR if there are a significant number of soft skills present.
+    return soft_hits >= 3 or (soft_hits > 0 and soft_hits >= tech_hits)
+
 def compute_semantic_score(text: str, job_text: str, min_ratio: float = 0.07) -> float:
     """Compute semantic similarity between text and job"""
     
@@ -742,15 +764,26 @@ async def match_resume(
         0.20 * (profile_score * 0.7 + quality_score * 0.3)
     )
     
+    # SOFT SKILL BOOST (User Request)
+    # If the job values soft skills, give a base lift to the raw score
+    is_soft_env = detect_soft_skill_environment(job_text)
+    if is_soft_env:
+        # Increase raw score by 0.12 (12%) to ensure even poor technical matches get visibility
+        raw_score += 0.12
+        print(f"[Neural] SOFT SKILL BOOST DETECTED: Applying +12% base lift")
+
     # Linear-Polynomial scaling with penalty for low scores
-    if raw_score < 0.15:
+    # Lower floor for soft-skill environments
+    floor = 0.10 if is_soft_env else 0.15
+    
+    if raw_score < floor:
         final_score_pct = 0
     else:
-        # 1.25x power ensures good separation without crushing viable candidates
+        # 1.25x power ensures good separation
         distributed_score = raw_score ** 1.25
         final_score_pct = round(distributed_score * 100)
     
-    # Ensure variety: add a tiny deterministic offset based on job title to break ties
+    # Final variety offset
     if final_score_pct > 0:
         tie_breaker = (hash(jobTitle) % 3) - 1
         final_score_pct = max(0, min(100, final_score_pct + tie_breaker))

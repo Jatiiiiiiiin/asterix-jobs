@@ -189,6 +189,26 @@ function stableScore(seed: string, min: number, max: number): number {
 
 /* ================= LOCAL AI SCORING ENGINE ================= */
 
+function detectSoftSkillEnvironmentLocal(jobText: string): boolean {
+  const SOFT_SKILL_KEYWORDS = [
+    "communication", "interpersonal", "leadership", "teamwork", "adaptability",
+    "problem-solving", "critical thinking", "collaboration", "client-facing",
+    "presentation", "negotiation", "empathy", "talking", "public speaking",
+    "stakeholder management", "relationship building", "conflict resolution"
+  ];
+  const TECH_SKILL_KEYWORDS = [
+    "python", "javascript", "typescript", "java", "c++", "c#", "rust", "golang",
+    "fullstack", "frontend", "backend", "devops", "cloud", "aws", "azure", "gcp",
+    "docker", "kubernetes", "sql", "react", "node", "html", "css", "web development"
+  ];
+
+  const jtLower = jobText.toLowerCase();
+  const softHits = SOFT_SKILL_KEYWORDS.filter(k => jtLower.includes(k)).length;
+  const techHits = TECH_SKILL_KEYWORDS.filter(k => jtLower.includes(k)).length;
+
+  return softHits >= 3 || (softHits > 0 && softHits >= techHits);
+}
+
 const jobEmbeddingCache: Record<string, number[]> = {};
 
 /**
@@ -486,14 +506,23 @@ export async function calculateSemanticFidelityBackend(
       const qualityScore = computeProfileQualityLocal(profileText, candidateSkills);
 
       // Prioritize Skills (50%) over generic Resume match (30%)
-      const rawScore = (
+      // Final overall weighted score
+      let rawScore = (
         0.30 * resScore +
         0.50 * skillScore +
         0.20 * (profMatchScore * 0.7 + qualityScore * 0.3)
       );
 
+      // SOFT SKILL BOOST (User Request)
+      const isSoftEnv = detectSoftSkillEnvironmentLocal(jobDescription);
+      if (isSoftEnv) {
+        console.log(`[Neural] SOFT SKILL BOOST DETECTED: Applying +12% base lift`);
+        rawScore += 0.12;
+      }
+
+      const floor = isSoftEnv ? 0.10 : 0.15;
       let finalScorePct = 0;
-      if (rawScore >= 0.15) {
+      if (rawScore >= floor) {
         finalScorePct = Math.round(Math.pow(rawScore, 1.25) * 100);
       }
 
@@ -726,9 +755,10 @@ function tokenize(text: string): Set<string> {
     "work", "role", "team", "job", "been", "what", "which", "also",
     "more", "their", "into", "through", "about", "other"
   ]);
+  const matches = text.toLowerCase().match(/\b[a-z][a-z0-9+#.\-]{1,}\b/g);
+  const words = (matches || []) as string[];
   return new Set(
-    (text.toLowerCase().match(/\b[a-z][a-z0-9+#.\-]{1,}\b/g) || [])
-      .filter(w => w.length >= 2 && !STOP.has(w))
+    words.filter(w => w.length >= 2 && !STOP.has(w))
   );
 }
 

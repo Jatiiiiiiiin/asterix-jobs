@@ -142,7 +142,7 @@ export function subscribeToActiveJobs(
         id: d.id,
         ...(d.data() as Omit<LiveJob, 'id'>),
         // Ensure candidate-side fields default to falsy
-        matchScore: 0,
+        matchScore: undefined,
         applied: false,
         analyzing: false,
         matchHighlights: [],
