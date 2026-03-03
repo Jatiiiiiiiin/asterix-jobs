@@ -548,21 +548,21 @@ const JobCard: React.FC<{
   return (
     <div className={`
       relative border-2 transition-all duration-300 overflow-hidden
-      bg-[#0a0a0a] border-[#1a1a1a] border-l-[2px] border-black/10 dark:border-white/10
+      bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#1a1a1a] border-l-[2px] border-l-black/10 dark:border-l-white/10
     `}>
       {/* ── HEADER ROW ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 p-4 sm:p-6">
         {/* Company Box & Title Cluster */}
         <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
-          <div className="size-12 sm:size-16 bg-white flex items-center justify-center shrink-0 border border-white/10">
-            <span className="material-symbols-outlined text-2xl sm:text-3xl text-black">corporate_fare</span>
+          <div className="size-12 sm:size-16 bg-black dark:bg-white flex items-center justify-center shrink-0 border border-black/10 dark:border-white/10">
+            <span className="material-symbols-outlined text-2xl sm:text-3xl text-white dark:text-black">corporate_fare</span>
           </div>
 
           <div className="flex-1 min-w-0">
-            <h2 className="text-base sm:text-xl font-black text-white uppercase tracking-tight leading-tight truncate">
+            <h2 className="text-base sm:text-xl font-black text-black dark:text-white uppercase tracking-tight leading-tight truncate">
               {job.title ?? 'Untitled Position'}
             </h2>
-            <p className="text-[9px] sm:text-[10px] font-black tracking-widest text-white/40 mt-1 uppercase truncate">
+            <p className="text-[9px] sm:text-[10px] font-black tracking-widest text-black/40 dark:text-white/40 mt-1 uppercase truncate">
               {typeof job.company === 'string' ? job.company : (job.company?.name ?? 'Unknown')} · {typeof job.location === 'string' ? job.location : (job.location?.city ?? 'Remote')}
             </p>
           </div>
@@ -570,7 +570,7 @@ const JobCard: React.FC<{
 
         {/* Score Cluster */}
         {(score > 0 || job.analyzing) && (
-          <div className="shrink-0 flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 w-full sm:w-auto pt-2 sm:pt-0 border-t border-white/5 sm:border-0">
+          <div className="shrink-0 flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 w-full sm:w-auto pt-2 sm:pt-0 border-t border-black/5 dark:border-white/5 sm:border-0">
             {job.analyzing ? (
               <div className="text-lg sm:text-2xl font-black text-[#ffb800] animate-pulse">Scanning...</div>
             ) : (
@@ -578,7 +578,7 @@ const JobCard: React.FC<{
                 <div className="text-2xl sm:text-4xl font-black tabular-nums text-[#ffb800] leading-none">
                   {score}%
                 </div>
-                <div className="text-[7px] font-black tracking-[0.4em] text-white/30 mt-1 uppercase">Match</div>
+                <div className="text-[7px] font-black tracking-[0.4em] text-black/30 dark:text-white/30 mt-1 uppercase">Match</div>
               </>
             )}
           </div>
@@ -586,11 +586,11 @@ const JobCard: React.FC<{
       </div>
 
       {/* ── META INFO ROW ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 pb-4 border-b border-white/5 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 pb-4 border-b border-black/5 dark:border-white/5 gap-4">
         {/* Skills */}
         <div className="flex flex-wrap gap-2">
           {(job.requiredSkills ?? []).slice(0, 4).map(skill => (
-            <span key={skill} className="px-2 sm:px-3 py-1 bg-[#141414] border border-white/5 text-[8px] sm:text-[9px] font-black text-white/60 tracking-wider">
+            <span key={skill} className="px-2 sm:px-3 py-1 bg-gray-100 dark:bg-[#141414] border border-black/5 dark:border-white/5 text-[8px] sm:text-[9px] font-black text-black/60 dark:text-white/60 tracking-wider">
               {skill}
             </span>
           ))}
@@ -599,11 +599,11 @@ const JobCard: React.FC<{
         {/* Economic / Engagement Meta */}
         <div className="flex items-center gap-4 sm:gap-6">
           <div className="flex items-center gap-2">
-            <span className="text-[8px] sm:text-[9px] font-black text-white/30 tracking-widest uppercase truncate max-w-[120px] sm:max-w-none">
+            <span className="text-[8px] sm:text-[9px] font-black text-black/30 dark:text-white/30 tracking-widest uppercase truncate max-w-[120px] sm:max-w-none">
               INR {(job.salaryRange?.min ?? 0)}-{(job.salaryRange?.max ?? 0)}L
             </span>
           </div>
-          <div className="px-2 py-0.5 border border-white/10 text-[8px] sm:text-[9px] font-black text-white/40 tracking-widest uppercase bg-[#141414] whitespace-nowrap">
+          <div className="px-2 py-0.5 border border-black/10 dark:border-white/10 text-[8px] sm:text-[9px] font-black text-black/40 dark:text-white/40 tracking-widest uppercase bg-gray-100 dark:bg-[#141414] whitespace-nowrap">
             {job.employmentType ?? 'Full-Time'}
           </div>
         </div>
@@ -611,7 +611,7 @@ const JobCard: React.FC<{
 
       {/* ── PROGRESS BAR ── */}
       {(score > 0 || job.analyzing) && (
-        <div className="h-[2px] w-full bg-white/5">
+        <div className="h-[2px] w-full bg-black/5 dark:bg-white/5">
           <div
             className={`h-full transition-all duration-1000 ease-out ${job.analyzing ? 'bg-emerald-500 animate-marquee' : 'bg-[#ffb800]'}`}
             style={{ width: job.analyzing ? '30%' : `${score}%` }}
@@ -620,12 +620,12 @@ const JobCard: React.FC<{
       )}
 
       {/* ── ACTION FOOTER ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 bg-[#0f0f0f] gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 bg-gray-50 dark:bg-[#0f0f0f] gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           {/* Share */}
           <button
             onClick={(e) => { e.stopPropagation(); handleShare(); }}
-            className="size-10 sm:size-11 flex items-center justify-center border border-white/10 text-white/40 hover:text-white transition-all bg-[#0a0a0a]"
+            className="size-10 sm:size-11 flex items-center justify-center border border-black/10 dark:border-white/10 text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white transition-all bg-white dark:bg-[#0a0a0a]"
           >
             <span className="material-symbols-outlined text-lg">share</span>
           </button>
@@ -634,7 +634,7 @@ const JobCard: React.FC<{
         <div className="flex items-center gap-3 w-full sm:w-auto">
           {isApplied ? (
             <div className={`flex items-center gap-2 justify-center px-5 py-3 sm:py-2.5 text-[9px] sm:text-[10px] font-black tracking-widest uppercase w-full sm:w-auto
-              ${job.isAdminPosted ? 'bg-indigo-600 text-white' : 'bg-[#00d1a0] text-black'}`}>
+              ${job.isAdminPosted ? 'bg-indigo-600 text-white' : 'bg-[#00d1a0] text-white dark:text-black'}`}>
               <span className="material-symbols-outlined text-lg">check_circle</span>
               Applied
             </div>
@@ -642,7 +642,7 @@ const JobCard: React.FC<{
             <button
               onClick={() => canManualApply ? navigate(`/job/${job.id}`, { state: { job } }) : onLockedClick()}
               className={`flex items-center gap-2 justify-center px-6 sm:px-8 py-3 sm:py-2.5 text-[9px] sm:text-[10px] font-black tracking-widest transition-all uppercase w-full sm:w-auto
-                ${canManualApply ? 'bg-white text-black hover:bg-gray-200 shadow-xl' : 'border border-white/20 text-white/40 hover:border-[#ffb800] hover:text-[#ffb800]'}`}
+                ${canManualApply ? 'bg-black text-white dark:bg-white dark:text-black hover:opacity-80 shadow-xl' : 'border border-black/20 dark:border-white/20 text-black/40 dark:text-white/40 hover:border-[#ffb800] hover:text-[#ffb800]'}`}
             >
               {!canManualApply && <span className="material-symbols-outlined text-base">lock</span>}
               View Protocol
