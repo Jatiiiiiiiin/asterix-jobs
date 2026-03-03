@@ -936,6 +936,8 @@ class ChatRequest(BaseModel):
     jobDescription: str
     question: str
     history: List[dict] = []
+    resumeText: str = ""
+    matchScore: float = 0.0
 
 
 @app.post("/chat")
@@ -946,12 +948,29 @@ async def chat(req: ChatRequest):
         try:
             # Build context-aware system message
             system_msg = f"""
-            You are an AI Job Assistant for Asterix-Jobs. 
-            Answer questions about this job role based on the following context:
-            Job Title: {req.jobTitle}
-            Job Description: {req.jobDescription[:2000]}
+            You are an AI Career Advisor for Asterix-Jobs. 
+            Your primary goal is to **only answer exactly what the user asks** while using the provided context (JD, Match Score, Resume) to make your answers accurate and personalized.
             
-            Be professional, helpful, and concise. If you don't know something, suggest they ask during the interview.
+            **Guidelines:**
+            1. **Answer Specifically**: If the user asks a specific question, answer it directly. Do not provide a full audit unless asked.
+            2. **Maintain Context**: Remember the previous parts of the conversation and the specific job/candidate details provided.
+            3. **Be Concise for Simple Questions**: If the question is simple, give a short answer. If the question is complex, give a detailed answer. (Word limit 250-600 is ONLY for full audits; otherwise, be as brief or as long as necessary).
+            4. **Formatting**: Always use clean Markdown (headers, bullet points, bolding) for long answers to ensure readability. Use **double newlines** between sections.
+            5. **Tone**: Stay professional, data-driven, and helpful.
+            
+            Job Context:
+            - Title: {req.jobTitle}
+            - JD Highlights: {req.jobDescription[:2000]}
+            """
+            if req.resumeText:
+                system_msg += f"""
+            Candidate Context:
+            - Resume Content: {req.resumeText[:2500]}
+            - Match Score: {req.matchScore}%
+            """
+            
+            system_msg += f"""
+            Use this context to answer the user's question accurately.
             """
             
             # Convert history to Groq format
@@ -966,7 +985,7 @@ async def chat(req: ChatRequest):
                 model="llama-3.3-70b-versatile",
                 messages=messages,
                 temperature=0.5,
-                max_tokens=500
+                max_tokens=2000
             )
             
             return {"answer": completion.choices[0].message.content}

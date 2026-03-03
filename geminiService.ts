@@ -682,13 +682,17 @@ export const getMatchingSummary = async (jobDescription: string) => {
 export async function queryJobContext(
   job: Job,
   userQuestion: string,
-  history: any[] = []
+  history: any[] = [],
+  resumeText: string = "",
+  matchScore: number = 0
 ): Promise<string> {
   const payload = {
     jobTitle: job.title,
     jobDescription: job.jobSummary || "",
     question: userQuestion,
-    history: history
+    history: history,
+    resumeText: resumeText,
+    matchScore: matchScore
   };
 
   try {

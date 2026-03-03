@@ -9,6 +9,7 @@ import { usePlan } from '../usePlan.ts';
 import UpgradeModal from '../components/UpgradeModal';
 import { getInterviewTips, InterviewTips } from '../geminiService';
 import InterviewTipsModal from '../components/InterviewTipsModal';
+import JobChatDrawer from '../components/JobChatDrawer';
 
 import { calculateSemanticFidelityBackend, extractResumeText } from '../geminiService';
 import { doc, getDoc } from "firebase/firestore";
@@ -39,6 +40,9 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
   const [interviewTipsJob, setInterviewTipsJob] = useState<Job | null>(null);
   const [interviewTips, setInterviewTips] = useState<InterviewTips | null>(null);
   const [isLoadingTips, setIsLoadingTips] = useState(false);
+
+  // ── AI Audit Chat State ─────────────────────────────────────
+  const [chatDrawerJob, setChatDrawerJob] = useState<Job | null>(null);
 
   const fetchProfilePayload = async (uid: string) => {
     try {
@@ -491,6 +495,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                         onAceInterview={() => { }} // Not used for universe feed
                         canManualApply={true}
                         onLockedClick={() => setShowUpgradeModal(true)}
+                        onAIAudit={() => setChatDrawerJob(job)}
                       />
                     ))
                   ) : (
@@ -517,6 +522,10 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
         isLoading={isLoadingTips}
         onClose={() => { setInterviewTipsJob(null); setInterviewTips(null); }}
       />
+
+      {chatDrawerJob && (
+        <JobChatDrawer job={chatDrawerJob} onClose={() => setChatDrawerJob(null)} />
+      )}
     </div>
   );
 };
@@ -531,7 +540,8 @@ const JobCard: React.FC<{
   onAceInterview: () => void;
   canManualApply: boolean;
   onLockedClick: () => void;
-}> = ({ job, navigate, onAceInterview, canManualApply, onLockedClick }) => {
+  onAIAudit: () => void;
+}> = ({ job, navigate, onAceInterview, canManualApply, onLockedClick, onAIAudit }) => {
   const handleShare = async () => {
     const company = typeof job.company === 'string' ? job.company : job.company?.name || '';
     const url = `${window.location.origin}/job/${job.id}`;
@@ -628,6 +638,15 @@ const JobCard: React.FC<{
             className="size-10 sm:size-11 flex items-center justify-center border border-black/10 dark:border-white/10 text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white transition-all bg-white dark:bg-[#0a0a0a]"
           >
             <span className="material-symbols-outlined text-lg">share</span>
+          </button>
+
+          {/* AI Audit */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onAIAudit(); }}
+            className="px-4 py-2 flex items-center gap-2 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all font-bold tracking-widest text-[9px] uppercase hover:shadow-lg"
+          >
+            <span className="material-symbols-outlined text-sm">robot_2</span>
+            AI Audit
           </button>
         </div>
 
