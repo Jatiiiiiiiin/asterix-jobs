@@ -29,6 +29,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { authService } from "../authService";
 import { LiveJob } from "../Jobservice";
+import { parseJobDescription } from "../geminiService";
 
 interface AdminPortalProps {
     onToggleTheme: () => void;
@@ -44,6 +45,10 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
     const [jobs, setJobs] = useState<LiveJob[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isPosting, setIsPosting] = useState(false);
+
+    // AI Parsing State
+    const [rawJD, setRawJD] = useState("");
+    const [isParsing, setIsParsing] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -86,6 +91,40 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
 
     const splitLines = (s: string) => s.split('\n').map(l => l.trim()).filter(Boolean);
     const splitCommas = (s: string) => s.split(',').map(l => l.trim()).filter(Boolean);
+
+    const handleParseJD = async () => {
+        if (!rawJD.trim()) {
+            alert("Please paste a job description first.");
+            return;
+        }
+        setIsParsing(true);
+        try {
+            const parsed = await parseJobDescription(rawJD);
+            if (parsed && !parsed.status) {
+                setFormData(prev => ({
+                    ...prev,
+                    title: parsed.title || prev.title,
+                    companyName: parsed.companyName || prev.companyName,
+                    city: parsed.city || prev.city,
+                    employmentType: parsed.employmentType || prev.employmentType,
+                    experienceRequired: parsed.experienceRequired || prev.experienceRequired,
+                    openings: parsed.openings || prev.openings,
+                    jobSummary: parsed.jobSummary || prev.jobSummary,
+                    responsibilities: Array.isArray(parsed.responsibilities) && parsed.responsibilities.length > 0 ? parsed.responsibilities.join('\n') : prev.responsibilities,
+                    requiredSkills: Array.isArray(parsed.requiredSkills) && parsed.requiredSkills.length > 0 ? parsed.requiredSkills.join(', ') : prev.requiredSkills,
+                    benefits: Array.isArray(parsed.benefits) && parsed.benefits.length > 0 ? parsed.benefits.join('\n') : prev.benefits,
+                }));
+                alert("Auto-filled fields successfully!");
+            } else {
+                alert("Failed to extract data: " + (parsed?.message || "Unknown error"));
+            }
+        } catch (err) {
+            console.error("Failed to parse JD:", err);
+            alert("Network error. Could not parse Job Description.");
+        } finally {
+            setIsParsing(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -202,6 +241,28 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                         <div className="flex items-center gap-2 mb-6">
                             <Plus className="w-5 h-5 text-indigo-600" />
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Post Admin Job</h2>
+                        </div>
+
+                        {/* AI Auto-Fill Section */}
+                        <div className="mb-8 p-5 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/50 rounded-xl space-y-4">
+                            <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-400 flex items-center gap-2">
+                                <Sun className="w-4 h-4" /> AI Auto-Fill
+                            </h3>
+                            <textarea
+                                rows={4}
+                                value={rawJD}
+                                onChange={e => setRawJD(e.target.value)}
+                                className="w-full px-4 py-3 rounded-lg border border-indigo-200 dark:border-indigo-800/50 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm placeholder:text-gray-400"
+                                placeholder='Paste whole "About the Role" or Job Description here to auto-fill fields...'
+                            />
+                            <button
+                                type="button"
+                                onClick={handleParseJD}
+                                disabled={isParsing || !rawJD.trim()}
+                                className="w-full bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 text-sm"
+                            >
+                                {isParsing ? "Extracting Details..." : "Extract & Auto-Fill Fields"}
+                            </button>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">

@@ -1204,6 +1204,87 @@ async def contact(req: ContactRequest):
         return {"status": "error", "message": str(e)}
 
 
+# ================= JD PARSER =================
+
+class ParseJDRequest(BaseModel):
+    text: str
+
+@app.post("/parse-jd")
+async def parse_jd(req: ParseJDRequest):
+    """Parse raw Job Description text into structured JSON for Admin Auto-Fill"""
+    if not req.text or len(req.text) < 50:
+        return {"status": "error", "message": "Text too short to parse."}
+        
+    # Check Cache
+    cache_key = f"parse_jd:{hashlib.md5(req.text[:2000].encode()).hexdigest()}"
+    if cache_key in AI_RESPONSE_CACHE:
+        return AI_RESPONSE_CACHE[cache_key]
+
+    default_result = {
+        "title": "",
+        "companyName": "",
+        "city": "",
+        "employmentType": "Full-Time",
+        "experienceRequired": "",
+        "openings": "1",
+        "jobSummary": "",
+        "responsibilities": [],
+        "requiredSkills": [],
+        "benefits": []
+    }
+
+    if groq_client:
+        try:
+            prompt = f"""
+            Analyze the following raw Job Description text and extract structured information.
+            Return ONLY a JSON object with this exact structure (no markdown formatting, just pure JSON):
+            {{
+                "title": "Job Title (e.g., SDET Intern, Software Engineer)",
+                "companyName": "Company Name",
+                "city": "Location/City",
+                "employmentType": "Full-Time or Part-Time or Contract or Internship",
+                "experienceRequired": "Required experience (e.g., 0-1 years)",
+                "openings": "Number of openings (default 1 if not specified but keep as string)",
+                "jobSummary": "A 2-3 sentence summary of the role/company",
+                "responsibilities": ["Responsibility 1", "Responsibility 2"],
+                "requiredSkills": ["Skill 1", "Skill 2", "Skill 3"],
+                "benefits": ["Benefit 1", "Benefit 2"]
+            }}
+
+            Raw JD Text:
+            {req.text[:5000]}
+            """
+            
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            
+            import json
+            res = json.loads(completion.choices[0].message.content)
+            
+            # Sanitation
+            result = {
+                "title": res.get("title", ""),
+                "companyName": res.get("companyName", ""),
+                "city": res.get("city", ""),
+                "employmentType": res.get("employmentType", "Full-Time"),
+                "experienceRequired": str(res.get("experienceRequired", "")),
+                "openings": str(res.get("openings", "1")),
+                "jobSummary": res.get("jobSummary", ""),
+                "responsibilities": res.get("responsibilities", []),
+                "requiredSkills": res.get("requiredSkills", []),
+                "benefits": res.get("benefits", [])
+            }
+            
+            AI_RESPONSE_CACHE[cache_key] = result
+            return result
+        except Exception as e:
+            print(f"[Parse JD Error] LLM fallback: {e}")
+
+    return default_result
+
 # ================= RUN =================
 
 if __name__ == "__main__":

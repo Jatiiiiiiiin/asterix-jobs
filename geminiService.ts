@@ -809,7 +809,7 @@ export async function getInterviewTips(
       const data = await res.json();
       if (data && data.strengths) {
         setInCache(cacheKey, data);
-        return data; // Return AI tips if successful
+        return data as InterviewTips;
       }
     }
   } catch (err) {
@@ -817,4 +817,22 @@ export async function getInterviewTips(
   }
 
   return tips;
+}
+
+/* ================= ADMIN JD PARSING ================= */
+
+export async function parseJobDescription(rawText: string) {
+  try {
+    const res = await fetch(`${API_BASE}/parse-jd`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: rawText })
+    });
+
+    if (!res.ok) throw new Error("JD Parse failed");
+    return await res.json();
+  } catch (err) {
+    console.error("[Asterix] Failed to parse JD:", err);
+    return null;
+  }
 }

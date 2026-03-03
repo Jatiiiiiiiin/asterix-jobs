@@ -83,10 +83,9 @@ const App: React.FC = () => {
         if (fullUser) {
           const path = window.location.pathname;
 
-          if (!fullUser.emailVerified && path !== '/verify-email') {
-            console.log("[Auth] Redirecting to verification (hydration)...");
-            navigate("/verify-email", { replace: true });
-          } else if (fullUser.emailVerified && !fullUser.isOnboarded && fullUser.role === 'candidate' && path !== '/candidate/onboarding') {
+          if (path === '/verify-email' && !fullUser.emailVerified) {
+            // Allow them to stay on the verification page if they just signed up and refreshed
+          } else if (!fullUser.isOnboarded && fullUser.role === 'candidate' && path !== '/candidate/onboarding') {
             console.log("[Auth] Redirecting to onboarding (hydration)...");
             navigate("/candidate/onboarding", { replace: true });
           }
@@ -109,9 +108,9 @@ const App: React.FC = () => {
 
     const intent = localStorage.getItem("auth_intent");
 
-    // 1. Verification First
-    if (!authUser.emailVerified) {
-      console.log("[Auth] Redirecting to verification...");
+    // 1. Verification First (Only for new signups)
+    if (isNewSignup && !authUser.emailVerified) {
+      console.log("[Auth] Redirecting to verification for new signup...");
       navigate("/verify-email", { replace: true });
       return;
     }
