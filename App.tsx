@@ -298,7 +298,7 @@ const App: React.FC = () => {
           }
         />
 
-        <Route path="/candidate/jobs" element={<RequireCandidate><JobsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
+        <Route path="/candidate/jobs" element={<JobsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />} />
         <Route path="/candidate/profile" element={<RequireCandidate><ProfilePage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
         <Route path="/candidate/applications" element={<RequireCandidate><ApplicationsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
         <Route path="/candidate/settings" element={<RequireCandidate><SettingsPage role="candidate" onToggleTheme={toggleTheme} isDarkMode={isDarkMode} onLogout={handleLogout} /></RequireCandidate>} />

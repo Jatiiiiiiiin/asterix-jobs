@@ -11,9 +11,10 @@ interface SidebarProps {
   role: UserRole;
   isOpen?: boolean;
   onClose?: () => void;
+  onAuthRequired?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -213,11 +214,26 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
         <nav className="flex flex-col gap-1">
           {navItems.map(item => {
             const isActive = location.pathname === item.path;
+            const isGuest = !user;
+            const handleClick = (e: React.MouseEvent) => {
+              if (isGuest && item.path !== '/candidate/jobs') {
+                e.preventDefault();
+                if (onAuthRequired) {
+                  onAuthRequired();
+                } else {
+                  navigate('/signup');
+                }
+                onClose?.();
+              } else {
+                onClose?.();
+              }
+            };
+
             return (
               <Link
                 key={item.name}
                 to={item.path}
-                onClick={onClose}
+                onClick={handleClick}
                 className={`flex items-center gap-3 px-3 py-3 transition-all ${isActive
                   ? 'bg-black text-white dark:bg-white dark:text-black font-black'
                   : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
@@ -241,25 +257,36 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
           </div>
           <div className="flex flex-col overflow-hidden">
             <span className="text-[10px] font-black text-black dark:text-white truncate">
-              {user?.displayName || user?.email?.split('@')[0] || 'User'}
+              {user ? (user.displayName || user.email?.split('@')[0] || 'User') : 'Guest Session'}
             </span>
-            <span className="text-[8px] font-bold text-black/40 dark:text-white/40 truncate">{user?.email}</span>
+            <span className="text-[8px] font-bold text-black/40 dark:text-white/40 truncate">
+              {user ? user.email : 'Authentication Required'}
+            </span>
           </div>
         </div>
 
-        <button
-          onClick={handleLogout}
-          disabled={isLoggingOut}
-          className={`w-full flex items-center justify-center gap-2 py-3 border transition-all text-[9px] font-black tracking-widest group relative overflow-hidden
-            ${isLoggingOut
-              ? 'border-red-500 text-red-500 bg-red-500/10 cursor-not-allowed'
-              : 'border-black dark:border-white text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black'}`}
-        >
-          {isLoggingOut
-            ? <span className="font-mono text-[9px]">{glitchText}</span>
-            : <><span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">logout</span> De-authorize</>}
-          {isLoggingOut && <span className="absolute top-0 left-0 w-full h-px bg-red-500/80 animate-scan-line" />}
-        </button>
+        {!user ? (
+          <button
+            onClick={() => { navigate('/signup'); onClose?.(); }}
+            className="w-full flex items-center justify-center gap-2 py-3 border border-black dark:border-white text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-[9px] font-black tracking-widest"
+          >
+            <span className="material-symbols-outlined text-sm">login</span> Sign In / Join
+          </button>
+        ) : (
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className={`w-full flex items-center justify-center gap-2 py-3 border transition-all text-[9px] font-black tracking-widest group relative overflow-hidden
+              ${isLoggingOut
+                ? 'border-red-500 text-red-500 bg-red-500/10 cursor-not-allowed'
+                : 'border-black dark:border-white text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black'}`}
+          >
+            {isLoggingOut
+              ? <span className="font-mono text-[9px]">{glitchText}</span>
+              : <><span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">logout</span> De-authorize</>}
+            {isLoggingOut && <span className="absolute top-0 left-0 w-full h-px bg-red-500/80 animate-scan-line" />}
+          </button>
+        )}
       </div>
     </div>
   );

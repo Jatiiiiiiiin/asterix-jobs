@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 
 import { subscribeToActiveJobs } from '../Jobservice';
@@ -24,7 +24,10 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [matchThreshold, setMatchThreshold] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const highlightedJobId = searchParams.get('jobId');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
   const [showFidelityFilter, setShowFidelityFilter] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -150,6 +153,14 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
     }
   };
 
+  const gateInteraction = () => {
+    if (!userId) {
+      setShowAuthPrompt(true);
+      return true;
+    }
+    return false;
+  };
+
   const handleAceInterview = async (job: Job) => {
     const uid = userId;
     const resumeText = uid ? (localStorage.getItem(`asterix_resume_content_${uid}`) || '') : '';
@@ -177,6 +188,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
   };
 
   const handleInitializeAutoPilot = () => {
+    if (gateInteraction()) return;
     setIsAutoPilotActive(true);
     performSemanticSync();
   };
@@ -192,49 +204,52 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
     const initializeJobs = async () => {
       try {
         const user = await authService.getCurrentUser();
-        if (user) {
-          setUserId(user.uid);
-          const savedJobs = localStorage.getItem(`asterix_jobs_${user.uid}`);
-          const jobDataMap = savedJobs ? JSON.parse(savedJobs) : [];
-
-          const unsub = subscribeToActiveJobs(
-            (liveJobs) => {
-              const merged: Job[] = liveJobs.map(liveJob => {
-                const savedData = Array.isArray(jobDataMap)
-                  ? jobDataMap.find((j: any) => j.id === liveJob.id)
-                  : jobDataMap[liveJob.id];
-
-                return {
-                  ...liveJob,
-                  matchScore: savedData?.matchScore !== undefined ? savedData.matchScore : undefined,
-                  applied: savedData?.applied ?? false,
-                  analyzing: savedData?.analyzing ?? false,
-                  matchHighlights: savedData?.matchHighlights ?? [],
-                  breakdown: savedData?.breakdown ?? null,
-                };
-              });
-
-              setDynamicJobs(merged);
-              setIsLoadingJobs(false);
-            },
-            (err) => {
-              console.error('[JobsPage] Jobs subscription error:', err);
-              setIsLoadingJobs(false);
-            }
-          );
-
-          return unsub;
-        } else {
-          setIsLoadingJobs(false);
-        }
+        if (user) setUserId(user.uid);
       } catch (err) {
-        console.error('Error initializing jobs:', err);
-        setIsLoadingJobs(false);
+        console.error('Error initializing user:', err);
       }
     };
 
     const unsubPromise = initializeJobs();
-    return () => { unsubPromise?.then(unsub => unsub?.()); };
+
+    // ── GUEST ACCESS: Subscribe even if no user ──
+    const unsubJobs = subscribeToActiveJobs(
+      (liveJobs) => {
+        const currentUid = auth.currentUser?.uid;
+        let jobDataMap: any[] = [];
+        if (currentUid) {
+          const savedJobs = localStorage.getItem(`asterix_jobs_${currentUid}`);
+          jobDataMap = savedJobs ? JSON.parse(savedJobs) : [];
+        }
+
+        const merged: Job[] = liveJobs.map(liveJob => {
+          const savedData = Array.isArray(jobDataMap)
+            ? jobDataMap.find((j: any) => j.id === liveJob.id)
+            : jobDataMap[liveJob.id];
+
+          return {
+            ...liveJob,
+            matchScore: savedData?.matchScore !== undefined ? savedData.matchScore : undefined,
+            applied: savedData?.applied ?? false,
+            analyzing: savedData?.analyzing ?? false,
+            matchHighlights: savedData?.matchHighlights ?? [],
+            breakdown: savedData?.breakdown ?? null,
+          };
+        });
+
+        setDynamicJobs(merged);
+        setIsLoadingJobs(false);
+      },
+      (err) => {
+        console.error('[JobsPage] Guest-ready jobs subscription error:', err);
+        setIsLoadingJobs(false);
+      }
+    );
+
+    return () => {
+      unsubPromise?.then(() => { });
+      unsubJobs();
+    };
   }, []);
 
   useEffect(() => {
@@ -254,6 +269,17 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (highlightedJobId && !isLoadingJobs && dynamicJobs.length > 0) {
+      setTimeout(() => {
+        const element = document.getElementById(`job-card-${highlightedJobId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 500);
+    }
+  }, [highlightedJobId, isLoadingJobs, dynamicJobs.length]);
 
   // ── FILTERED JOBS ──────────────────────────────────────────
   // This is the source for both sections. 
@@ -299,7 +325,12 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
 
   return (
     <div className="flex h-screen bg-white dark:bg-background-dark text-black dark:text-white transition-colors duration-500 overflow-hidden">
-      <Sidebar role="candidate" isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <Sidebar
+        role="candidate"
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onAuthRequired={() => setShowAuthPrompt(true)}
+      />
 
       <main className="flex-1 overflow-y-auto border-l border-black dark:border-white/10 flex flex-col custom-scrollbar scroll-smooth">
         <header className="px-6 md:px-10 py-4 md:py-5 border-b border-black/5 dark:border-white/5 shrink-0 bg-white dark:bg-background-dark sticky top-0 z-10">
@@ -468,7 +499,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                   </div>
                   {!isLoadingJobs && (
                     <button
-                      onClick={() => performSemanticSync(true)}
+                      onClick={() => gateInteraction() ? null : performSemanticSync(true)}
                       disabled={isVectorizing}
                       className="px-3 py-1 border border-black/20 dark:border-white/20 text-[8px] font-black tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all uppercase"
                     >
@@ -490,12 +521,13 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                       <JobCard
                         key={job.id}
                         job={job}
-                        isBestFit={false}
                         navigate={navigate}
                         onAceInterview={() => { }} // Not used for universe feed
                         canManualApply={true}
                         onLockedClick={() => setShowUpgradeModal(true)}
-                        onAIAudit={() => setChatDrawerJob(job)}
+                        onAIAudit={() => gateInteraction() ? null : setChatDrawerJob(job)}
+                        isHighlighted={highlightedJobId === String(job.id)}
+                        gateInteraction={gateInteraction}
                       />
                     ))
                   ) : (
@@ -526,6 +558,56 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
       {chatDrawerJob && (
         <JobChatDrawer job={chatDrawerJob} onClose={() => setChatDrawerJob(null)} />
       )}
+
+      {/* GUEST AUTH PROMPT MODAL */}
+      {showAuthPrompt && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#0a0a0a] border-2 border-black dark:border-white w-full max-w-md p-8 md:p-12 shadow-[20px_20px_0px_rgba(0,0,0,0.1)] dark:shadow-[20px_20px_0px_rgba(255,255,255,0.05)] relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+
+            <div className="space-y-8 relative z-10">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 text-emerald-500">
+                  <span className="material-symbols-outlined text-3xl animate-pulse">auto_awesome</span>
+                  <span className="text-[10px] font-black tracking-[0.4em] uppercase">Security Protocol</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-[0.85]">
+                  READY TO <span className="text-emerald-500">APPLY?</span>
+                </h2>
+                <p className="text-sm font-bold tracking-tight text-black/60 dark:text-white/60 leading-relaxed">
+                  Join 2,400+ members and unlock AI Mission Audits, Career Calibration, and fast-track job match routing.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="w-full bg-black dark:bg-white text-white dark:text-black py-4 text-[11px] font-black tracking-[0.2em] uppercase hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
+                >
+                  Create Identity
+                </button>
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="w-full border-2 border-black dark:border-white text-black dark:text-white py-4 text-[11px] font-black tracking-[0.2em] uppercase hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+                >
+                  Existing Member
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowAuthPrompt(false)}
+                className="w-full text-[9px] font-black tracking-widest text-black/30 dark:text-white/30 uppercase hover:text-black dark:hover:text-white transition-colors"
+              >
+                Continue Browsing as Guest
+              </button>
+            </div>
+
+            {/* Aesthetic Background Elements */}
+            <div className="absolute -bottom-10 -right-10 size-40 border border-black/[0.05] dark:border-white/[0.05] rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute -top-10 -left-10 size-24 border border-black/[0.05] dark:border-white/[0.05] rotate-45 group-hover:rotate-90 transition-transform duration-1000"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -541,14 +623,33 @@ const JobCard: React.FC<{
   canManualApply: boolean;
   onLockedClick: () => void;
   onAIAudit: () => void;
-}> = ({ job, navigate, onAceInterview, canManualApply, onLockedClick, onAIAudit }) => {
+  isHighlighted?: boolean;
+  gateInteraction: () => boolean;
+}> = ({ job, navigate, onAceInterview, canManualApply, onLockedClick, onAIAudit, isHighlighted, gateInteraction }) => {
   const handleShare = async () => {
-    const company = typeof job.company === 'string' ? job.company : job.company?.name || '';
-    const url = `${window.location.origin}/job/${job.id}`;
+    if (gateInteraction()) return;
+    const company = typeof job.company === 'string' ? job.company : job.company?.name || 'Top Tier Co';
+    const jobTitle = job.title || 'Exciting Position';
+
+    // Hash-compatible URL for sharing
+    const url = `${window.location.origin}/#/candidate/jobs?jobId=${job.id}`;
+
+    // Professional message under 50 words
+    const message = `Check out this opening for ${jobTitle} at ${company}! I thought you might be interested. View details and apply here: ${url} \n- Shared via Asterix Jobs`;
+
     if (navigator.share) {
-      try { await navigator.share({ title: `${job.title} at ${company}`, url }); } catch { /* dismissed */ }
+      try {
+        await navigator.share({
+          title: `${jobTitle} at ${company}`,
+          text: message,
+          url: url
+        });
+      } catch (err) {
+        console.warn('Share failed or dismissed', err);
+      }
     } else {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(message);
+      alert('Professional share message copied to clipboard!');
     }
   };
 
@@ -556,9 +657,12 @@ const JobCard: React.FC<{
   const isApplied = job.applied;
 
   return (
-    <div className={`
+    <div
+      id={`job-card-${job.id}`}
+      className={`
       relative border-2 transition-all duration-300 overflow-hidden
       bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#1a1a1a] border-l-[2px] border-l-black/10 dark:border-l-white/10
+      ${isHighlighted ? 'blink-highlight scale-[1.02] z-10' : ''}
     `}>
       {/* ── HEADER ROW ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 p-4 sm:p-6">
@@ -659,7 +763,10 @@ const JobCard: React.FC<{
             </div>
           ) : (
             <button
-              onClick={() => canManualApply ? navigate(`/job/${job.id}`, { state: { job } }) : onLockedClick()}
+              onClick={() => {
+                if (gateInteraction()) return;
+                canManualApply ? navigate(`/job/${job.id}`, { state: { job } }) : onLockedClick();
+              }}
               className={`flex items-center gap-2 justify-center px-6 sm:px-8 py-3 sm:py-2.5 text-[9px] sm:text-[10px] font-black tracking-widest transition-all uppercase w-full sm:w-auto
                 ${canManualApply ? 'bg-black text-white dark:bg-white dark:text-black hover:opacity-80 shadow-xl' : 'border border-black/20 dark:border-white/20 text-black/40 dark:text-white/40 hover:border-[#ffb800] hover:text-[#ffb800]'}`}
             >
