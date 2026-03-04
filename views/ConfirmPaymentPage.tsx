@@ -15,8 +15,8 @@ interface PlanConfig {
 const PLAN_CONFIG: Record<string, PlanConfig> = {
     student: {
         name: "Student Plan",
-        price: "₹1",
-        amount: 1,
+        price: "₹99",
+        amount: 99,
         features: [
             "Auto-apply to 30+ jobs daily",
             "Get noticed by recruiters first",
