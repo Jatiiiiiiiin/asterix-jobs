@@ -670,6 +670,15 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
       setShowUpgradeModal(true);
       return;
     }
+
+    // Enforce restriction: score >= (threshold - 5)
+    const threshold = job.matchThreshold ?? 65;
+    const score = job.matchScore ?? 0;
+    if (score < (threshold - 5)) {
+      addNotification('Neural Guard', 'Match score too low for manual initialization.', 'alert');
+      return;
+    }
+
     navigate(`/job/${job.id}`, { state: { job } });
   };
 
@@ -1036,6 +1045,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                             (() => {
                               const threshold = job.matchThreshold ?? 65;
                               const isEligible = canManualApply && score >= (threshold - 5);
+                              const isPremiumButLowScore = canManualApply && !isEligible;
 
                               return (
                                 <button onClick={(e) => { e.stopPropagation(); handleInitialize(job); }}
@@ -1043,9 +1053,9 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                                     ${isEligible
                                       ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
                                       : 'border border-black/20 dark:border-white/20 opacity-50 hover:border-emerald-500 hover:text-emerald-500 hover:opacity-100'}`}>
-                                  {!isEligible && <span className="material-symbols-outlined text-xs">lock</span>}
-                                  Apply
-                                  {!isEligible && (
+                                  {!isEligible && <span className="material-symbols-outlined text-xs">{isPremiumButLowScore ? 'warning' : 'lock'}</span>}
+                                  {isPremiumButLowScore ? 'Low Match' : 'Apply'}
+                                  {!canManualApply && (
                                     <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[6px] font-black px-1 py-0.5">PRO</span>
                                   )}
                                 </button>
