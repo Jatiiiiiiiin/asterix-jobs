@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ReactNode, useCallback } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 
 import { auth } from "./firebase";
@@ -110,6 +110,57 @@ const App: React.FC = () => {
 
     return unsub;
   }, [navigate]);
+
+  /* ───────────────── GLOBAL PAYMENT WATCHER ───────────────── */
+
+  const { search } = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const orderId = params.get("order_id");
+
+    if (orderId && !isLoading) {
+      const verifyGlobalPayment = async () => {
+        console.log("[App] Payment signature detected (Order ID):", orderId);
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/status/${orderId}`);
+          const data = await response.json();
+
+          if (data.status === "success" && (data.payment_status === "SUCCESS" || data.payment_status === "PAID")) {
+            console.log("[App] Global verification successful! Activating subscription...");
+
+            const selectedPlanId = localStorage.getItem("selected_plan") || "premium_student";
+            const planData = {
+              plan: (selectedPlanId === "recruiter" ? "premium" : "premium_student") as "free" | "premium" | "premium_student",
+              status: "active" as const,
+              isPremium: true,
+              isStudent: selectedPlanId === "premium_student",
+              startDate: new Date(),
+              endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+              paymentId: orderId,
+            };
+
+            await authService.updateSubscription(planData);
+
+            // Immediately refresh user state
+            const updatedUser = await authService.getCurrentUser();
+            setUser(updatedUser);
+
+            // Clean up the URL (remove order_id)
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+
+            // Handle standard success callback logic
+            handlePaymentSuccess();
+          }
+        } catch (err) {
+          console.error("[App] Global payment verification error:", err);
+        }
+      };
+
+      verifyGlobalPayment();
+    }
+  }, [search, isLoading]);
 
   /* ───────────────── POST SIGNUP ───────────────── */
 

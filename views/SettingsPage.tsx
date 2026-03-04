@@ -80,7 +80,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
   const hasAccess = isPremium || isStudent;
 
   /* ── Upgrade handler ── */
-  const handleUpgrade = (plan: 'student' | 'recruiter') => {
+  const handleUpgrade = (plan: 'premium_student' | 'recruiter') => {
     localStorage.setItem('auth_intent', 'buy_plan');
     localStorage.setItem('selected_plan', plan);
     localStorage.setItem('payment_redirect_path', window.location.pathname);
@@ -516,7 +516,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                           <p className="text-2xl font-black tracking-tighter mt-1">{planConfig.price}</p>
                         </div>
                         <button
-                          onClick={() => handleUpgrade(role === 'candidate' ? 'student' : 'recruiter')}
+                          onClick={() => handleUpgrade(role === 'candidate' ? 'premium_student' : 'recruiter')}
                           className="bg-black dark:bg-white text-white dark:text-black px-8 py-4 text-[10px] font-black tracking-widest hover:invert transition-all"
                         >
                           {planConfig.upgradeLabel}

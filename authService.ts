@@ -73,6 +73,8 @@ export const authService = {
         email: res.user.email,
         role,
         isOnboarded: false,
+        isPremium: isRecruiter,
+        isStudent: false,
         subscription: {
           plan: isRecruiter ? "premium" : "free",
           status: "active",
@@ -118,6 +120,8 @@ export const authService = {
         email: res.user.email,
         role: "candidate",
         isOnboarded: false,
+        isPremium: false,
+        isStudent: false,
         subscription: {
           plan: "free",
           status: "active",
@@ -181,6 +185,8 @@ export const authService = {
           email: res.user.email,
           role: role || "candidate",
           isOnboarded: false,
+          isPremium: isRecruiter,
+          isStudent: false,
           subscription: {
             plan: isRecruiter ? "premium" : "free",
             status: "active",
@@ -273,7 +279,7 @@ export const authService = {
 
   /* ========= UPDATE SUBSCRIPTION ========= */
   async updateSubscription(subscriptionData: {
-    plan: "free" | "premium" | "student";
+    plan: "free" | "premium" | "premium_student";
     status?: "active" | "canceled" | "expired";
     isPremium?: boolean;
     isStudent?: boolean;

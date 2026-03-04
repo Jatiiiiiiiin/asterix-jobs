@@ -6,7 +6,7 @@ const PaymentButton: React.FC = () => {
 
   const handleUpgrade = () => {
     localStorage.setItem("auth_intent", "buy_plan");
-    localStorage.setItem("selected_plan", "student"); // Default for this button
+    localStorage.setItem("selected_plan", "premium_student"); // Default for this button
     navigate("/confirm-payment");
   };
 

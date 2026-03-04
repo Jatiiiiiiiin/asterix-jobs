@@ -13,7 +13,7 @@ interface PlanConfig {
 }
 
 const PLAN_CONFIG: Record<string, PlanConfig> = {
-    student: {
+    premium_student: {
         name: "Student Plan",
         price: "₹99",
         amount: 99,
@@ -52,8 +52,8 @@ const ConfirmPaymentPage: React.FC<ConfirmPaymentPageProps> = ({ onPaymentSucces
     const [error, setError] = useState<string | null>(null);
     const [cashfree, setCashfree] = useState<any>(null);
 
-    const selectedPlanId = localStorage.getItem("selected_plan") || "student";
-    const plan = PLAN_CONFIG[selectedPlanId] || PLAN_CONFIG.student;
+    const selectedPlanId = localStorage.getItem("selected_plan") || "premium_student";
+    const plan = PLAN_CONFIG[selectedPlanId] || PLAN_CONFIG.premium_student;
 
     useEffect(() => {
         const initSDK = async () => {
@@ -69,51 +69,13 @@ const ConfirmPaymentPage: React.FC<ConfirmPaymentPageProps> = ({ onPaymentSucces
         initSDK();
     }, []);
 
-    // Handle callback if order_id is present in URL
+    // Handle UI for verification if order_id is present
     useEffect(() => {
         const orderId = searchParams.get("order_id");
         if (orderId) {
-            verifyPayment(orderId);
+            setIsLoading(true);
         }
     }, [searchParams]);
-
-    const verifyPayment = async (orderId: string) => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/status/${orderId}`);
-            const data = await response.json();
-
-            if (data.status === "success" && (data.payment_status === "SUCCESS" || data.payment_status === "PAID")) {
-                await activateSubscription(orderId);
-            } else {
-                setError("Payment verification failed or pending. Please contact support.");
-            }
-        } catch (err) {
-            setError("An error occurred during verification.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const activateSubscription = async (paymentId: string) => {
-        try {
-            const planData = {
-                plan: (selectedPlanId === "recruiter" ? "premium" : "student") as "free" | "premium" | "student",
-                status: "active" as const,
-                isPremium: true,
-                isStudent: selectedPlanId === "student",
-                startDate: new Date(),
-                endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                paymentId,
-            };
-            await authService.updateSubscription(planData);
-            localStorage.removeItem("auth_intent");
-            localStorage.removeItem("selected_plan");
-            onPaymentSuccess();
-        } catch (err) {
-            setError("Failed to update account. Please contact support.");
-        }
-    };
 
     const handlePayment = async () => {
         if (!cashfree) return;
@@ -255,7 +217,7 @@ const ConfirmPaymentPage: React.FC<ConfirmPaymentPageProps> = ({ onPaymentSucces
                                     ) : (
                                         <span className="material-symbols-outlined">bolt</span>
                                     )}
-                                    {isLoading ? "Synchronizing..." : `Secure Payment`}
+                                    {searchParams.get("order_id") ? "Verifying Transaction..." : isLoading ? "Synchronizing..." : `Secure Payment`}
                                 </div>
                             </button>
 
