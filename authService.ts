@@ -291,21 +291,26 @@ export const authService = {
     const uid = readSessionUid() || auth.currentUser?.uid;
     if (!uid) throw new Error("No user session");
 
+    // Hardened logic: Determine flags based on plan name to avoid accidental sync issues
+    const isPremium = subscriptionData.plan !== "free";
+    const isStudent = subscriptionData.plan === "premium_student";
 
-    await setDoc(
-      doc(db, "users", uid),
-      {
-        isPremium: subscriptionData.isPremium ?? false,
-        isStudent: subscriptionData.isStudent ?? false,
-        subscription: {
-          ...subscriptionData,
-          updatedAt: new Date(),
-        },
+    const updatePayload = {
+      isPremium,
+      isStudent,
+      subscription: {
+        ...subscriptionData,
+        isPremium,
+        isStudent,
+        updatedAt: new Date(),
       },
-      { merge: true }
-    );
-    console.log("[AuthService] Subscription updated for:", uid, "isPremium:", subscriptionData.isPremium);
+    };
 
+    console.log("[AuthService] Calling updateSubscription for UID:", uid, "Payload:", JSON.stringify(updatePayload));
+
+    await setDoc(doc(db, "users", uid), updatePayload, { merge: true });
+
+    console.log("[AuthService] Firestore update complete for:", uid);
   },
 
   /* ========= LOGOUT ========= */

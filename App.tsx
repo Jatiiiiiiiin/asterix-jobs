@@ -129,16 +129,19 @@ const App: React.FC = () => {
           if (data.status === "success" && (data.payment_status === "SUCCESS" || data.payment_status === "PAID")) {
             console.log("[App] Global verification successful! Activating subscription...");
 
-            const selectedPlanId = localStorage.getItem("selected_plan") || "premium_student";
+            const storedPlan = localStorage.getItem("selected_plan");
+            console.log("[App] Retrieved stored plan from localStorage:", storedPlan);
+
+            const selectedPlanId = storedPlan || "premium_student";
             const planData = {
               plan: (selectedPlanId === "recruiter" ? "premium" : "premium_student") as "free" | "premium" | "premium_student",
               status: "active" as const,
-              isPremium: true,
-              isStudent: selectedPlanId === "premium_student",
               startDate: new Date(),
               endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
               paymentId: orderId,
             };
+
+            console.log("[App] Syncing planData to Firestore:", JSON.stringify(planData));
 
             await authService.updateSubscription(planData);
 
