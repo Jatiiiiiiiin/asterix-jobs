@@ -39,7 +39,13 @@ const PLAN_CONFIG: Record<string, PlanConfig> = {
     },
 };
 
-const ConfirmPaymentPage: React.FC = () => {
+interface ConfirmPaymentPageProps {
+    onPaymentSuccess: () => void;
+    onToggleTheme?: () => void;
+    isDarkMode?: boolean;
+}
+
+const ConfirmPaymentPage: React.FC<ConfirmPaymentPageProps> = ({ onPaymentSuccess }) => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
@@ -103,7 +109,7 @@ const ConfirmPaymentPage: React.FC = () => {
             await authService.updateSubscription(planData);
             localStorage.removeItem("auth_intent");
             localStorage.removeItem("selected_plan");
-            navigate("/candidate", { replace: true });
+            onPaymentSuccess();
         } catch (err) {
             setError("Failed to update account. Please contact support.");
         }
