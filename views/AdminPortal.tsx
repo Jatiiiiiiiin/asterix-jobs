@@ -112,6 +112,8 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                     jobSummary: parsed.jobSummary || prev.jobSummary,
                     responsibilities: Array.isArray(parsed.responsibilities) && parsed.responsibilities.length > 0 ? parsed.responsibilities.join('\n') : prev.responsibilities,
                     requiredSkills: Array.isArray(parsed.requiredSkills) && parsed.requiredSkills.length > 0 ? parsed.requiredSkills.join(', ') : prev.requiredSkills,
+                    preferredSkills: Array.isArray(parsed.preferredSkills) && parsed.preferredSkills.length > 0 ? parsed.preferredSkills.join(', ') : prev.preferredSkills,
+                    techStack: Array.isArray(parsed.techStack) && parsed.techStack.length > 0 ? parsed.techStack.join(', ') : (Array.isArray(parsed.requiredSkills) ? parsed.requiredSkills.join(', ') : prev.techStack),
                     benefits: Array.isArray(parsed.benefits) && parsed.benefits.length > 0 ? parsed.benefits.join('\n') : prev.benefits,
                 }));
                 alert("Auto-filled fields successfully!");

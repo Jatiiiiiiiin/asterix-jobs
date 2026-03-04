@@ -1299,9 +1299,19 @@ async def parse_jd(req: ParseJDRequest):
                 "openings": "Number of openings (default 1 if not specified but keep as string)",
                 "jobSummary": "A 2-3 sentence summary of the role/company",
                 "responsibilities": ["Responsibility 1", "Responsibility 2"],
-                "requiredSkills": ["Skill 1", "Skill 2", "Skill 3"],
+                "requiredSkills": ["Core Mandatory Tech Skill 1", "Core Mandatory Tech Skill 2"],
+                "preferredSkills": ["Soft/Professional Skill 1", "Soft/Professional Skill 2"],
+                "techStack": ["Technology 1", "Technology 2"],
                 "benefits": ["Benefit 1", "Benefit 2"]
             }}
+
+            CRITICAL INSTRUCTIONS:
+            - All items in "requiredSkills", "preferredSkills", and "techStack" MUST be strict keywords (e.g., "Python", "React", "Docker") NOT full sentences.
+            - ABSOLUTELY NO prefixes like "Expertise in...", "Knowledge of...", "Basic understanding of...", "Strong skills in...".
+            - Just the raw skill names.
+            - "techStack" should contain specific technologies, libraries, or tools.
+            - "preferredSkills" should contain soft skills, professional qualities, or secondary requirements.
+            - "requiredSkills" should contain the most critical technical must-haves.
 
             Raw JD Text:
             {req.text[:5000]}
@@ -1327,6 +1337,8 @@ async def parse_jd(req: ParseJDRequest):
                 "jobSummary": res.get("jobSummary", ""),
                 "responsibilities": res.get("responsibilities", []),
                 "requiredSkills": res.get("requiredSkills", []),
+                "preferredSkills": res.get("preferredSkills", []),
+                "techStack": res.get("techStack", []),
                 "benefits": res.get("benefits", [])
             }
             
