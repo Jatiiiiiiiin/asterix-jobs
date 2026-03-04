@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -6,7 +7,18 @@ interface UpgradeModalProps {
 }
 
 export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   if (!isOpen) return null;
+
+  const handleUpgrade = () => {
+    localStorage.setItem('auth_intent', 'buy_plan');
+    localStorage.setItem('selected_plan', 'student');
+    localStorage.setItem('payment_redirect_path', location.pathname);
+    onClose();
+    navigate('/confirm-payment');
+  };
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
@@ -85,10 +97,7 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
           {/* CTA */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
-              onClick={() => {
-                // TODO: route to your upgrade/pricing page
-                onClose();
-              }}
+              onClick={handleUpgrade}
               className="flex-1 bg-black dark:bg-white text-white dark:text-black py-4 text-[10px] font-black tracking-widest hover:invert transition-all shadow-lg flex items-center justify-center gap-2"
             >
               <span className="material-symbols-outlined text-base">upgrade</span>

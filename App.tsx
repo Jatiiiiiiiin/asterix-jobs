@@ -69,25 +69,34 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async firebaseUser => {
+      console.log("[App] Auth state changed. User:", firebaseUser?.email || "null");
+
       if (!firebaseUser) {
-        setUser(null);
+        // Only set null if there's no sessionUid either (prevents flicker on redirect)
+        const sessionUid = localStorage.getItem("asterix_session_uid") || sessionStorage.getItem("asterix_session_uid");
+        if (!sessionUid) {
+          console.log("[App] No user and no session, setting user to null.");
+          setUser(null);
+        } else {
+          console.log("[App] No Firebase user but session exists, waiting for hydration...");
+        }
         setIsLoading(false);
         return;
       }
 
       try {
         const fullUser = await authService.getCurrentUser();
+        console.log("[App] User hydrated:", fullUser?.email, "isPremium:", fullUser?.isPremium);
         setUser(fullUser);
 
         // --- HYDRATION REDIRECTION ---
-        // If user is logged in but hasn't completed specific steps, redirect them
         if (fullUser) {
           const path = window.location.pathname;
 
           if (path === '/verify-email' && !fullUser.emailVerified) {
-            // Allow them to stay on the verification page if they just signed up and refreshed
+            // Stay
           } else if (!fullUser.isOnboarded && fullUser.role === 'candidate' && path !== '/candidate/onboarding') {
-            console.log("[Auth] Redirecting to onboarding (hydration)...");
+            console.log("[App] Redirecting to onboarding (hydration callback)...");
             navigate("/candidate/onboarding", { replace: true });
           }
         }
@@ -151,8 +160,17 @@ const App: React.FC = () => {
       const updatedUser = await authService.getCurrentUser();
       setUser(updatedUser);
 
+      const redirectPath = localStorage.getItem("payment_redirect_path");
+
       localStorage.removeItem("auth_intent");
       localStorage.removeItem("selected_plan");
+      localStorage.removeItem("payment_redirect_path");
+
+      if (redirectPath && redirectPath !== "/confirm-payment") {
+        console.log(`[POST-PAYMENT] Contextual redirect to: ${redirectPath}`);
+        navigate(redirectPath, { replace: true });
+        return;
+      }
 
       if (updatedUser?.role === "recruiter") {
         navigate("/recruiter", { replace: true });

@@ -225,6 +225,7 @@ export const authService = {
     if (!snap.exists()) return null;
 
     const data = snap.data();
+    console.log("[AuthService] Found Firestore data for UID:", uid, "isPremium:", data.subscription?.isPremium || data.isPremium);
 
     // Ensure sessionStorage is populated even after a refresh
     if (!sessionUid && firebaseUser) {
@@ -236,8 +237,8 @@ export const authService = {
       email: data.email ?? firebaseUser?.email ?? null,
       role: (data.role === 'admin' || data.email === 'asterixadmin@gmail.com' || firebaseUser?.email === 'asterixadmin@gmail.com') ? 'admin' : data.role,
       isOnboarded: data.isOnboarded || false,
-      isPremium: data.subscription?.isPremium || false,
-      isStudent: data.subscription?.isStudent || false,
+      isPremium: data.subscription?.isPremium || data.isPremium || false,
+      isStudent: data.subscription?.isStudent || data.isStudent || false,
       photoURL: firebaseUser?.photoURL || data.photoURL || undefined,
       displayName: firebaseUser?.displayName || data.displayName || undefined,
       emailVerified: firebaseUser?.emailVerified ?? false,
@@ -288,6 +289,8 @@ export const authService = {
     await setDoc(
       doc(db, "users", uid),
       {
+        isPremium: subscriptionData.isPremium ?? false,
+        isStudent: subscriptionData.isStudent ?? false,
         subscription: {
           ...subscriptionData,
           updatedAt: new Date(),
@@ -295,6 +298,7 @@ export const authService = {
       },
       { merge: true }
     );
+    console.log("[AuthService] Subscription updated for:", uid, "isPremium:", subscriptionData.isPremium);
 
   },
 

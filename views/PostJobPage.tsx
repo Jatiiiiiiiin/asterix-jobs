@@ -8,6 +8,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 interface PostJobPageProps {
   onToggleTheme: () => void;
   isDarkMode: boolean;
+  isPremium: boolean;
 }
 
 type Status = 'idle' | 'saving' | 'saved' | 'error';
@@ -66,7 +67,7 @@ const splitCommas = (s: string) => s.split(',').map(l => l.trim()).filter(Boolea
 /* ================================================================
    COMPONENT
 ================================================================ */
-const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode }) => {
+const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, isPremium }) => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>(EMPTY);

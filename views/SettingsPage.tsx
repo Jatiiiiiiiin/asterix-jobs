@@ -83,6 +83,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
   const handleUpgrade = (plan: 'student' | 'recruiter') => {
     localStorage.setItem('auth_intent', 'buy_plan');
     localStorage.setItem('selected_plan', plan);
+    localStorage.setItem('payment_redirect_path', window.location.pathname);
     navigate('/confirm-payment');
   };
 
