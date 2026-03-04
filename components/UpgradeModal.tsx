@@ -14,7 +14,7 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
   const handleUpgrade = () => {
     localStorage.setItem('auth_intent', 'buy_plan');
-    localStorage.setItem('selected_plan', 'premium_student');
+    localStorage.setItem('selected_plan', 'student');
     localStorage.setItem('payment_redirect_path', location.pathname);
     onClose();
     navigate('/confirm-payment');

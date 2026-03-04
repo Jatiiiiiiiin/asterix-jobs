@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ReactNode, useCallback } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 
 import { auth } from "./firebase";
@@ -65,148 +65,6 @@ const App: React.FC = () => {
     });
   };
 
-  /* ───────────────── AUTH HYDRATION ───────────────── */
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async firebaseUser => {
-      console.log("[App] Auth state changed. User:", firebaseUser?.email || "null");
-
-      if (!firebaseUser) {
-        // Only set null if there's no sessionUid either (prevents flicker on redirect)
-        const sessionUid = localStorage.getItem("asterix_session_uid") || sessionStorage.getItem("asterix_session_uid");
-        if (!sessionUid) {
-          console.log("[App] No user and no session, setting user to null.");
-          setUser(null);
-        } else {
-          console.log("[App] No Firebase user but session exists, waiting for hydration...");
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const fullUser = await authService.getCurrentUser();
-        console.log("[App] User hydrated:", fullUser?.email, "isPremium:", fullUser?.isPremium);
-        setUser(fullUser);
-
-        // --- HYDRATION REDIRECTION ---
-        if (fullUser) {
-          const path = window.location.pathname;
-
-          if (path === '/verify-email' && !fullUser.emailVerified) {
-            // Stay
-          } else if (!fullUser.isOnboarded && fullUser.role === 'candidate' && path !== '/candidate/onboarding') {
-            console.log("[App] Redirecting to onboarding (hydration callback)...");
-            navigate("/candidate/onboarding", { replace: true });
-          }
-        }
-      } catch (error) {
-        console.error('[❌ App] Error hydrating user:', error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    });
-
-    return unsub;
-  }, [navigate]);
-
-  /* ───────────────── GLOBAL PAYMENT WATCHER ───────────────── */
-
-  const { search } = useLocation();
-
-  useEffect(() => {
-    const params = new URLSearchParams(search);
-    const orderId = params.get("order_id");
-
-    if (orderId && !isLoading) {
-      const verifyGlobalPayment = async () => {
-        console.log("[App] Payment signature detected (Order ID):", orderId);
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/status/${orderId}`);
-          const data = await response.json();
-
-          if (data.status === "success" && (data.payment_status === "SUCCESS" || data.payment_status === "PAID")) {
-            console.log("[App] Global verification successful! Activating subscription...");
-
-            const storedPlan = localStorage.getItem("selected_plan");
-            console.log("[App] Retrieved stored plan from localStorage:", storedPlan);
-
-            const selectedPlanId = storedPlan || "premium_student";
-            const planData = {
-              plan: (selectedPlanId === "recruiter" ? "premium" : "premium_student") as "free" | "premium" | "premium_student",
-              status: "active" as const,
-              startDate: new Date(),
-              endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-              paymentId: orderId,
-            };
-
-            console.log("[App] Syncing planData to Firestore:", JSON.stringify(planData));
-
-            await authService.updateSubscription(planData);
-
-            // Immediately refresh user state
-            const updatedUser = await authService.getCurrentUser();
-            setUser(updatedUser);
-
-            // Clean up the URL (remove order_id)
-            const newUrl = window.location.pathname;
-            window.history.replaceState({}, '', newUrl);
-
-            // Handle standard success callback logic
-            handlePaymentSuccess();
-          }
-        } catch (err) {
-          console.error("[App] Global payment verification error:", err);
-        }
-      };
-
-      verifyGlobalPayment();
-    }
-  }, [search, isLoading]);
-
-  /* ───────────────── POST SIGNUP ───────────────── */
-
-  const handlePostSignup = useCallback((authUser: AuthUser, isNewSignup = false) => {
-    setUser(authUser);
-
-    const intent = localStorage.getItem("auth_intent");
-
-    // 1. Verification First (Only for new signups)
-    if (isNewSignup && !authUser.emailVerified) {
-      console.log("[Auth] Redirecting to verification for new signup...");
-      navigate("/verify-email", { replace: true });
-      return;
-    }
-
-    // 2. Onboarding Second (for Candidates)
-    if (authUser.role === "candidate" && !authUser.isOnboarded) {
-      console.log("[Auth] Redirecting to onboarding...");
-      navigate("/candidate/onboarding", { replace: true });
-      return;
-    }
-
-    // 3. Role-based Dashboards
-    if (authUser.role === "admin") {
-      navigate("/admin", { replace: true });
-      return;
-    }
-
-    if (authUser.role === "recruiter") {
-      localStorage.removeItem("auth_intent");
-      navigate("/recruiter", { replace: true });
-      return;
-    }
-
-    if (intent === "buy_plan") {
-      navigate("/confirm-payment", { replace: true });
-      return;
-    }
-
-    // Default Dashboard
-    navigate("/candidate", { replace: true });
-  }, [navigate]);
-
   /* ───────────────── POST PAYMENT ───────────────── */
 
   const handlePaymentSuccess = useCallback(async () => {
@@ -241,15 +99,127 @@ const App: React.FC = () => {
     }
   }, [navigate]);
 
-  /* ───────────────── POST ONBOARDING ───────────────── */
+  /* ───────────────── GLOBAL PAYMENT WATCHER ───────────────── */
+
+  const handleGlobalPaymentVerification = useCallback(async (orderId: string) => {
+    try {
+      console.log("[GlobalPayment] Verifying order:", orderId);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/status/${orderId}`);
+      const data = await response.json();
+
+      if (data.status === "success" && (data.payment_status === "SUCCESS" || data.payment_status === "PAID")) {
+        console.log("[GlobalPayment] Verification logic success. Activating premium_student...");
+        const selectedPlanId = localStorage.getItem("selected_plan") || "student";
+
+        const planData = {
+          plan: (selectedPlanId === "recruiter" ? "premium" : "premium_student") as any,
+          status: "active" as const,
+          isPremium: true,
+          isStudent: selectedPlanId === "student",
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          paymentId: orderId,
+        };
+
+        await authService.updateSubscription(planData);
+
+        // Clean up URL parameters to avoid re-triggering
+        const newUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, newUrl);
+
+        await handlePaymentSuccess();
+      }
+    } catch (err) {
+      console.error("[GlobalPayment] Verification failed:", err);
+    }
+  }, [handlePaymentSuccess]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("order_id");
+    if (orderId) {
+      handleGlobalPaymentVerification(orderId);
+    }
+  }, [handleGlobalPaymentVerification]);
+
+  /* ───────────────── AUTH HYDRATION ───────────────── */
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async firebaseUser => {
+      console.log("[App] Auth state changed. User:", firebaseUser?.email || "null");
+
+      if (!firebaseUser) {
+        const sessionUid = localStorage.getItem("asterix_session_uid") || sessionStorage.getItem("asterix_session_uid");
+        if (!sessionUid) {
+          setUser(null);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const fullUser = await authService.getCurrentUser();
+        setUser(fullUser);
+
+        if (fullUser) {
+          const path = window.location.pathname;
+          if (path === '/verify-email' && !fullUser.emailVerified) {
+            // Stay
+          } else if (!fullUser.isOnboarded && fullUser.role === 'candidate' && path !== '/candidate/onboarding') {
+            navigate("/candidate/onboarding", { replace: true });
+          }
+        }
+      } catch (error) {
+        console.error('[❌ App] Error hydrating user:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    });
+
+    return unsub;
+  }, [navigate]);
+
+  /* ───────────────── POST SIGNUP / ONBOARDING / VERIFICATION ───────────────── */
+
+  const handlePostSignup = useCallback((authUser: AuthUser, isNewSignup = false) => {
+    setUser(authUser);
+    const intent = localStorage.getItem("auth_intent");
+
+    if (isNewSignup && !authUser.emailVerified) {
+      navigate("/verify-email", { replace: true });
+      return;
+    }
+
+    if (authUser.role === "candidate" && !authUser.isOnboarded) {
+      navigate("/candidate/onboarding", { replace: true });
+      return;
+    }
+
+    if (authUser.role === "admin") {
+      navigate("/admin", { replace: true });
+      return;
+    }
+
+    if (authUser.role === "recruiter") {
+      localStorage.removeItem("auth_intent");
+      navigate("/recruiter", { replace: true });
+      return;
+    }
+
+    if (intent === "buy_plan") {
+      navigate("/confirm-payment", { replace: true });
+      return;
+    }
+
+    navigate("/candidate", { replace: true });
+  }, [navigate]);
 
   const handleOnboardingSuccess = useCallback(async () => {
     const updatedUser = await authService.getCurrentUser();
     setUser(updatedUser);
     navigate("/candidate", { replace: true });
   }, [navigate]);
-
-  /* ───────────────── POST VERIFICATION ───────────────── */
 
   const handleVerificationSuccess = useCallback(async () => {
     const updatedUser = await authService.getCurrentUser();

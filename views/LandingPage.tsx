@@ -82,7 +82,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
      PAYMENT HANDLERS - Simple flow to /confirm-payment
   ════════════════════════════════════════════════════════════════ */
 
-  const handleUpgradePlan = (plan: 'premium_student' | 'recruiter') => {
+  const handleUpgradePlan = (plan: 'student' | 'recruiter') => {
     localStorage.setItem('auth_intent', 'buy_plan');
     localStorage.setItem('selected_plan', plan);
     localStorage.setItem('payment_redirect_path', window.location.pathname);
@@ -400,7 +400,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
 
                   {/* Premium Button */}
                   <button
-                    onClick={() => handleUpgradePlan('premium_student')}
+                    onClick={() => handleUpgradePlan('student')}
                     className="block w-full text-center border-2 border-black dark:border-white py-5 md:py-6 text-[10px] md:text-xs font-black  tracking-[0.2em] group-hover:bg-white group-hover:text-black dark:group-hover:bg-black dark:group-hover:text-white transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-sm">lock</span>
@@ -432,7 +432,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                       'Unlimited job postings',
                       'Advanced candidate matching',
                       'AI-powered screening',
-                      'Access to highlighted premium_students',
+                      'Access to highlighted students',
                       'Custom filters & search',
                       'Analytics dashboard',
                       'Team collaboration tools',

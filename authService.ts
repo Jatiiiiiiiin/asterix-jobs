@@ -73,8 +73,6 @@ export const authService = {
         email: res.user.email,
         role,
         isOnboarded: false,
-        isPremium: isRecruiter,
-        isStudent: false,
         subscription: {
           plan: isRecruiter ? "premium" : "free",
           status: "active",
@@ -120,8 +118,6 @@ export const authService = {
         email: res.user.email,
         role: "candidate",
         isOnboarded: false,
-        isPremium: false,
-        isStudent: false,
         subscription: {
           plan: "free",
           status: "active",
@@ -185,8 +181,6 @@ export const authService = {
           email: res.user.email,
           role: role || "candidate",
           isOnboarded: false,
-          isPremium: isRecruiter,
-          isStudent: false,
           subscription: {
             plan: isRecruiter ? "premium" : "free",
             status: "active",
@@ -279,7 +273,7 @@ export const authService = {
 
   /* ========= UPDATE SUBSCRIPTION ========= */
   async updateSubscription(subscriptionData: {
-    plan: "free" | "premium" | "premium_student";
+    plan: "free" | "premium" | "student" | "premium_student" | "student_premium";
     status?: "active" | "canceled" | "expired";
     isPremium?: boolean;
     isStudent?: boolean;
@@ -291,26 +285,26 @@ export const authService = {
     const uid = readSessionUid() || auth.currentUser?.uid;
     if (!uid) throw new Error("No user session");
 
-    // Hardened logic: Determine flags based on plan name to avoid accidental sync issues
-    const isPremium = subscriptionData.plan !== "free";
-    const isStudent = subscriptionData.plan === "premium_student";
+    const isPremium = subscriptionData.isPremium ?? true;
+    const isStudent = subscriptionData.isStudent ?? (subscriptionData.plan.includes('student'));
 
-    const updatePayload = {
-      isPremium,
-      isStudent,
-      subscription: {
-        ...subscriptionData,
+    console.log(`[AuthService] Hardened Sync for ${uid}: isPremium=${isPremium}, plan=${subscriptionData.plan}`);
+
+    await setDoc(
+      doc(db, "users", uid),
+      {
         isPremium,
         isStudent,
-        updatedAt: new Date(),
+        subscription: {
+          ...subscriptionData,
+          isPremium,
+          isStudent,
+          updatedAt: new Date(),
+        },
       },
-    };
-
-    console.log("[AuthService] Calling updateSubscription for UID:", uid, "Payload:", JSON.stringify(updatePayload));
-
-    await setDoc(doc(db, "users", uid), updatePayload, { merge: true });
-
-    console.log("[AuthService] Firestore update complete for:", uid);
+      { merge: true }
+    );
+    console.log("[AuthService] Subscription sync complete.");
   },
 
   /* ========= LOGOUT ========= */
