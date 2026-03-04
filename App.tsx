@@ -34,6 +34,7 @@ import './App.css';
 
 import PublicRoute from "./views/PublicRoute";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import AsterixAssistant from "./components/AsterixAssistant";
 
 
 
@@ -329,6 +330,7 @@ const App: React.FC = () => {
 
       <Analytics />
       <SpeedInsights />
+      <AsterixAssistant />
     </div>
   );
 };
