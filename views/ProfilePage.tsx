@@ -152,7 +152,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
       if (!uid) return;
       const u = await authService.getCurrentUser();
       if (u) setAuthUser({ ...u, uid });
-      else setAuthUser({ uid, email: null, role: 'candidate', isOnboarded: false });
+      else setAuthUser({ uid, email: null, role: 'candidate', isOnboarded: false, emailVerified: false });
     };
     loadUser();
   }, []);
@@ -325,6 +325,18 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                     placeholder="Job Title"
                     className="text-base font-black tracking-widest w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-2 outline-none focus:border-black dark:focus:border-white"
                   />
+                  <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                    <div className="flex-1 space-y-1">
+                      <label className="text-[7px] font-black tracking-[0.4em] opacity-40 uppercase">Phone Number</label>
+                      <input
+                        name="phone"
+                        value={contact.phone ?? ''}
+                        onChange={handleContactChange}
+                        placeholder="+1 XXX XXX XXXX"
+                        className="w-full bg-black/5 dark:bg-white/5 border border-black/20 dark:border-white/20 p-2 text-[10px] font-black tracking-widest outline-none focus:border-black dark:focus:border-white"
+                      />
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-0.5 md:space-y-1">
@@ -337,6 +349,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                   <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1.5 text-[7px] md:text-[8px] font-black tracking-[0.4em] opacity-40">
                     <span className="truncate max-w-[120px] sm:max-w-none">UID: {authUser?.uid}</span>
                     <span className="truncate max-w-[150px] sm:max-w-none">EMAIL: {authUser?.email}</span>
+                    <span className="truncate max-w-[150px] sm:max-w-none">PHONE: {contact.phone || 'N/A'}</span>
                   </div>
                 </div>
               )}
