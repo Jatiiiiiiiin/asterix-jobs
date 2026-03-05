@@ -5,39 +5,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asterix-Jobs | AI Job Matching</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet">
 
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#000000",
-                        "accent-violet": "#333333",
-                        "background-light": "#ffffff",
-                        "background-dark": "#0a0a0a",
-                        "border-gray": "#e5e5e5",
-                    },
-                    fontFamily: {
-                        "display": ["Montserrat", "sans-serif"],
-                        "sans": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0px",
-                        "lg": "0px",
-                        "xl": "0px",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script type="importmap">
 {
@@ -77,79 +50,6 @@
         window.process.version = '';
         window.process.nextTick = (cb) => setTimeout(cb, 0);
     </script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        h1,
-        h2 {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 700;
-        }
-
-        .glass-nav {
-            backdrop-filter: blur(8px);
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-
-        .dark .glass-nav {
-            background-color: rgba(10, 10, 10, 0.9);
-        }
-
-        .hero-gradient {
-            background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.02) 0%, rgba(255, 255, 255, 0) 70%);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #000;
-        }
-
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite linear;
-        }
-
-        .dark .skeleton {
-            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
-            background-size: 200% 100%;
-        }
-
-        @keyframes skeleton-loading {
-            0% {
-                background-position: 200% 0;
-            }
-
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        input,
-        button,
-        select,
-        textarea {
-            border-radius: 0 !important;
-        }
-    </style>
 
 </head>
 
