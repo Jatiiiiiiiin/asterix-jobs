@@ -255,13 +255,17 @@ const App: React.FC = () => {
   /* ───────────────── ROUTE GUARDS ───────────────── */
 
   const RequireAuth = ({ children }: { children: ReactNode }) => {
-    if (!user) return <Navigate to="/signup" replace />;
+    const params = new URLSearchParams(window.location.search);
+    const isGuest = params.get("guest") === "true";
+    if (!user && !isGuest) return <Navigate to="/signup" replace />;
     return <>{children}</>;
   };
 
   const RequireCandidate = ({ children }: { children: ReactNode }) => {
-    if (!user) return <Navigate to="/signup" replace />;
-    if (user.role !== "candidate" && user.role !== "admin") return <Navigate to="/signup" replace />;
+    const params = new URLSearchParams(window.location.search);
+    const isGuest = params.get("guest") === "true";
+    if (!user && !isGuest) return <Navigate to="/signup" replace />;
+    if (user && user.role !== "candidate" && user.role !== "admin") return <Navigate to="/signup" replace />;
     return <>{children}</>;
   };
 

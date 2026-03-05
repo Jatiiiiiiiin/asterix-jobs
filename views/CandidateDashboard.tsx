@@ -12,6 +12,7 @@ import { auth, db } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { usePlan } from '../usePlan';
 import UpgradeModal from '../components/UpgradeModal';
+import AuthPromptModal from '../components/AuthPromptModal';
 import '../App.css';
 
 
@@ -79,6 +80,15 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   /* ── Plan ── */
   const { canManualApply, planLabel, isLoading: isPlanLoading } = usePlan();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
+  const gateInteraction = () => {
+    if (!userId) {
+      setShowAuthPrompt(true);
+      return true;
+    }
+    return false;
+  };
 
   /* ════════════════════════════════════════════════════════
      INIT: load user, restore local state, subscribe to jobs
@@ -281,6 +291,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
      RESUME VIEWER  (Hybrid: Local Ref + Base64 Vault)
   ════════════════════════════════════════════════════════ */
   const openResumeViewer = () => {
+    if (gateInteraction()) return;
     // Priority 1: Current session file (fast/blob)
     if (resumeFileRef.current) {
       setResumePreviewUrl(URL.createObjectURL(resumeFileRef.current));
@@ -575,6 +586,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
      AUTO-PILOT TOGGLE
   ════════════════════════════════════════════════════════ */
   const toggleAutoPilot = () => {
+    if (gateInteraction()) return;
     const next = !isAutoPilotOn;
     setIsAutoPilotOn(next);
     autoPilotRef.current = next;
@@ -586,10 +598,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     if (next) triggerAutoSync();
   };
 
-  /* ════════════════════════════════════════════════════════
-     FILE UPLOAD  — Base64 Identity Vault (ISP Proof)
-  ════════════════════════════════════════════════════════ */
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (gateInteraction()) return;
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -666,6 +676,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
      MANUAL INITIALIZE  — premium only
   ════════════════════════════════════════════════════════ */
   const handleInitialize = (job: Job) => {
+    if (gateInteraction()) return;
     if (!canManualApply) {
       setShowUpgradeModal(true);
       return;
@@ -686,6 +697,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
      ACE INTERVIEW  — GenAI tips via HuggingFace
   ════════════════════════════════════════════════════════ */
   const handleAceInterview = async (job: Job) => {
+    if (gateInteraction()) return;
     const uid = mountedUidRef.current;
     const resumeText = uid ? (localStorage.getItem(`asterix_resume_content_${uid}`) || '') : '';
 
@@ -713,6 +725,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
   /* ══ SHARE JOB ══ */
   const handleShareJob = async (job: Job) => {
+    if (gateInteraction()) return;
     const company = typeof job.company === 'string' ? job.company : job.company?.name || '';
     const url = `${window.location.origin}/job/${job.id}`;
     const text = `${job.title} at ${company}`;
@@ -1196,6 +1209,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
       }
 
       <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+      <AuthPromptModal isOpen={showAuthPrompt} onClose={() => setShowAuthPrompt(false)} />
 
       <InterviewTipsModal
         isOpen={!!interviewTipsJob}
