@@ -50,11 +50,14 @@ const App: React.FC = () => {
     const saved = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    if (saved === "dark" || (!saved && prefersDark)) {
-      document.documentElement.classList.add("dark");
-      setIsDarkMode(true);
-    }
+    // Determine initial dark mode state
+    const shouldBeDark = saved === "dark" || (!saved && prefersDark);
+
+    // Explicitly toggle class to ensure consistency
+    document.documentElement.classList.toggle("dark", shouldBeDark);
+    setIsDarkMode(shouldBeDark);
   }, []);
+
 
   const toggleTheme = () => {
     setIsDarkMode(prev => {
