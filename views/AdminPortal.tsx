@@ -163,6 +163,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                 applicationDeadline: formData.applicationDeadline || null,
                 externalUrl: formData.externalUrl.trim(),
                 isAdminPosted: true,
+                recruiterId: auth.currentUser?.uid || "admin",
                 status: "active",
                 postedDate: new Date().toISOString().split('T')[0],
                 createdAt: serverTimestamp(),
