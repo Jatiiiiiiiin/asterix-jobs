@@ -97,6 +97,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerified }) => {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         try {
+            sessionStorage.removeItem('is_new_signup');
             await authService.logout();
             navigate('/signup', { replace: true });
         } catch (err: any) {

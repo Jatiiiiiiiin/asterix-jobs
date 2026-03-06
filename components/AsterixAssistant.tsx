@@ -7,22 +7,22 @@ interface Message {
 }
 
 const SITE_KNOWLEDGE = {
-    about: "Asterix is a premium AI-powered career platform that bridges the gap between talent and opportunity using neural matching algorithms.",
+    about: "Asterix is a premium AI-powered career platform that bridges the gap between talent and opportunity using smart AI matching.",
     features: [
-        { name: "Mission Control", desc: "Our advanced job board where we list 'Universe Feed' jobs with real-time AI matching scores." },
-        { name: "AI Audit", desc: "A deep semantic analysis of how your resume aligns with a specific job description, providing exhaustive feedback." },
-        { name: "Mission Calibration", desc: "Advanced tools for recruiters to fine-tune their search and find the perfect candidate fidelity." },
-        { name: "Auto-Pilot", desc: "A background sync service that automatically scores and can auto-apply to jobs that match your profile 90% or higher." }
+        { name: "Find Jobs", desc: "Our AI-powered job board where we list all open jobs with real-time match scores based on your resume." },
+        { name: "AI Audit", desc: "A deep analysis of how your resume aligns with a specific job, with detailed feedback to improve your chances." },
+        { name: "Recalibrate", desc: "Refresh your job scores anytime. No need to re-upload your resume — just click Recalibrate to re-score all open jobs." },
+        { name: "Auto-Pilot", desc: "Automatically scores and applies to jobs that match your profile without you needing to do anything." }
     ],
     pricing: "We offer Student and Pro plans. Student plans starting at ₹99/mo provide full access to AI tools and fast-track applications.",
-    autoApply: "Yes, our Auto-Pilot feature handles automatic applications. It syncs your profile against the Universe Feed and applies to high-fidelity matches (90%+) automatically while you sleep."
+    autoApply: "Yes, our Auto-Pilot feature handles automatic applications. It checks your profile against all open jobs and applies where your match score is above the recruiter's threshold."
 };
 
 const AsterixAssistant: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { role: 'ai', text: "Neural Bridge established. I am Asterix Scout. How can I accelerate your career today?" }
+        { role: 'ai', text: "Hey! I'm Asterix Scout. How can I help you find your next job today?" }
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -109,7 +109,7 @@ const AsterixAssistant: React.FC = () => {
 
         // Simulate AI thinking and enhanced matching
         setTimeout(() => {
-            let response = "I'm still learning about that. Ask me about 'Mission Control', 'AI Audit', or 'What we do'.";
+            let response = "I'm still learning about that. Try asking me about 'jobs', 'auto-pilot', 'pricing', or 'what do you do'.";
             const query = text.toLowerCase();
 
             const matches = (keywords: string[]) => keywords.some(k => {
@@ -120,18 +120,16 @@ const AsterixAssistant: React.FC = () => {
             if (matches(['what', 'whay', 'who', 'do', 'motive', 'goal', 'purpose', 'about'])) {
                 response = `${SITE_KNOWLEDGE.about}\n\nKey features include:\n` +
                     SITE_KNOWLEDGE.features.map(f => `• **${f.name}**: ${f.desc}`).join('\n');
-            } else if (matches(['mission control', 'job board', 'jobs', 'feed'])) {
+            } else if (matches(['mission control', 'job board', 'jobs', 'feed', 'find jobs'])) {
                 response = SITE_KNOWLEDGE.features[0].desc;
-            } else if (matches(['audit', 'resume', 'feedback', 'analysis', 'calibrate'])) {
-                response = SITE_KNOWLEDGE.features[1].desc;
-            } else if (matches(['calibration', 'recruiter', 'search', 'fidelity'])) {
+            } else if (matches(['audit', 'resume', 'feedback', 'analysis', 'calibrate', 'recalibrate'])) {
                 response = SITE_KNOWLEDGE.features[2].desc;
             } else if (matches(['auto-pilot', 'sync', 'background', 'every job', 'apply', 'automatic', 'candidates'])) {
                 response = SITE_KNOWLEDGE.autoApply;
             } else if (matches(['pricing', 'cost', 'plan', 'student', 'pro', 'money', 'buy'])) {
                 response = SITE_KNOWLEDGE.pricing;
             } else if (matches(['hello', 'hi', 'greetings', 'hey', 'start'])) {
-                response = "Greetings, candidate. I'm ready to help you navigate the Asterix Universe. What's on your mind?";
+                response = "Hey! I'm here to help you get the most out of Asterix. What would you like to know?";
             }
 
             setMessages(prev => [...prev, { role: 'ai', text: response }]);
@@ -160,7 +158,7 @@ const AsterixAssistant: React.FC = () => {
                         <X size={10} />
                     </button>
                     <p className="text-[10px] font-black tracking-widest leading-relaxed opacity-60">
-                        NEURAL PROMPT
+                        SCOUT
                     </p>
                     <p className="mt-1 text-[11px] font-bold leading-relaxed">
                         Wanna save time? Ask me what we actually do.
@@ -173,7 +171,7 @@ const AsterixAssistant: React.FC = () => {
                         }}
                         className="mt-3 w-full bg-black dark:bg-white text-white dark:text-black py-2 text-[9px] font-black tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all rounded-lg"
                     >
-                        INITIALIZE SCOUT
+                        TALK TO SCOUT
                     </button>
                 </div>
             )}
@@ -191,7 +189,7 @@ const AsterixAssistant: React.FC = () => {
                                 <h3 className="text-[11px] font-black tracking-[0.2em] leading-none">ASTERIX SCOUT</h3>
                                 <div className="flex items-center gap-1.5 mt-1">
                                     <span className="size-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-                                    <span className="text-[8px] font-bold tracking-widest opacity-40">NEURAL SYNC ACTIVE</span>
+                                    <span className="text-[8px] font-bold tracking-widest opacity-40">ONLINE</span>
                                 </div>
                             </div>
                         </div>

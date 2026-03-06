@@ -340,7 +340,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-2 -ml-2 text-black dark:text-white" aria-label="Open menu">
                 <span className="material-symbols-outlined text-lg">menu</span>
               </button>
-              <h1 className="text-xl md:text-3xl font-black  tracking-tighter truncate">Mission Control</h1>
+              <h1 className="text-xl md:text-3xl font-black  tracking-tighter truncate">Find Jobs</h1>
             </div>
 
             <div className="flex items-center gap-2 flex-1 max-w-2xl hidden sm:flex">
@@ -395,7 +395,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
             ${showMobileFilters ? 'translate-x-0' : '-translate-x-full'}
           `}>
             <div className="flex justify-between items-center pb-4 border-b border-black/10 dark:border-white/10">
-              <h3 className="text-[10px] font-black  tracking-[0.3em] opacity-40">Filter Protocol</h3>
+              <h3 className="text-[10px] font-black  tracking-[0.3em] opacity-40">Filters</h3>
               <button onClick={() => setShowMobileFilters(false)} className="material-symbols-outlined text-lg hover:bg-black/5 dark:hover:bg-white/5 p-1 transition-colors">close</button>
             </div>
 
@@ -407,7 +407,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                 >
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-base">tune</span>
-                    <span className="text-[10px] font-black  tracking-[0.3em]">Fidelity Guard</span>
+                    <span className="text-[10px] font-black  tracking-[0.3em]">Min Match Score</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-black">{matchThreshold}%</span>
@@ -418,7 +418,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                 {showFidelityFilter && (
                   <div className="space-y-4 p-4 border-2 border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5">
                     <div className="flex justify-between items-end">
-                      <span className="text-[8px] font-black  tracking-widest opacity-60">Neural Threshold</span>
+                      <span className="text-[8px] font-black  tracking-widest opacity-60">Minimum Score</span>
                       <span className="text-xl font-black">{matchThreshold}%</span>
                     </div>
                     <input
@@ -434,7 +434,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-[9px] font-black  tracking-[0.3em] opacity-40">Mission Type</h3>
+                <h3 className="text-[9px] font-black  tracking-[0.3em] opacity-40">Job Type</h3>
                 <div className="space-y-2">
                   {['Full-time', 'Contract', 'Remote'].map(type => (
                     <label key={type} className="flex items-center justify-between group cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 p-2 transition-colors">
@@ -453,10 +453,10 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               </div>
 
               <div className="pt-6 border-t border-black/5 dark:border-white/5">
-                <h3 className="text-[9px] font-black  tracking-[0.3em] opacity-40 mb-4">Market View</h3>
+                <h3 className="text-[9px] font-black  tracking-[0.3em] opacity-40 mb-4">Quick Jump</h3>
                 <div className="flex flex-col gap-2">
                   <button onClick={() => scrollToSection('all-jobs')} className="text-[9px] font-black  tracking-[0.25em] px-4 py-3 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center">
-                    Universe Feed ({filteredJobs.length})
+                    All Jobs ({filteredJobs.length})
                   </button>
                 </div>
               </div>
@@ -464,16 +464,17 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
               <div className="bg-emerald-500 text-white p-6 space-y-4 shadow-xl">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-lg animate-pulse">auto_awesome</span>
-                  <h4 className="text-[9px] font-black  tracking-widest">Neural Auto-Pilot</h4>
+                  <h4 className="text-[9px] font-black  tracking-widest">Auto-Pilot</h4>
                 </div>
                 <p className="text-[8px] font-bold  tracking-widest opacity-80 leading-relaxed">
-                  Identity is synchronized. Application routing is 98.2% calibrated.
+                  Your profile is ready. Auto-Pilot will apply to matching jobs automatically.
                 </p>
                 <button
+                  id="jobspage-recalibrate-btn"
                   onClick={handleInitializeAutoPilot}
                   className={`w-full py-3 text-[9px] font-black  tracking-widest border-2 border-white transition-all ${isAutoPilotActive ? 'bg-white text-emerald-500' : 'hover:bg-white hover:text-emerald-500'}`}
                 >
-                  {isAutoPilotActive ? '✓ System Active' : 'Initialize'}
+                  {isAutoPilotActive ? '✓ Active' : 'Start Auto-Pilot'}
                 </button>
               </div>
             </div>
@@ -491,8 +492,8 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
             <section id="all-jobs" className="space-y-8 pb-32 scroll-mt-4">
               <div className="flex justify-between items-center border-b-2 border-black/10 dark:border-white/10 pb-6">
                 <div className="space-y-1">
-                  <h2 className="text-2xl md:text-4xl font-black  tracking-tighter opacity-40">Universe Feed</h2>
-                  <p className="text-[9px] font-black  tracking-widest opacity-20">Full market inventory matching logic</p>
+                  <h2 className="text-2xl md:text-4xl font-black  tracking-tighter opacity-40">All Jobs</h2>
+                  <p className="text-[9px] font-black  tracking-widest opacity-20">Live job postings — manually apply using your match score</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-[9px] font-black  tracking-widest opacity-30">
@@ -500,11 +501,12 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                   </div>
                   {!isLoadingJobs && (
                     <button
+                      id="jobspage-recalibrate-top"
                       onClick={() => gateInteraction() ? null : performSemanticSync(true)}
                       disabled={isVectorizing}
                       className="px-3 py-1 border border-black/20 dark:border-white/20 text-[8px] font-black tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all uppercase"
                     >
-                      {isVectorizing ? 'Syncing...' : 'Recalibrate'}
+                      {isVectorizing ? 'Scoring...' : 'Recalibrate'}
                     </button>
                   )}
                 </div>
@@ -533,7 +535,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                     ))
                   ) : (
                     <div className="py-24 text-center opacity-30 border-2 border-black/5 dark:border-white/5">
-                      <p className="text-xs font-black  tracking-[0.3em]">Empty Universe Protocol engaged.</p>
+                      <p className="text-xs font-black  tracking-[0.3em]">No jobs match your filters.</p>
                     </div>
                   )}
                 </div>
@@ -725,7 +727,7 @@ const JobCard: React.FC<{
                 ${canManualApply ? 'bg-black text-white dark:bg-white dark:text-black hover:opacity-80 shadow-xl' : 'border border-black/20 dark:border-white/20 text-black/40 dark:text-white/40 hover:border-[#ffb800] hover:text-[#ffb800]'}`}
             >
               {!canManualApply && <span className="material-symbols-outlined text-base">lock</span>}
-              View Protocol
+              View & Apply
             </button>
           )}
         </div>

@@ -30,7 +30,13 @@ const PublicRoute = ({ children, user, isLoading }: PublicRouteProps) => {
     return <>{children}</>;
   }
 
-
+  // Force redirect to verification step if this was a brand new email signup
+  if (sessionStorage.getItem('is_new_signup') === 'true' && !user.emailVerified) {
+    if (location.pathname !== '/verify-email') {
+      return <Navigate to="/verify-email" replace />;
+    }
+    return <>{children}</>;
+  }
 
   if (user.role === 'admin') {
     return <Navigate to="/admin" replace />;

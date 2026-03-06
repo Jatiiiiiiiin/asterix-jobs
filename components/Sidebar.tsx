@@ -12,9 +12,10 @@ interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
   onAuthRequired?: () => void;
+  onTutorialJobsClick?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired }) => {
+const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired, onTutorialJobsClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -232,8 +233,14 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired
             return (
               <Link
                 key={item.name}
+                id={item.name === 'Jobs' ? 'tutorial-jobs-link' : undefined}
                 to={item.path}
-                onClick={handleClick}
+                onClick={(e) => {
+                  handleClick(e);
+                  if (item.name === 'Jobs' && onTutorialJobsClick) {
+                    onTutorialJobsClick();
+                  }
+                }}
                 className={`flex items-center gap-3 px-3 py-3 transition-all ${isActive
                   ? 'bg-black text-white dark:bg-white dark:text-black font-black'
                   : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'

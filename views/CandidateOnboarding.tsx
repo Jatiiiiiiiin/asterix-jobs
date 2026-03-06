@@ -6,10 +6,10 @@ import '../App.css';
 
 
 const STEPS = [
-  { id: 'identity', label: 'Identity Matrix' },
-  { id: 'stack', label: 'Neural Stack' },
-  { id: 'experience', label: 'History' },
-  { id: 'directives', label: 'Directives' },
+  { id: 'identity', label: 'About You' },
+  { id: 'stack', label: 'Your Skills' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'directives', label: 'Preferences' },
   { id: 'review', label: 'Review' },
 ];
 
@@ -145,7 +145,7 @@ export default function CandidateOnboarding({
           <div className="bg-black dark:bg-white size-10 flex items-center justify-center text-white dark:text-black">
             <span className="material-symbols-outlined font-black">auto_awesome</span>
           </div>
-          <h2 className="text-2xl font-black tracking-tighter">Onboarding Protocol</h2>
+          <h2 className="text-2xl font-black tracking-tighter">Get Started</h2>
         </div>
         <div className="hidden md:flex gap-4">
           {STEPS.map((s, idx) => (
@@ -185,8 +185,8 @@ export default function CandidateOnboarding({
             {step === 0 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">01 / Identity Matrix</h3>
-                  <p className="text-xs font-bold tracking-widest opacity-40">Core bio and professional coordinates.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">01 / About You</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">Your basic info and how to reach you.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {[
@@ -210,8 +210,8 @@ export default function CandidateOnboarding({
             {step === 1 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">02 / Neural Stack</h3>
-                  <p className="text-xs font-bold tracking-widest opacity-40">Select your core technical competencies or add your own.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">02 / Your Skills</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">Pick your skills or type your own. This helps match you to the right jobs.</p>
                 </div>
 
                 {/* Predefined skill chips */}
@@ -222,8 +222,8 @@ export default function CandidateOnboarding({
                       type="button"
                       onClick={() => toggleSkill(skill)}
                       className={`px-6 py-3 border-2 text-[10px] font-black tracking-widest transition-all ${form.skills.includes(skill)
-                          ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-xl'
-                          : 'border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
+                        ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-xl'
+                        : 'border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
                         }`}
                     >
                       {skill}
@@ -291,8 +291,8 @@ export default function CandidateOnboarding({
             {step === 2 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">03 / Experience Log</h3>
-                  <p className="text-xs font-bold tracking-widest opacity-40">Detail your professional trajectory.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">03 / Experience</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">Tell us about your work history and education.</p>
                 </div>
                 <div className="space-y-8">
                   <div className="space-y-3">
@@ -300,7 +300,7 @@ export default function CandidateOnboarding({
                     <textarea name="experience" value={form.experience} onChange={handle} rows={5} className={TEXTAREA} placeholder="COMPANY – ROLE – ACHIEVEMENT..." />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black tracking-widest opacity-60">Education Matrix</label>
+                    <label className="text-[10px] font-black tracking-widest opacity-60">Education</label>
                     <textarea name="education" value={form.education} onChange={handle} rows={3} className={TEXTAREA} placeholder="DEGREE @ UNIVERSITY – YEAR" />
                   </div>
                 </div>
@@ -311,8 +311,8 @@ export default function CandidateOnboarding({
             {step === 3 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">04 / Target Directives</h3>
-                  <p className="text-xs font-bold tracking-widest opacity-40">Mission parameters for job matching.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">04 / Job Preferences</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">What kind of job are you looking for?</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-3">
@@ -320,13 +320,13 @@ export default function CandidateOnboarding({
                     <input name="minSalary" value={form.minSalary} onChange={handle} className={INPUT} placeholder="E.G. $120,000" />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black tracking-widest opacity-60">Preferred Deployment</label>
+                    <label className="text-[10px] font-black tracking-widest opacity-60">Preferred Job Type</label>
                     <select name="jobType" value={form.jobType} onChange={handle} className={INPUT}>
                       <option>Full-time</option><option>Contract</option><option>Part-time</option>
                     </select>
                   </div>
                   <div className="space-y-3 md:col-span-2">
-                    <label className="text-[10px] font-black tracking-widest opacity-60">Remote Protocol</label>
+                    <label className="text-[10px] font-black tracking-widest opacity-60">Work Location</label>
                     <select name="remotePreference" value={form.remotePreference} onChange={handle} className={INPUT}>
                       <option>Remote Only</option><option>Hybrid</option><option>On-site</option>
                     </select>
@@ -339,8 +339,8 @@ export default function CandidateOnboarding({
             {step === 4 && (
               <div className="space-y-10">
                 <div className="space-y-2">
-                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">05 / Profile Review</h3>
-                  <p className="text-xs font-bold tracking-widest opacity-40">Verify before deployment.</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter">05 / Review</h3>
+                  <p className="text-xs font-bold tracking-widest opacity-40">Check your info before saving.</p>
                 </div>
                 <div className="border-2 border-emerald-500/30 p-8 bg-black/5 dark:bg-white/5 space-y-6">
                   <div className="grid grid-cols-2 gap-6 text-sm">
@@ -391,9 +391,9 @@ export default function CandidateOnboarding({
                   {saving ? (
                     <>
                       <span className="material-symbols-outlined text-sm animate-spin">autorenew</span>
-                      Deploying…
+                      Saving...
                     </>
-                  ) : 'Deploy Identity'}
+                  ) : 'Save & Continue'}
                 </button>
               ) : (
                 <button
@@ -420,7 +420,7 @@ export default function CandidateOnboarding({
       </main>
 
       <footer className="px-6 py-8 border-t border-black/5 dark:border-white/5 flex items-center justify-between text-[8px] font-black tracking-[0.4em] opacity-20">
-        <p>© 2026 Asterix-find. All telemetry encrypted.</p>
+        <p>© 2026 Asterix-find.</p>
         <p>Step {step + 1} of {STEPS.length}</p>
       </footer>
     </div>

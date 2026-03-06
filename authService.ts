@@ -87,6 +87,7 @@ export const authService = {
     });
 
     writeSession(res.user.uid, res.user.email, role);
+    sessionStorage.setItem('is_new_signup', 'true');
 
     // Send verification email
     await sendEmailVerification(res.user);

@@ -13,6 +13,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { usePlan } from '../usePlan';
 import UpgradeModal from '../components/UpgradeModal';
 import AuthPromptModal from '../components/AuthPromptModal';
+import OnboardingTutorial, { TutorialStep } from '../components/OnboardingTutorial';
 import '../App.css';
 
 
@@ -71,6 +72,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'score' | 'time'>('score');
   const [isRestored, setIsRestored] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   /* ── Interview Tips ── */
   const [interviewTipsJob, setInterviewTipsJob] = useState<Job | null>(null);
@@ -101,6 +103,13 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         const uid = user.uid;
         setUserId(uid);
         mountedUidRef.current = uid;
+
+        // Show tutorial for new users
+        const tutorialKey = `asterix_tutorial_dashboard_${uid}`;
+        if (!localStorage.getItem(tutorialKey)) {
+          // small delay so the page paints first
+          setTimeout(() => setShowTutorial(true), 1500);
+        }
 
         // Fetch profile
         try {
@@ -340,12 +349,12 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     if (!resumeFileRef.current && !extractedText) {
       // Last try: if we have resumeUrl (base64) but no extracted text, extract it now
       if (resumeUrl && resumeUrl.length > 1000) {
-        addNotification('Neural Link', 'Restoring resume from vault...', 'info');
+        addNotification('Restoring', 'Loading your resume from cloud...', 'info');
         try {
           extractedText = await extractResumeText(resumeUrl);
           if (persistentKey) localStorage.setItem(persistentKey, extractedText);
         } catch (err) {
-          addNotification('Sync Error', 'Could not restore resume. Please re-upload.', 'alert');
+          addNotification('Error', 'Could not load resume. Please re-upload.', 'alert');
           return;
         }
       } else {
@@ -355,7 +364,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
     vectorizingRef.current = true;
     setIsVectorizing(true);
-    addNotification('System Sync', 'Initializing high-fidelity neural scan...', 'info');
+    addNotification('Scanning Jobs', 'Comparing your resume to all open jobs...', 'info');
 
     // uid is already defined above
     const { profileText, candidateSkills } = uid
@@ -365,15 +374,15 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     // 1. Ensure we have extracted text for matching
     if (resumeFileRef.current) {
       try {
-        addNotification('Neural Link', 'Extracting identity from local file...', 'info');
+        addNotification('Reading Resume', 'Extracting text from your resume...', 'info');
         extractedText = await extractResumeText(resumeFileRef.current);
         if (uid) localStorage.setItem(`asterix_resume_content_${uid}`, extractedText);
-        addNotification('Neural Link', 'Identity re-mapped', 'success');
+        addNotification('Resume Ready', 'Your resume has been read successfully!', 'success');
 
         // NEW: Extract structured identity and update profile if UID exists
         if (uid) {
           try {
-            addNotification('Neural Link', 'Synchronizing profile...', 'info');
+            addNotification('Updating Profile', 'Syncing your skills and experience...', 'info');
             const identity = await embedResumeBackend(extractedText);
 
             if (identity && identity.skills) {
@@ -532,8 +541,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
       vectorizingRef.current = false;
       setIsVectorizing(false);
       addNotification(
-        'Neural Sync Complete',
-        autoAppliedCount ? `${autoAppliedCount} mandates executed` : 'Zero mandates detected',
+        'Scan Complete',
+        autoAppliedCount ? `Auto-applied to ${autoAppliedCount} job(s)!` : 'All jobs scored. Good luck!',
         autoAppliedCount ? 'success' : 'info'
       );
     }
@@ -591,8 +600,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     setIsAutoPilotOn(next);
     autoPilotRef.current = next;
     addNotification(
-      next ? 'Auto-Pilot Active' : 'Auto-Pilot Disabled',
-      next ? 'Autonomous sync every 15 minutes engaged' : 'Autonomous agents standing down',
+      next ? 'Auto-Pilot On' : 'Auto-Pilot Off',
+      next ? 'Will auto-apply to matching jobs every 15 minutes' : 'Auto-apply paused',
       next ? 'alert' : 'info'
     );
     if (next) triggerAutoSync();
@@ -617,7 +626,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     setDynamicJobs(prev => prev.map(j => ({ ...j, analyzing: true, matchScore: undefined })));
 
     const uid = readSessionUid();
-    addNotification('Vault Sync', `Archiving ${file.name} to secure vault...`, 'info');
+    addNotification('Uploading Resume', `Saving ${file.name} to your profile...`, 'info');
 
     // Helper: File to Base64
     const toBase64 = (f: File): Promise<string> => new Promise((res, rej) => {
@@ -631,7 +640,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     const syncToVault = async () => {
       try {
         if (!uid) {
-          addNotification('Ready', `${file.name} synced for this session`, 'success');
+          addNotification('Ready', `${file.name} loaded for this session`, 'success');
           return;
         }
 
@@ -649,10 +658,10 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         }, { merge: true });
 
         setResumeUrl(base64);
-        addNotification('Identity Vaulted', 'Resume securely stored in your profile', 'success');
+        addNotification('Resume Saved', 'Your resume is saved to your profile', 'success');
       } catch (err: any) {
         console.error('[Vault Sync] Failed:', err);
-        addNotification('Vault Error', 'Could not sync to cloud vault. Local matching active.', 'alert');
+        addNotification('Upload Error', 'Could not save to cloud. Matching still works locally.', 'alert');
       } finally {
         setIsUploading(false);
       }
@@ -686,7 +695,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
     const threshold = job.matchThreshold ?? 65;
     const score = job.matchScore ?? 0;
     if (score < (threshold - 5)) {
-      addNotification('Neural Guard', 'Match score too low for manual initialization.', 'alert');
+      addNotification('Low Match', 'Your match score is too low to apply for this job.', 'alert');
       return;
     }
 
@@ -758,7 +767,15 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
   ════════════════════════════════════════════════════════ */
   return (
     <div className="flex h-screen bg-white dark:bg-background-dark text-black dark:text-white transition-colors duration-500 overflow-hidden font-display">
-      <Sidebar role="candidate" isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <Sidebar
+        role="candidate"
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onTutorialJobsClick={showTutorial ? () => {
+          localStorage.setItem(`asterix_tutorial_dashboard_${userId}`, 'done');
+          setShowTutorial(false);
+        } : undefined}
+      />
 
       <main className="flex-1 overflow-y-auto border-l border-black dark:border-white/10 flex flex-col custom-scrollbar">
 
@@ -793,11 +810,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
           {/* Row 1 — Title + Page info */}
           <div className="flex items-center justify-between py-3 border-b border-black/5 dark:border-white/5">
             <div className="flex items-center gap-3">
-              <button onClick={() => setIsMenuOpen(true)} className="md:hidden p-1.5 text-black dark:text-white">
+              <button id="tutorial-menu-button" onClick={() => setIsMenuOpen(true)} className="md:hidden p-1.5 text-black dark:text-white">
                 <span className="material-symbols-outlined text-xl">menu</span>
               </button>
               <div>
-                <div className="text-[7px] font-black  tracking-[0.5em] opacity-30">Neural Control Center</div>
+                <div className="text-[7px] font-black  tracking-[0.5em] opacity-30">Your Dashboard</div>
                 <h1 className="text-xl md:text-2xl font-black  tracking-tight leading-none">My Dashboard</h1>
               </div>
             </div>
@@ -839,7 +856,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             <div className="h-5 w-px bg-black/10 dark:bg-white/10 shrink-0" />
 
             {/* Sync Identity */}
-            <button onClick={() => fileInputRef.current?.click()}
+            <button id="tutorial-embed-resume" onClick={() => fileInputRef.current?.click()}
               disabled={isUploading || isVectorizing}
               className={`flex items-center gap-2 px-4 py-1.5 text-[8px] font-black  tracking-widest shrink-0 transition-all
                 ${isUploading || isVectorizing
@@ -848,12 +865,12 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
               {(isUploading || isVectorizing) && (
                 <span className="material-symbols-outlined text-xs animate-circular-spin">progress_activity</span>
               )}
-              {isUploading ? 'Archiving...' : isVectorizing ? 'Scanning...' : 'Embed Resume'}
+              {isUploading ? 'Uploading...' : isVectorizing ? 'Scanning...' : 'Embed Resume'}
             </button>
 
             {/* Recalibrate */}
             {(resumeName !== 'Resume.pdf' || (resumeUrl && resumeUrl.length > 100)) && (
-              <button onClick={() => performSemanticSync(true)}
+              <button id="tutorial-recalibrate" onClick={() => performSemanticSync(true)}
                 disabled={isUploading || isVectorizing}
                 className="flex items-center gap-2 px-4 py-1.5 border border-black/10 dark:border-white/10 text-[8px] font-black tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all uppercase"
               >
@@ -893,10 +910,10 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
           {/* ── STATS ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-black dark:border-white/20">
             {[
-              { label: 'Network Mandates', val: isLoadingJobs ? '...' : dynamicJobs.length },
-              { label: 'Applied Protocols', val: dynamicJobs.filter(j => j.applied).length },
-              { label: 'Neural Accuracy', val: '98.2%' },
-              { label: 'Agent Logic', val: isAutoPilotOn ? 'READY' : 'IDLE' },
+              { label: 'Open Jobs', val: isLoadingJobs ? '...' : dynamicJobs.length },
+              { label: 'Jobs Applied', val: dynamicJobs.filter(j => j.applied).length },
+              { label: 'Match Accuracy', val: '98.2%' },
+              { label: 'Auto-Pilot', val: isAutoPilotOn ? 'ON' : 'OFF' },
             ].map((s, i) => (
               <div
                 key={i}
@@ -1154,16 +1171,16 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
               )}
 
               {/* Identity source */}
-              <div className="bg-black text-white dark:bg-white dark:text-black p-6 md:p-8 space-y-6 shadow-2xl">
-                <h4 className="text-[10px] font-black tracking-[0.3em] opacity-60">Identity Source</h4>
+              <div id="resume-source-card" className="bg-black text-white dark:bg-white dark:text-black p-6 md:p-8 space-y-6 shadow-2xl">
+                <h4 className="text-[10px] font-black tracking-[0.3em] opacity-60">Your Resume</h4>
                 <div className="space-y-2">
-                  <p className="text-[8px] font-black tracking-widest opacity-40">Current Root Node</p>
+                  <p className="text-[8px] font-black tracking-widest opacity-40">Active File</p>
                   <p className="text-xs font-black truncate">{resumeName}</p>
                   <span className="text-[7px] font-black tracking-widest px-2 py-0.5 border inline-block border-emerald-500 text-emerald-500">
-                    IDENTITY_SYNCED
+                    SAVED
                   </span>
                   <span className="text-[7px] font-black tracking-widest px-2 py-0.5 border inline-block border-white/20 text-white/40 dark:border-black/20 dark:text-black/40 ml-2">
-                    LOCAL_NEURAL_PROCESSING
+                    AI PROCESSING
                   </span>
                 </div>
               </div>
@@ -1218,6 +1235,48 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         isLoading={isLoadingTips}
         onClose={() => { setInterviewTipsJob(null); setInterviewTips(null); }}
       />
+
+      {showTutorial && userId && (
+        <OnboardingTutorial
+          storageKey={`asterix_tutorial_dashboard_${userId}`}
+          onComplete={() => setShowTutorial(false)}
+          onStepChange={(stepIndex) => {
+            // Auto-open sidebar when the user reaches the sidebar/jobs step
+            if (stepIndex === 2) {
+              setIsMenuOpen(true);
+            } else {
+              setIsMenuOpen(false);
+            }
+          }}
+          steps={[
+            {
+              id: 'upload-resume',
+              title: 'Upload Your Resume',
+              description: 'Start by clicking "Embed Resume" in the toolbar above. Your resume will be read by AI to find the best matching jobs for you.',
+              targetId: 'tutorial-embed-resume',
+              position: 'bottom',
+              icon: 'upload_file',
+            },
+            {
+              id: 'recalibrate',
+              title: 'No Need to Re-Upload Every Time',
+              description: 'Your resume is saved to your profile. Next time you visit, just hit "Recalibrate" to re-score jobs — no upload needed!',
+              targetId: 'tutorial-recalibrate',
+              position: 'bottom',
+              icon: 'refresh',
+            },
+            {
+              id: 'jobs-page',
+              title: 'Go to the Jobs Page',
+              description: 'The sidebar just opened! Tap "Jobs" to browse all open positions. Each job shows your AI match score — the higher it is, the better your chances!',
+              targetId: 'tutorial-jobs-link',
+              position: 'right',
+              icon: 'work',
+              requireClick: true,
+            },
+          ] satisfies TutorialStep[]}
+        />
+      )}
 
       <style>{`
         @keyframes spin-slow { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }

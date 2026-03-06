@@ -166,8 +166,13 @@ const App: React.FC = () => {
 
         if (fullUser) {
           const path = window.location.pathname;
+          const isNewSignup = sessionStorage.getItem('is_new_signup') === 'true';
+
           if (path === '/verify-email' && !fullUser.emailVerified) {
             // Stay
+          } else if (isNewSignup && !fullUser.emailVerified) {
+            // Force newly signed up users to verify email before onboarding
+            navigate("/verify-email", { replace: true });
           } else if (!fullUser.isOnboarded && fullUser.role === 'candidate' && path !== '/candidate/onboarding') {
             navigate("/candidate/onboarding", { replace: true });
           }
@@ -225,6 +230,7 @@ const App: React.FC = () => {
   }, [navigate]);
 
   const handleVerificationSuccess = useCallback(async () => {
+    sessionStorage.removeItem('is_new_signup');
     const updatedUser = await authService.getCurrentUser();
     setUser(updatedUser);
     if (updatedUser) {
