@@ -863,10 +863,13 @@ export async function parseJobDescription(rawText: string) {
       body: JSON.stringify({ text: rawText })
     });
 
-    if (!res.ok) throw new Error("JD Parse failed");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => null);
+      throw new Error(errData?.message || "JD Parse failed with status " + res.status);
+    }
     return await res.json();
-  } catch (err) {
+  } catch (err: any) {
     console.error("[Asterix] Failed to parse JD:", err);
-    return null;
+    return { status: "error", message: err.message || "Network request failed" };
   }
 }

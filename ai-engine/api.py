@@ -1264,8 +1264,8 @@ class ParseJDRequest(BaseModel):
 @app.post("/parse-jd")
 async def parse_jd(req: ParseJDRequest):
     """Parse raw Job Description text into structured JSON for Admin Auto-Fill"""
-    if not req.text or len(req.text) < 50:
-        return {"status": "error", "message": "Text too short to parse."}
+    if not req.text or len(req.text) < 10:
+        return {"status": "error", "message": "Please paste at least one full sentence of the job description."}
         
     # Check Cache
     cache_key = f"parse_jd:{hashlib.md5(req.text[:2000].encode()).hexdigest()}"
