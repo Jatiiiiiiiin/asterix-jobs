@@ -296,21 +296,39 @@ export default function CandidateOnboarding({
                   <p className="text-xs font-bold tracking-widest opacity-40">Tell us about your work history and education.</p>
                 </div>
                 <div className="space-y-8">
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isFresher}
-                        onChange={(e) => {
-                          setIsFresher(e.target.checked);
-                          if (e.target.checked) {
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-black tracking-widest opacity-60">Experience Level</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className={`flex items-center gap-4 p-4 border-2 cursor-pointer transition-all ${isFresher ? 'border-black dark:border-white bg-black/5 dark:bg-white/5' : 'border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30'}`}>
+                        <div className={`size-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isFresher ? 'border-black dark:border-white' : 'border-black/30 dark:border-white/30'}`}>
+                          {isFresher && <div className="size-2 rounded-full bg-black dark:bg-white" />}
+                        </div>
+                        <input
+                          type="radio"
+                          name="experienceType"
+                          checked={isFresher}
+                          onChange={() => {
+                            setIsFresher(true);
                             setForm(prev => ({ ...prev, experience: '' }));
-                          }
-                        }}
-                        className="w-4 h-4 cursor-pointer accent-black dark:accent-white"
-                      />
-                      <span className="text-[10px] font-black tracking-widest opacity-60">I am a Fresher (No Professional Experience)</span>
-                    </label>
+                          }}
+                          className="hidden"
+                        />
+                        <span className="text-[10px] font-black tracking-widest">Fresher (No Experience)</span>
+                      </label>
+                      <label className={`flex items-center gap-4 p-4 border-2 cursor-pointer transition-all ${!isFresher ? 'border-black dark:border-white bg-black/5 dark:bg-white/5' : 'border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30'}`}>
+                        <div className={`size-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${!isFresher ? 'border-black dark:border-white' : 'border-black/30 dark:border-white/30'}`}>
+                          {!isFresher && <div className="size-2 rounded-full bg-black dark:bg-white" />}
+                        </div>
+                        <input
+                          type="radio"
+                          name="experienceType"
+                          checked={!isFresher}
+                          onChange={() => setIsFresher(false)}
+                          className="hidden"
+                        />
+                        <span className="text-[10px] font-black tracking-widest">Experienced Professional</span>
+                      </label>
+                    </div>
                   </div>
                   {!isFresher && (
                     <div className="space-y-3">
