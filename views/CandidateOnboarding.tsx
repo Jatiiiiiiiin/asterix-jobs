@@ -48,6 +48,7 @@ export default function CandidateOnboarding({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [customSkillInput, setCustomSkillInput] = useState('');
+  const [isFresher, setIsFresher] = useState(true);
 
   const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -192,7 +193,7 @@ export default function CandidateOnboarding({
                   {[
                     { name: 'name', label: 'Professional Name', placeholder: 'FULL NAME' },
                     { name: 'title', label: 'Primary Role', placeholder: 'E.G. SOFTWARE ENGINEER' },
-                    { name: 'phone', label: 'Phone Number', placeholder: '+1 XXX XXX XXXX' },
+                    { name: 'phone', label: 'Phone Number', placeholder: 'XXX XXX XXXX' },
                     { name: 'location', label: 'Location (City, Country)', placeholder: 'E.G. NEW YORK, USA' },
                     { name: 'github', label: 'GitHub URL', placeholder: 'GITHUB.COM/USER' },
                     { name: 'linkedin', label: 'LinkedIn URL', placeholder: 'LINKEDIN.COM/IN/USER' },
@@ -296,9 +297,27 @@ export default function CandidateOnboarding({
                 </div>
                 <div className="space-y-8">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black tracking-widest opacity-60">Work History</label>
-                    <textarea name="experience" value={form.experience} onChange={handle} rows={5} className={TEXTAREA} placeholder="COMPANY – ROLE – ACHIEVEMENT..." />
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isFresher}
+                        onChange={(e) => {
+                          setIsFresher(e.target.checked);
+                          if (e.target.checked) {
+                            setForm(prev => ({ ...prev, experience: '' }));
+                          }
+                        }}
+                        className="w-4 h-4 cursor-pointer accent-black dark:accent-white"
+                      />
+                      <span className="text-[10px] font-black tracking-widest opacity-60">I am a Fresher (No Professional Experience)</span>
+                    </label>
                   </div>
+                  {!isFresher && (
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black tracking-widest opacity-60">Work History</label>
+                      <textarea name="experience" value={form.experience} onChange={handle} rows={5} className={TEXTAREA} placeholder="COMPANY – ROLE – ACHIEVEMENT..." />
+                    </div>
+                  )}
                   <div className="space-y-3">
                     <label className="text-[10px] font-black tracking-widest opacity-60">Education</label>
                     <textarea name="education" value={form.education} onChange={handle} rows={3} className={TEXTAREA} placeholder="DEGREE @ UNIVERSITY – YEAR" />
@@ -317,12 +336,16 @@ export default function CandidateOnboarding({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-3">
                     <label className="text-[10px] font-black tracking-widest opacity-60">Min Salary Expectation</label>
-                    <input name="minSalary" value={form.minSalary} onChange={handle} className={INPUT} placeholder="E.G. $120,000" />
+                    <input name="minSalary" value={form.minSalary} onChange={handle} className={INPUT} placeholder="E.G. ₹12,00,000 / INR" />
                   </div>
                   <div className="space-y-3">
                     <label className="text-[10px] font-black tracking-widest opacity-60">Preferred Job Type</label>
                     <select name="jobType" value={form.jobType} onChange={handle} className={INPUT}>
-                      <option>Full-time</option><option>Contract</option><option>Part-time</option>
+                      <option>Full-time</option>
+                      <option>Part-time</option>
+                      <option>Contract</option>
+                      <option>Internship</option>
+                      <option>Apprenticeship</option>
                     </select>
                   </div>
                   <div className="space-y-3 md:col-span-2">
@@ -357,6 +380,10 @@ export default function CandidateOnboarding({
                         <strong>{val || '—'}</strong>
                       </div>
                     ))}
+                    <div className="col-span-2">
+                      <span className="opacity-60 text-[10px] tracking-widest">Experience Level:</span>{' '}
+                      <strong>{isFresher ? 'Fresher' : 'Experienced'}</strong>
+                    </div>
                     <div className="col-span-2">
                       <span className="opacity-60 text-[10px] tracking-widest">Skills:</span>{' '}
                       <strong>{form.skills.join(', ') || 'None selected'}</strong>

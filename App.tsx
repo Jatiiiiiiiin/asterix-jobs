@@ -40,6 +40,35 @@ import AsterixAssistant from "./components/AsterixAssistant";
 
 
 
+/* ───────────────── ROUTE GUARDS ───────────────── */
+
+const RequireAuth = ({ user, children }: { user: AuthUser | null, children: ReactNode }) => {
+  const params = new URLSearchParams(window.location.search);
+  const isGuest = params.get("guest") === "true";
+  if (!user && !isGuest) return <Navigate to="/signup" replace />;
+  return <>{children}</>;
+};
+
+const RequireCandidate = ({ user, children }: { user: AuthUser | null, children: ReactNode }) => {
+  const params = new URLSearchParams(window.location.search);
+  const isGuest = params.get("guest") === "true";
+  if (!user && !isGuest) return <Navigate to="/signup" replace />;
+  if (user && user.role !== "candidate" && user.role !== "admin") return <Navigate to="/signup" replace />;
+  return <>{children}</>;
+};
+
+const RequireRecruiter = ({ user, children }: { user: AuthUser | null, children: ReactNode }) => {
+  if (!user) return <Navigate to="/signup" replace />;
+  if (user.role !== "recruiter") return <Navigate to="/signup" replace />;
+  return <>{children}</>;
+};
+
+const RequireAdmin = ({ user, children }: { user: AuthUser | null, children: ReactNode }) => {
+  if (!user) return <Navigate to="/signup" replace />;
+  if (user.role !== "admin") return <Navigate to="/signup" replace />;
+  return <>{children}</>;
+};
+
 const App: React.FC = () => {
   const navigate = useNavigate();
 
@@ -263,34 +292,7 @@ const App: React.FC = () => {
     );
   }
 
-  /* ───────────────── ROUTE GUARDS ───────────────── */
-
-  const RequireAuth = ({ children }: { children: ReactNode }) => {
-    const params = new URLSearchParams(window.location.search);
-    const isGuest = params.get("guest") === "true";
-    if (!user && !isGuest) return <Navigate to="/signup" replace />;
-    return <>{children}</>;
-  };
-
-  const RequireCandidate = ({ children }: { children: ReactNode }) => {
-    const params = new URLSearchParams(window.location.search);
-    const isGuest = params.get("guest") === "true";
-    if (!user && !isGuest) return <Navigate to="/signup" replace />;
-    if (user && user.role !== "candidate" && user.role !== "admin") return <Navigate to="/signup" replace />;
-    return <>{children}</>;
-  };
-
-  const RequireRecruiter = ({ children }: { children: ReactNode }) => {
-    if (!user) return <Navigate to="/signup" replace />;
-    if (user.role !== "recruiter") return <Navigate to="/signup" replace />;
-    return <>{children}</>;
-  };
-
-  const RequireAdmin = ({ children }: { children: ReactNode }) => {
-    if (!user) return <Navigate to="/signup" replace />;
-    if (user.role !== "admin") return <Navigate to="/signup" replace />;
-    return <>{children}</>;
-  };
+  /* ───────────────── ROUTE GUARDS (MOVED ABOVE App) ───────────────── */
 
   /* ───────────────── ROUTES ───────────────── */
 
@@ -323,7 +325,7 @@ const App: React.FC = () => {
         <Route
           path="/confirm-payment"
           element={
-            <RequireAuth>
+            <RequireAuth user={user}>
               <ConfirmPaymentPage
                 onPaymentSuccess={handlePaymentSuccess}
                 onToggleTheme={toggleTheme}
@@ -337,7 +339,7 @@ const App: React.FC = () => {
         <Route
           path="/candidate/onboarding"
           element={
-            <RequireCandidate>
+            <RequireCandidate user={user}>
               <CandidateOnboarding
                 onOnboardingSuccess={handleOnboardingSuccess}
                 onToggleTheme={toggleTheme}
@@ -350,28 +352,28 @@ const App: React.FC = () => {
         <Route
           path="/candidate"
           element={
-            <RequireCandidate>
+            <RequireCandidate user={user}>
               <CandidateDashboard onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />
             </RequireCandidate>
           }
         />
 
         <Route path="/candidate/jobs" element={<JobsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />} />
-        <Route path="/candidate/campus" element={<RequireCandidate><CampusConnectPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
-        <Route path="/candidate/test" element={<RequireCandidate><CampusConnectTestPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
-        <Route path="/candidate/profile" element={<RequireCandidate><ProfilePage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
-        <Route path="/candidate/applications" element={<RequireCandidate><ApplicationsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
-        <Route path="/candidate/settings" element={<RequireCandidate><SettingsPage role="candidate" onToggleTheme={toggleTheme} isDarkMode={isDarkMode} onLogout={handleLogout} /></RequireCandidate>} />
+        <Route path="/candidate/campus" element={<RequireCandidate user={user}><CampusConnectPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
+        <Route path="/candidate/test" element={<RequireCandidate user={user}><CampusConnectTestPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
+        <Route path="/candidate/profile" element={<RequireCandidate user={user}><ProfilePage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
+        <Route path="/candidate/applications" element={<RequireCandidate user={user}><ApplicationsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
+        <Route path="/candidate/settings" element={<RequireCandidate user={user}><SettingsPage role="candidate" onToggleTheme={toggleTheme} isDarkMode={isDarkMode} onLogout={handleLogout} /></RequireCandidate>} />
 
         {/* RECRUITER */}
-        <Route path="/recruiter" element={<RequireRecruiter><RecruiterDashboard onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isPremium={user?.isPremium ?? false} /></RequireRecruiter>} />
-        <Route path="/recruiter/talent" element={<RequireRecruiter><TalentPipelinePage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireRecruiter>} />
-        <Route path="/recruiter/reports" element={<RequireRecruiter><RecruiterReportsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireRecruiter>} />
-        <Route path="/recruiter/settings" element={<RequireRecruiter><SettingsPage role="recruiter" onToggleTheme={toggleTheme} isDarkMode={isDarkMode} onLogout={handleLogout} /></RequireRecruiter>} />
-        <Route path="/post-job" element={<RequireRecruiter><PostJobPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isPremium={user?.isPremium ?? false} /></RequireRecruiter>} />
+        <Route path="/recruiter" element={<RequireRecruiter user={user}><RecruiterDashboard onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isPremium={user?.isPremium ?? false} /></RequireRecruiter>} />
+        <Route path="/recruiter/talent" element={<RequireRecruiter user={user}><TalentPipelinePage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireRecruiter>} />
+        <Route path="/recruiter/reports" element={<RequireRecruiter user={user}><RecruiterReportsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireRecruiter>} />
+        <Route path="/recruiter/settings" element={<RequireRecruiter user={user}><SettingsPage role="recruiter" onToggleTheme={toggleTheme} isDarkMode={isDarkMode} onLogout={handleLogout} /></RequireRecruiter>} />
+        <Route path="/post-job" element={<RequireRecruiter user={user}><PostJobPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isPremium={user?.isPremium ?? false} /></RequireRecruiter>} />
 
         {/* ADMIN */}
-        <Route path="/admin" element={<RequireAdmin><AdminPortal onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireAdmin>} />
+        <Route path="/admin" element={<RequireAdmin user={user}><AdminPortal onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireAdmin>} />
 
         {/* SHARED */}
         <Route path="/job/:id" element={<JobDetailsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />} />
