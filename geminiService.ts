@@ -873,3 +873,24 @@ export async function parseJobDescription(rawText: string) {
     return { status: "error", message: err.message || "Network request failed" };
   }
 }
+
+/* ================= CAMPUS CONNECT TEST ================= */
+
+export async function generateTestQuestions(skills: string[]) {
+  try {
+    const res = await fetch(`${API_BASE}/generate-test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ skills })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => null);
+      throw new Error(errData?.message || "Test generation failed with status " + res.status);
+    }
+    return await res.json();
+  } catch (err: any) {
+    console.error("[Asterix] Failed to generate test:", err);
+    return null;
+  }
+}

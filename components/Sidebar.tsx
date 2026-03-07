@@ -74,6 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired
     ? [
       { name: 'Dashboard', icon: 'dashboard', path: '/candidate' },
       { name: 'Jobs', icon: 'work', path: '/candidate/jobs' },
+      { name: 'Campus Connect', icon: 'school', path: '/candidate/campus' },
       { name: 'Profile', icon: 'person', path: '/candidate/profile' },
       { name: 'My Applications', icon: 'work_history', path: '/candidate/applications' },
       { name: 'Settings', icon: 'settings', path: '/candidate/settings' },

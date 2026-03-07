@@ -1349,6 +1349,79 @@ async def parse_jd(req: ParseJDRequest):
 
     return default_result
 
+# ================= CAMPUS CONNECT TEST GENERATION =================
+
+class GenerateTestRequest(BaseModel):
+    skills: List[str]
+
+@app.post("/generate-test")
+async def generate_test(req: GenerateTestRequest):
+    """Generate dynamic test questions based on user skills."""
+    if not req.skills:
+        return {"status": "error", "message": "At least one skill is required."}
+
+    skills_str = ", ".join(req.skills)
+    cache_key = f"gen_test:{hashlib.md5(skills_str.encode()).hexdigest()}"
+    
+    if cache_key in AI_RESPONSE_CACHE:
+        return AI_RESPONSE_CACHE[cache_key]
+
+    default_result = [
+        {"question": "What is 2 + 2?", "options": ["3", "4", "5", "6"], "answer": "4", "type": "aptitude", "difficulty": "easy"}
+    ]
+
+    if groq_client:
+        try:
+            prompt = f"""
+            You are an expert technical recruiter and assessor.
+            Generate a 52-question test for a candidate with the following skills: {skills_str}.
+            
+            The test must contain exactly:
+            - 25 Aptitude / Logical Reasoning multiple-choice questions
+            - 25 Technical multiple-choice questions focusing on the provided skills (mix of easy, medium, hard)
+            - 2 Coding questions focusing on the provided skills (require written code answers, not multiple choice)
+
+            Return ONLY a JSON object with a single key "questions" containing an array of exactly 52 objects.
+            
+            Structure for multiple-choice questions (the first 50):
+            {{
+                "question": "The question text",
+                "options": ["Option A", "Option B", "Option C", "Option D"],
+                "answer": "The exact string of the correct option",
+                "type": "aptitude or technical",
+                "difficulty": "easy, medium, or hard"
+            }}
+
+            Structure for coding questions (the final 2):
+            {{
+                "question": "The problem description and exact requirements...",
+                "options": [],
+                "answer": "",
+                "type": "coding",
+                "difficulty": "hard"
+            }}
+            
+            Return the JSON precisely like this:
+            {{ "questions": [ ... ] }}
+            """
+            
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            
+            import json
+            res = json.loads(completion.choices[0].message.content)
+            questions = res.get("questions", default_result)
+            
+            AI_RESPONSE_CACHE[cache_key] = questions
+            return questions
+        except Exception as e:
+            print(f"[Generate Test Error] LLM fallback: {e}")
+
+    return default_result
+
 # ================= RUN =================
 
 if __name__ == "__main__":

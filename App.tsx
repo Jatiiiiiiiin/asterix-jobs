@@ -28,6 +28,8 @@ import ContactPage from "./views/ContactPage";
 import PrivacyPage from "./views/PrivacyPage";
 import TermsPage from "./views/TermsPage";
 import AdminPortal from "./views/AdminPortal";
+import CampusConnectPage from "./views/CampusConnectPage";
+import CampusConnectTestPage from "./views/CampusConnectTestPage";
 import './App.css';
 
 /* Components */
@@ -355,6 +357,8 @@ const App: React.FC = () => {
         />
 
         <Route path="/candidate/jobs" element={<JobsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />} />
+        <Route path="/candidate/campus" element={<RequireCandidate><CampusConnectPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
+        <Route path="/candidate/test" element={<RequireCandidate><CampusConnectTestPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
         <Route path="/candidate/profile" element={<RequireCandidate><ProfilePage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
         <Route path="/candidate/applications" element={<RequireCandidate><ApplicationsPage onToggleTheme={toggleTheme} isDarkMode={isDarkMode} /></RequireCandidate>} />
         <Route path="/candidate/settings" element={<RequireCandidate><SettingsPage role="candidate" onToggleTheme={toggleTheme} isDarkMode={isDarkMode} onLogout={handleLogout} /></RequireCandidate>} />

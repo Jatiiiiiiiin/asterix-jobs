@@ -13,7 +13,10 @@ import {
     Search,
     ExternalLink,
     Trash2,
-    FileText
+    FileText,
+    School,
+    ShieldAlert,
+    Unlock
 } from "lucide-react";
 import { db, auth } from "../firebase";
 import {
@@ -24,12 +27,15 @@ import {
     onSnapshot,
     deleteDoc,
     doc,
-    serverTimestamp
+    setDoc,
+    serverTimestamp,
+    updateDoc
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../authService";
 import { LiveJob } from "../Jobservice";
 import { parseJobDescription } from "../geminiService";
+import { COLLEGES } from "../data/colleges";
 
 interface AdminPortalProps {
     onToggleTheme: () => void;
@@ -45,6 +51,8 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
     const [jobs, setJobs] = useState<LiveJob[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isPosting, setIsPosting] = useState(false);
+    const [activeTab, setActiveTab] = useState<'jobs' | 'codes' | 'blocked'>('jobs');
+    const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
 
     // AI Parsing State
     const [rawJD, setRawJD] = useState("");
@@ -83,6 +91,28 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
         });
         return unsub;
     }, []);
+
+    useEffect(() => {
+        const q = query(collection(db, "profiles"), where("isBlocked", "==", true));
+        const unsub = onSnapshot(q, (snap) => {
+            const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            setBlockedUsers(fetched);
+        });
+        return unsub;
+    }, []);
+
+    const handleUnblock = async (id: string) => {
+        if (window.confirm("Are you sure you want to unblock this user?")) {
+            try {
+                // Use setDoc with merge in case updateDoc has some field issues
+                await setDoc(doc(db, "profiles", id), { isBlocked: false }, { merge: true });
+                alert("Candidate unblocked successfully.");
+            } catch (err: any) {
+                console.error(err);
+                alert(`Failed to unblock: ${err.message}`);
+            }
+        }
+    };
 
     const handleLogout = async () => {
         await authService.logout();
@@ -527,84 +557,156 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                     </div>
                 </div>
 
-                {/* Jobs List */}
+                {/* Right Column: Content Area */}
                 <div className="lg:col-span-7 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <Briefcase className="w-6 h-6 text-indigo-600" />
-                            Active Admin Jobs ({jobs.length})
-                        </h2>
+                    {/* Tabs */}
+                    <div className="flex items-center gap-4 border-b border-gray-200 dark:border-slate-700 pb-2">
+                        <button
+                            onClick={() => setActiveTab('jobs')}
+                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'jobs' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                        >
+                            <Briefcase className="w-5 h-5" />
+                            Active Jobs ({jobs.length})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('codes')}
+                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'codes' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                        >
+                            <School className="w-5 h-5" />
+                            Campus Codes
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('blocked')}
+                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'blocked' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                        >
+                            <ShieldAlert className="w-5 h-5" />
+                            Blocked Candidates
+                        </button>
                     </div>
 
-                    {isLoading ? (
-                        <div className="space-y-4">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="h-32 bg-gray-200 dark:bg-slate-800 animate-pulse rounded-2xl" />
-                            ))}
-                        </div>
-                    ) : jobs.length === 0 ? (
-                        <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700">
-                            <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-500 dark:text-gray-400">No admin jobs posted yet.</p>
+                    {activeTab === 'jobs' ? (
+                        <>
+                            {isLoading ? (
+                                <div className="space-y-4">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="h-32 bg-gray-200 dark:bg-slate-800 animate-pulse rounded-2xl" />
+                                    ))}
+                                </div>
+                            ) : jobs.length === 0 ? (
+                                <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700">
+                                    <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500 dark:text-gray-400">No admin jobs posted yet.</p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-4">
+                                    {jobs.map(job => (
+                                        <div key={job.id} className="group bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all">
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex gap-4">
+                                                    <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                                                        <Building2 className="w-6 h-6 text-indigo-600" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{job.title}</h3>
+                                                        <p className="text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                                            {typeof job.company === 'string' ? job.company : job.company.name} • {typeof job.location === 'string' ? job.location : job.location.city}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <a
+                                                        href={job.externalUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg"
+                                                    >
+                                                        <ExternalLink className="w-5 h-5" />
+                                                    </a>
+                                                    <button
+                                                        onClick={() => handleDelete(job.id)}
+                                                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                                                    >
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400">
+                                                <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-slate-700 rounded-md">
+                                                    <Briefcase className="w-3 h-3" />
+                                                    {job.department}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <DollarSign className="w-4 h-4" />
+                                                    {job.salaryRange?.min} - {job.salaryRange?.max} {job.salaryRange?.currency}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <MapPin className="w-4 h-4" />
+                                                    {typeof job.location === 'string' ? job.location : job.location.type}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <FileText className="w-4 h-4" />
+                                                    {job.employmentType}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Plus className="w-3 h-3" />
+                                                    {job.openings} Openings
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    ) : activeTab === 'codes' ? (
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 dark:border-slate-700">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Campus Connect Access Codes</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Provide these securely generated 6-digit codes to placement officers.</p>
+                            </div>
+                            <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
+                                <table className="w-full text-left border-collapse">
+                                    <thead className="bg-gray-50 dark:bg-slate-900/50 sticky top-0 backdrop-blur-md">
+                                        <tr>
+                                            <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Institution Name</th>
+                                            <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Access Code</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                                        {COLLEGES.map((c, i) => (
+                                            <tr key={i} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{c.name}</td>
+                                                <td className="px-6 py-4 text-sm font-mono font-bold text-indigo-600 dark:text-indigo-400 text-right">{c.code}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     ) : (
-                        <div className="grid gap-4">
-                            {jobs.map(job => (
-                                <div key={job.id} className="group bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all">
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
-                                                <Building2 className="w-6 h-6 text-indigo-600" />
-                                            </div>
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 overflow-hidden">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Blocked Test Candidates</h3>
+                            {blockedUsers.length === 0 ? (
+                                <p className="text-gray-500 dark:text-gray-400">No blocked users found.</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {blockedUsers.map(user => (
+                                        <div key={user.id} className="flex justify-between items-center p-4 border border-gray-200 dark:border-slate-700 rounded-lg">
                                             <div>
-                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{job.title}</h3>
-                                                <p className="text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                                    {typeof job.company === 'string' ? job.company : job.company.name} • {typeof job.location === 'string' ? job.location : job.location.city}
-                                                </p>
+                                                <p className="font-bold text-gray-900 dark:text-white">{user.name || user.email || user.id}</p>
+                                                <p className="text-sm text-gray-500">{user.email || ""}</p>
                                             </div>
-                                        </div>
-                                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <a
-                                                href={job.externalUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg"
-                                            >
-                                                <ExternalLink className="w-5 h-5" />
-                                            </a>
                                             <button
-                                                onClick={() => handleDelete(job.id)}
-                                                className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                                                onClick={() => handleUnblock(user.id)}
+                                                className="flex items-center gap-2 px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-bold rounded-lg transition-colors text-sm"
                                             >
-                                                <Trash2 className="w-5 h-5" />
+                                                <Unlock className="w-4 h-4" />
+                                                Unblock
                                             </button>
                                         </div>
-                                    </div>
-
-                                    <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400">
-                                        <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-slate-700 rounded-md">
-                                            <Briefcase className="w-3 h-3" />
-                                            {job.department}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <DollarSign className="w-4 h-4" />
-                                            {job.salaryRange?.min} - {job.salaryRange?.max} {job.salaryRange?.currency}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <MapPin className="w-4 h-4" />
-                                            {typeof job.location === 'string' ? job.location : job.location.type}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <FileText className="w-4 h-4" />
-                                            {job.employmentType}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <Plus className="w-3 h-3" />
-                                            {job.openings} Openings
-                                        </span>
-                                    </div>
+                                    ))}
                                 </div>
-                            ))}
+                            )}
                         </div>
                     )}
                 </div>
