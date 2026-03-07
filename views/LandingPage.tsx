@@ -256,7 +256,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                   <span className="text-xl font-black leading-none tracking-tight">
                     {liveMembers !== null ? (liveMembers >= 1000 ? `${(liveMembers / 1000).toFixed(1)}K+` : `${liveMembers}+`) : '87K+'}
                   </span>
-                  <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">People Hired</span>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">People Connected</span>
                 </div>
               </div>
 
