@@ -316,7 +316,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
 
         {/* Save toast */}
         <div className={`fixed top-6 right-6 z-[500] transition-all duration-500 ${saveState === 'done' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
-          <div className="bg-emerald-500 text-white px-8 py-4 flex items-center gap-3 shadow-2xl">
+          <div className="bg-[#826BF0] text-white px-8 py-4 flex items-center gap-3 shadow-2xl">
             <span className="material-symbols-outlined text-lg animate-bounce">check_circle</span>
             <span className="text-[10px] font-black tracking-widest">Protocol Updated</span>
           </div>
@@ -392,7 +392,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                         <p className="text-sm font-black tracking-tight">{account.name || 'Unknown'}</p>
                         <p className="text-[10px] font-bold tracking-widest opacity-40">{account.email}</p>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[8px] font-black tracking-widest px-2 py-0.5 border border-emerald-500 text-emerald-500">LIVE SESSION</span>
+                          <span className="text-[8px] font-black tracking-widest px-2 py-0.5 border border-[#826BF0] text-[#826BF0]">LIVE SESSION</span>
                           {hasAccess && (
                             <span className="text-[8px] font-black tracking-widest px-2 py-0.5 border border-blue-400 text-blue-400">
                               {role === 'candidate' ? (isStudent ? 'STUDENT' : 'PREMIUM') : 'PRO'}
@@ -469,7 +469,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                   <h3 className="text-lg md:text-xl font-black tracking-widest border-b border-black/10 dark:border-white/10 pb-6">Billing Matrix</h3>
 
                   {/* Current plan card */}
-                  <div className={`p-8 md:p-12 space-y-4 ${hasAccess ? 'bg-emerald-500 text-white' : 'bg-black dark:bg-white text-white dark:text-black'}`}>
+                  <div className={`p-8 md:p-12 space-y-4 ${hasAccess ? 'bg-[#826BF0] text-white' : 'bg-black dark:bg-white text-white dark:text-black'}`}>
                     <p className="text-[9px] font-black tracking-widest opacity-60">Current Plan</p>
                     <p className="text-4xl md:text-5xl font-black tracking-tighter">
                       {hasAccess ? planConfig.paidName : planConfig.freeName}
@@ -497,11 +497,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                         <span className="text-[9px] font-black tracking-widest col-span-1">{f.label}</span>
                         <div className="flex justify-center">
                           {f.free
-                            ? <span className="material-symbols-outlined text-sm text-emerald-500">check</span>
+                            ? <span className="material-symbols-outlined text-sm text-[#826BF0]">check</span>
                             : <span className="material-symbols-outlined text-sm opacity-20">remove</span>}
                         </div>
                         <div className="flex justify-center">
-                          <span className="material-symbols-outlined text-sm text-emerald-500">check</span>
+                          <span className="material-symbols-outlined text-sm text-[#826BF0]">check</span>
                         </div>
                       </div>
                     ))}
@@ -527,12 +527,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                       </p>
                     </div>
                   ) : (
-                    <div className="p-6 border border-emerald-500/30 bg-emerald-500/5 flex items-center justify-between">
+                    <div className="p-6 border border-[#826BF0]/30 bg-[#826BF0]/5 flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="text-[9px] font-black tracking-widest text-emerald-500">Plan Active</p>
+                        <p className="text-[9px] font-black tracking-widest text-[#826BF0]">Plan Active</p>
                         <p className="text-[8px] font-bold tracking-widest opacity-40">Renews automatically · Manage via payment provider</p>
                       </div>
-                      <span className="material-symbols-outlined text-emerald-500">verified</span>
+                      <span className="material-symbols-outlined text-[#826BF0]">verified</span>
                     </div>
                   )}
                 </section>

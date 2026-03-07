@@ -124,7 +124,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerified }) => {
                         Verify Your Identity
                     </h1>
                     {userEmail && (
-                        <p className="text-[10px] font-black  tracking-widest text-emerald-500">
+                        <p className="text-[10px] font-black  tracking-widest text-[#826BF0]">
                             Sent to: {userEmail}
                         </p>
                     )}
@@ -146,7 +146,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerified }) => {
                 </div>
 
                 {message && (
-                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded text-[10px] font-black  tracking-widest text-green-700 dark:text-green-300">
+                    <div className="bg-[#826BF0]/10 dark:bg-[#826BF0]/20 border border-[#826BF0]/30 dark:border-[#826BF0]/50 p-4 rounded text-[10px] font-black  tracking-widest text-[#826BF0]">
                         {message}
                     </div>
                 )}

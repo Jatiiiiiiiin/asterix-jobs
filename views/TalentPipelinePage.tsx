@@ -47,14 +47,14 @@ const STAGES: { id: PipelineStage; label: string; sublabel: string; color: strin
   { id: 'shortlisted', label: 'Shortlisted', sublabel: 'New candidates', color: 'border-blue-500/40', accent: 'text-blue-400' },
   { id: 'interview', label: 'Interviewing', sublabel: 'Active discussions', color: 'border-amber-500/40', accent: 'text-amber-400' },
   { id: 'offer', label: 'Offer Stage', sublabel: 'Pending decisions', color: 'border-violet-500/40', accent: 'text-violet-400' },
-  { id: 'hired', label: 'Hired', sublabel: 'Confirmed hires', color: 'border-emerald-500/40', accent: 'text-emerald-400' },
+  { id: 'hired', label: 'Hired', sublabel: 'Confirmed hires', color: 'border-[#826BF0]/40', accent: 'text-[#826BF0]' },
 ];
 
 const STAGE_DOT: Record<PipelineStage, string> = {
   shortlisted: 'bg-blue-400',
   interview: 'bg-amber-400',
   offer: 'bg-violet-400',
-  hired: 'bg-emerald-400',
+  hired: 'bg-[#826BF0]',
 };
 
 /* ================= HELPERS ================= */
@@ -250,7 +250,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
   const byStage = (stage: PipelineStage) => candidates.filter(c => c.pipelineStage === stage);
 
   const scoreColor = (score: number) =>
-    score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-amber-400' : score > 0 ? 'text-red-400' : 'text-white/20';
+    score >= 80 ? 'text-[#826BF0]' : score >= 60 ? 'text-amber-400' : score > 0 ? 'text-red-400' : 'text-white/20';
 
   /* ================================================================
      RENDER
@@ -379,7 +379,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                           {/* Top row: avatar + name + score */}
                           <div className="flex items-start gap-3">
                             <div className={`size-9 shrink-0 flex items-center justify-center text-[11px] font-black border ${c.matchScore >= (60)
-                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                              ? 'bg-[#826BF0]/10 border-[#826BF0]/30 text-[#826BF0]'
                               : 'bg-white/5 border-white/10 text-white/40'
                               }`}>
                               {(c.name?.trim() || '?')[0].toUpperCase()}
@@ -407,7 +407,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                               {c.jobTitle}
                             </span>
                             {c.autoApplied && (
-                              <span className="text-[6px] font-black  tracking-widest text-emerald-400/70 border border-emerald-500/20 px-1.5 py-0.5">
+                              <span className="text-[6px] font-black  tracking-widest text-[#826BF0]/70 border border-[#826BF0]/20 px-1.5 py-0.5">
                                 Auto
                               </span>
                             )}
@@ -493,7 +493,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className={`size-14 flex items-center justify-center text-xl font-black border-2 ${selectedCandidate.matchScore >= 65
-                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                    ? 'bg-[#826BF0]/10 border-[#826BF0]/40 text-[#826BF0]'
                     : 'bg-white/5 border-white/10 text-white/30'
                     }`}>
                     {(selectedCandidate.name?.trim() || '?')[0].toUpperCase()}
@@ -619,7 +619,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedCandidate.skills.map(s => (
-                      <span key={s} className="text-[8px] font-black  tracking-widest px-3 py-1.5 border border-white/10 text-white/50 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors">
+                      <span key={s} className="text-[8px] font-black  tracking-widest px-3 py-1.5 border border-white/10 text-white/50 hover:border-[#826BF0]/50 hover:text-[#826BF0] transition-colors">
                         {s}
                       </span>
                     ))}
@@ -634,7 +634,7 @@ const TalentPipelinePage: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   </h4>
                   <div className="space-y-5">
                     {selectedCandidate.experience.map((exp, i) => (
-                      <div key={i} className="border-l-2 border-white/10 pl-4 space-y-1 hover:border-emerald-500/40 transition-colors">
+                      <div key={i} className="border-l-2 border-white/10 pl-4 space-y-1 hover:border-[#826BF0]/40 transition-colors">
                         {exp.date && <p className="text-[7px] font-black  tracking-widest text-white/25">{exp.date}</p>}
                         <p className="text-sm font-black  tracking-tight">
                           {exp.role}<span className="text-white/30 font-medium mx-2">@</span>{exp.co}

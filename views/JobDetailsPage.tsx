@@ -238,7 +238,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
               <div className="lg:col-span-8 space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="bg-emerald-500 text-white px-2 py-0.5 text-[7px] font-black tracking-widest">
+                  <span className="bg-[#826BF0] text-white px-2 py-0.5 text-[7px] font-black tracking-widest">
                     {job?.department ?? 'Priority Recruitment'}
                   </span>
                   <span className="text-[7px] font-black tracking-widest opacity-40">
@@ -270,7 +270,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                 </div>
               </div>
               <div className="lg:col-span-4 flex flex-col items-start lg:items-end gap-1">
-                <div className="text-4xl md:text-5xl lg:text-6xl font-black leading-none text-emerald-500 tracking-tighter">
+                <div className="text-4xl md:text-5xl lg:text-6xl font-black leading-none text-[#826BF0] tracking-tighter">
                   {job?.matchScore ?? 0}%
                 </div>
                 <div className="text-[8px] md:text-[9px] font-black tracking-[0.3em] opacity-40 lg:text-right">
@@ -301,7 +301,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                   <ul className="space-y-3">
                     {job.responsibilities.map((item: string, i: number) => (
                       <li key={i} className="flex gap-3 items-start">
-                        <span className="text-emerald-500 font-black text-xs shrink-0 mt-1">→</span>
+                        <span className="text-[#826BF0] font-black text-xs shrink-0 mt-1">→</span>
                         <span className="text-sm md:text-base font-medium tracking-tight leading-relaxed">{item ?? ''}</span>
                       </li>
                     ))}
@@ -323,7 +323,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                       <div key={tag} className="bg-white dark:bg-[#0c0c0c] border border-black dark:border-white/10 p-5 md:p-6 space-y-6 group hover:border-black dark:hover:border-white transition-all shadow-sm">
                         <div className="flex justify-between items-start gap-3">
                           <h4 className="text-xl md:text-2xl font-black tracking-tighter leading-none break-words">{tag ?? ''}</h4>
-                          <span className="material-symbols-outlined text-lg opacity-20 group-hover:opacity-100 group-hover:text-emerald-500 transition-all shrink-0">shield_with_heart</span>
+                          <span className="material-symbols-outlined text-lg opacity-20 group-hover:opacity-100 group-hover:text-[#826BF0] transition-all shrink-0">shield_with_heart</span>
                         </div>
                         <div className="space-y-3">
                           <div className="flex justify-between items-end">
@@ -331,7 +331,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                             <span className="text-xs md:text-sm font-black">{score ?? 0}%</span>
                           </div>
                           <div className="w-full h-[2px] bg-black/5 dark:bg-white/5 relative">
-                            <div className={`h-full transition-all duration-1000 ease-out ${(score ?? 0) > 70 ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'bg-amber-500'}`} style={{ width: `${score ?? 0}%` }}></div>
+                            <div className={`h-full transition-all duration-1000 ease-out ${(score ?? 0) > 70 ? 'bg-[#826BF0] shadow-[0_0_8px_rgba(130,107,240,0.3)]' : 'bg-amber-500'}`} style={{ width: `${score ?? 0}%` }}></div>
                           </div>
                         </div>
                       </div>
@@ -401,7 +401,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               )}
 
               <div className="bg-black text-white dark:bg-white dark:text-black p-6 space-y-6 shadow-2xl">
-                <div className="flex items-center gap-3 text-emerald-500">
+                <div className="flex items-center gap-3 text-[#826BF0]">
                   <span className="material-symbols-outlined animate-pulse text-lg">insights</span>
                   <h4 className="text-[8px] font-black tracking-[0.3em]">Audit Intelligence</h4>
                 </div>
@@ -427,7 +427,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                   <div className="space-y-2">
                     {job.benefits.map((benefit: string, i: number) => (
                       <div key={i} className="flex items-center gap-2 border border-black/10 dark:border-white/10 p-3">
-                        <span className="material-symbols-outlined text-emerald-500 text-sm">check_circle</span>
+                        <span className="material-symbols-outlined text-[#826BF0] text-sm">check_circle</span>
                         <span className="text-[9px] md:text-[10px] font-black tracking-wide">{benefit ?? ''}</span>
                       </div>
                     ))}
@@ -439,8 +439,8 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                 <h4 className="text-[8px] font-black tracking-[0.3em] opacity-40">Vetting Checklist</h4>
                 <div className="space-y-3">
                   {['Review Case Study', 'Validate Tech Stack', 'Company Research'].map(item => (
-                    <div key={item} onClick={() => toggleCheck(item)} className={`flex items-center gap-3 group cursor-pointer border border-black/5 dark:border-white/5 p-3 transition-all ${checkedItems[item] ? 'bg-emerald-500/5 border-emerald-500' : 'hover:bg-black/5'}`}>
-                      <div className={`size-5 border border-black dark:border-white flex items-center justify-center transition-all shrink-0 ${checkedItems[item] ? 'bg-emerald-500 border-emerald-500' : 'opacity-20'}`}>
+                    <div key={item} onClick={() => toggleCheck(item)} className={`flex items-center gap-3 group cursor-pointer border border-black/5 dark:border-white/5 p-3 transition-all ${checkedItems[item] ? 'bg-[#826BF0]/5 border-[#826BF0]' : 'hover:bg-black/5'}`}>
+                      <div className={`size-5 border border-black dark:border-white flex items-center justify-center transition-all shrink-0 ${checkedItems[item] ? 'bg-[#826BF0] border-[#826BF0]' : 'opacity-20'}`}>
                         {checkedItems[item] && <span className="material-symbols-outlined text-white text-sm font-bold">check</span>}
                       </div>
                       <span className={`text-[9px] md:text-[10px] font-black tracking-widest ${checkedItems[item] ? 'opacity-100' : 'opacity-40'}`}>{item}</span>
@@ -469,7 +469,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-6 flex-1 min-w-0">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[7px] font-black tracking-[0.25em] opacity-40">Salary Range</span>
-                  <span className="text-[9px] md:text-[10px] font-black text-emerald-500">{formatSalary()}</span>
+                  <span className="text-[9px] md:text-[10px] font-black text-[#826BF0]">{formatSalary()}</span>
                 </div>
                 <div className="hidden sm:block h-8 w-px bg-black/10 dark:bg-white/10 shrink-0"></div>
                 <div className="flex flex-col gap-0.5 overflow-hidden flex-1 min-w-0">
@@ -497,7 +497,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                   <button
                     disabled
                     className={`flex-1 lg:flex-none px-8 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider text-white cursor-default shadow-lg flex items-center justify-center gap-2
-                      ${job.isAdminPosted ? 'bg-indigo-600' : 'bg-emerald-500'}`}
+                      ${job.isAdminPosted ? 'bg-[#826BF0]' : 'bg-[#826BF0]'}`}
                   >
                     <span className="material-symbols-outlined text-sm">check_circle</span>
                     {job.isAdminPosted ? 'Applied' : 'Synced'}
@@ -505,7 +505,7 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                 ) : job.isAdminPosted && job.externalUrl ? (
                   <button
                     onClick={handleApply}
-                    className="flex-1 lg:flex-none px-12 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider bg-indigo-600 text-white hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg"
+                    className="flex-1 lg:flex-none px-12 py-2.5 text-[8px] md:text-[9px] font-black tracking-wider bg-[#826BF0] text-white hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg"
                   >
                     <span className="material-symbols-outlined text-sm">external_link</span>
                     Apply on External Site

@@ -244,7 +244,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
             {/* Header */}
             <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-600 rounded-lg">
+                    <div className="p-2 bg-[#826BF0] rounded-lg">
                         <Globe className="w-5 h-5 text-white" />
                     </div>
                     <h1 className="text-xl font-bold text-gray-900 dark:text-white">Asterix Admin</h1>
@@ -272,27 +272,27 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                 <div className="lg:col-span-5">
                     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
                         <div className="flex items-center gap-2 mb-6">
-                            <Plus className="w-5 h-5 text-indigo-600" />
+                            <Plus className="w-5 h-5 text-[#826BF0]" />
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Post Admin Job</h2>
                         </div>
 
                         {/* AI Auto-Fill Section */}
-                        <div className="mb-8 p-5 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/50 rounded-xl space-y-4">
-                            <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-400 flex items-center gap-2">
+                        <div className="mb-8 p-5 bg-[#826BF0]/10 dark:bg-[#826BF0]/5 border border-[#826BF0]/20 dark:border-[#826BF0]/20 rounded-xl space-y-4">
+                            <h3 className="text-sm font-bold text-[#826BF0] flex items-center gap-2">
                                 <Sun className="w-4 h-4" /> AI Auto-Fill
                             </h3>
                             <textarea
                                 rows={4}
                                 value={rawJD}
                                 onChange={e => setRawJD(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg border border-indigo-200 dark:border-indigo-800/50 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm placeholder:text-gray-400"
+                                className="w-full px-4 py-3 rounded-lg border border-[#826BF0]/20 dark:border-[#826BF0]/20 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none text-sm placeholder:text-gray-400"
                                 placeholder='Paste whole "About the Role" or Job Description here to auto-fill fields...'
                             />
                             <button
                                 type="button"
                                 onClick={handleParseJD}
                                 disabled={isParsing || !rawJD.trim()}
-                                className="w-full bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 text-sm"
+                                className="w-full bg-[#826BF0]/10 hover:bg-[#826BF0]/20 dark:bg-[#826BF0]/20 dark:hover:bg-[#826BF0]/30 text-[#826BF0] font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 text-sm"
                             >
                                 {isParsing ? "Extracting Details..." : "Extract & Auto-Fill Fields"}
                             </button>
@@ -309,7 +309,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         type="text"
                                         value={formData.title}
                                         onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         placeholder="Senior Software Engineer"
                                     />
                                 </div>
@@ -319,7 +319,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         <select
                                             value={formData.department}
                                             onChange={e => setFormData({ ...formData, department: e.target.value })}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         >
                                             {DEPARTMENTS.map(d => <option key={d}>{d}</option>)}
                                         </select>
@@ -329,7 +329,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         <select
                                             value={formData.employmentType}
                                             onChange={e => setFormData({ ...formData, employmentType: e.target.value })}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         >
                                             {EMP_TYPES.map(t => <option key={t}>{t}</option>)}
                                         </select>
@@ -342,7 +342,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                             type="text"
                                             value={formData.experienceRequired}
                                             onChange={e => setFormData({ ...formData, experienceRequired: e.target.value })}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                             placeholder="3-5 years"
                                         />
                                     </div>
@@ -352,7 +352,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                             type="number"
                                             value={formData.openings}
                                             onChange={e => setFormData({ ...formData, openings: e.target.value })}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         />
                                     </div>
                                 </div>
@@ -368,7 +368,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         type="text"
                                         value={formData.companyName}
                                         onChange={e => setFormData({ ...formData, companyName: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         placeholder="Google"
                                     />
                                 </div>
@@ -380,7 +380,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                             type="text"
                                             value={formData.city}
                                             onChange={e => setFormData({ ...formData, city: e.target.value })}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                             placeholder="Bangalore"
                                         />
                                     </div>
@@ -389,7 +389,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         <select
                                             value={formData.type}
                                             onChange={e => setFormData({ ...formData, type: e.target.value })}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         >
                                             <option>On-site</option>
                                             <option>Remote</option>
@@ -404,7 +404,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         type="url"
                                         value={formData.externalUrl}
                                         onChange={e => setFormData({ ...formData, externalUrl: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         placeholder="https://..."
                                     />
                                 </div>
@@ -420,7 +420,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                             type="number"
                                             value={formData.salaryMin}
                                             onChange={e => setFormData({ ...formData, salaryMin: e.target.value })}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         />
                                     </div>
                                     <div>
@@ -429,7 +429,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                             type="number"
                                             value={formData.salaryMax}
                                             onChange={e => setFormData({ ...formData, salaryMax: e.target.value })}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         />
                                     </div>
                                     <div>
@@ -437,7 +437,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         <select
                                             value={formData.currency}
                                             onChange={e => setFormData({ ...formData, currency: e.target.value })}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         >
                                             {CURRENCIES.map(c => <option key={c}>{c}</option>)}
                                         </select>
@@ -455,7 +455,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         type="text"
                                         value={formData.requiredSkills}
                                         onChange={e => setFormData({ ...formData, requiredSkills: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         placeholder="React, TypeScript, Node.js"
                                     />
                                 </div>
@@ -465,7 +465,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         type="text"
                                         value={formData.preferredSkills}
                                         onChange={e => setFormData({ ...formData, preferredSkills: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         placeholder="GraphQL, Docker"
                                     />
                                 </div>
@@ -475,7 +475,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         type="text"
                                         value={formData.techStack}
                                         onChange={e => setFormData({ ...formData, techStack: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         placeholder="AWS, PostgreSQL"
                                     />
                                 </div>
@@ -491,7 +491,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         rows={3}
                                         value={formData.jobSummary}
                                         onChange={e => setFormData({ ...formData, jobSummary: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
                                         placeholder="High-level overview..."
                                     />
                                 </div>
@@ -532,7 +532,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                 <div>
                                     <div className="flex justify-between items-center mb-1">
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Match Threshold</label>
-                                        <span className="text-sm font-bold text-indigo-600">{formData.matchThreshold}%</span>
+                                        <span className="text-sm font-bold text-[#826BF0]">{formData.matchThreshold}%</span>
                                     </div>
                                     <input
                                         type="range"
@@ -541,7 +541,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         step="5"
                                         value={formData.matchThreshold}
                                         onChange={e => setFormData({ ...formData, matchThreshold: parseInt(e.target.value) })}
-                                        className="w-full h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                        className="w-full h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#826BF0]"
                                     />
                                 </div>
                             </div>
@@ -549,7 +549,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                             <button
                                 disabled={isPosting}
                                 type="submit"
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 rounded-xl transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="w-full bg-[#826BF0] hover:bg-[#826BF0]/90 text-white font-semibold py-4 rounded-xl transition-all shadow-lg shadow-[#826BF0]/20 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {isPosting ? "Publishing Protocol..." : "Activate Admin Listing"}
                             </button>
@@ -563,21 +563,21 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                     <div className="flex items-center gap-4 border-b border-gray-200 dark:border-slate-700 pb-2">
                         <button
                             onClick={() => setActiveTab('jobs')}
-                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'jobs' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'jobs' ? 'text-[#826BF0] border-[#826BF0]' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
                         >
                             <Briefcase className="w-5 h-5" />
                             Active Jobs ({jobs.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('codes')}
-                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'codes' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'codes' ? 'text-[#826BF0] border-[#826BF0]' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
                         >
                             <School className="w-5 h-5" />
                             Campus Codes
                         </button>
                         <button
                             onClick={() => setActiveTab('blocked')}
-                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'blocked' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'blocked' ? 'text-[#826BF0] border-[#826BF0]' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
                         >
                             <ShieldAlert className="w-5 h-5" />
                             Blocked Candidates
@@ -604,7 +604,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                             <div className="flex justify-between items-start">
                                                 <div className="flex gap-4">
                                                     <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
-                                                        <Building2 className="w-6 h-6 text-indigo-600" />
+                                                        <Building2 className="w-6 h-6 text-[#826BF0]" />
                                                     </div>
                                                     <div>
                                                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">{job.title}</h3>
@@ -618,7 +618,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                                         href={job.externalUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg"
+                                                        className="p-2 text-[#826BF0] hover:bg-[#826BF0]/10 dark:hover:bg-[#826BF0]/20 rounded-lg"
                                                     >
                                                         <ExternalLink className="w-5 h-5" />
                                                     </a>
@@ -676,7 +676,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                         {COLLEGES.map((c, i) => (
                                             <tr key={i} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
                                                 <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{c.name}</td>
-                                                <td className="px-6 py-4 text-sm font-mono font-bold text-indigo-600 dark:text-indigo-400 text-right">{c.code}</td>
+                                                <td className="px-6 py-4 text-sm font-mono font-bold text-[#826BF0] dark:text-[#826BF0]/80 text-right">{c.code}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -698,7 +698,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                             </div>
                                             <button
                                                 onClick={() => handleUnblock(user.id)}
-                                                className="flex items-center gap-2 px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-bold rounded-lg transition-colors text-sm"
+                                                className="flex items-center gap-2 px-4 py-2 bg-[#826BF0]/10 hover:bg-[#826BF0]/20 text-[#826BF0] font-bold rounded-lg transition-colors text-sm"
                                             >
                                                 <Unlock className="w-4 h-4" />
                                                 Unblock

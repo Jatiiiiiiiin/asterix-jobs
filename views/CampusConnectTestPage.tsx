@@ -253,7 +253,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
 
                     <div className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-8 md:p-12 shadow-2xl">
                         <div className="flex items-center gap-4 mb-8 border-b border-slate-200 dark:border-slate-700 pb-6">
-                            <Monitor className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
+                            <Monitor className="w-10 h-10 text-[#826BF0]" />
                             <h1 className="text-3xl font-black tracking-tighter">Proctored Assessment Setup</h1>
                         </div>
 
@@ -270,21 +270,21 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                                         <span className="text-sm font-medium">Do not switch tabs or windows. More than 2 tab switches will result in immediate termination.</span>
                                     </li>
                                     <li className="flex gap-3">
-                                        <Video className="w-5 h-5 text-indigo-500 shrink-0" />
+                                        <Video className="w-5 h-5 text-[#826BF0] shrink-0" />
                                         <span className="text-sm font-medium">Your camera and microphone must remain on and unobstructed.</span>
                                     </li>
                                 </ul>
 
                                 <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
                                     {hasPermissions ? (
-                                        <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50">
+                                        <div className="flex items-center gap-3 text-[#826BF0] p-4 bg-[#826BF0]/5 border border-[#826BF0]/20">
                                             <CheckCircle className="w-5 h-5" />
                                             <span className="text-sm font-bold">Hardware verified. You are ready.</span>
                                         </div>
                                     ) : (
                                         <button
                                             onClick={requestPermissions}
-                                            className="w-full flex items-center justify-center gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:invert transition-colors p-4 font-black tracking-widest uppercase text-sm"
+                                            className="w-full flex items-center justify-center gap-3 bg-[#826BF0] text-white hover:invert transition-colors p-4 font-black tracking-widest uppercase text-sm"
                                         >
                                             <Mic className="w-4 h-4" /> <Video className="w-4 h-4" />
                                             Grant Camera & Mic Access
@@ -330,9 +330,9 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
     if (testPhase === 'loading') {
         return (
             <div className="flex h-screen w-screen bg-slate-900 text-white flex-col items-center justify-center p-6 text-center z-50 fixed inset-0">
-                <div className="animate-spin w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full mb-8" />
+                <div className="animate-spin w-16 h-16 border-4 border-[#826BF0] border-t-transparent rounded-full mb-8" />
                 <h2 className="text-2xl font-black tracking-widest uppercase">Initializing Neural Sequence</h2>
-                <p className="text-indigo-400 mt-4 font-medium tracking-wide">Compiling custom questions based on your profile skills...</p>
+                <p className="border-[#826BF0] mt-4 font-medium tracking-wide">Compiling custom questions based on your profile skills...</p>
             </div>
         );
     }
@@ -340,12 +340,12 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
     if (testPhase === 'completed') {
         return (
             <div className="flex h-screen w-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white flex-col items-center justify-center p-6 text-center">
-                <CheckCircle className="w-24 h-24 text-emerald-500 mb-6" />
-                <h1 className="text-4xl font-black tracking-tighter mb-4 uppercase text-emerald-600 dark:text-emerald-400">Test Submitted</h1>
+                <CheckCircle className="w-24 h-24 text-[#826BF0] mb-6" />
+                <h1 className="text-4xl font-black tracking-tighter mb-4 uppercase text-[#826BF0]">Test Submitted</h1>
 
                 <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 my-8 w-full max-w-sm">
                     <p className="text-sm font-black tracking-widest opacity-50 mb-2 uppercase">Your Final Score</p>
-                    <p className="text-6xl font-black text-indigo-600 dark:text-indigo-400">{score} <span className="text-2xl opacity-50">/ {questions.length}</span></p>
+                    <p className="text-6xl font-black text-[#826BF0]">{score} <span className="text-2xl opacity-50">/ {questions.length}</span></p>
                 </div>
 
                 <p className="text-sm font-medium tracking-widest opacity-80 mb-8 max-w-md">
@@ -370,7 +370,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
             {/* Header Toolbar */}
             <header className="flex justify-between items-center px-6 py-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-4">
-                    <Monitor className="w-6 h-6 text-indigo-600" />
+                    <Monitor className="w-6 h-6 text-[#826BF0]" />
                     <span className="text-sm font-black tracking-widest uppercase">Proctored Assessment</span>
                 </div>
 
@@ -407,7 +407,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                     {/* Progress Indicators */}
                     <div className="flex justify-between items-end mb-8 border-b border-slate-200 dark:border-slate-800 pb-4">
                         <div>
-                            <span className="text-[10px] font-black tracking-[0.2em] text-indigo-600 dark:text-indigo-400 uppercase">
+                            <span className="text-[10px] font-black tracking-[0.2em] text-[#826BF0] uppercase">
                                 Question {currentIndex + 1} of {questions.length}
                             </span>
                             <div className="flex gap-2 mt-2">
@@ -419,7 +419,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                             <span className="text-xs font-bold opacity-40 uppercase tracking-widest">Total Progress</span>
                             <div className="w-32 h-1.5 bg-slate-200 dark:bg-slate-800 mt-2 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-indigo-600 transition-all duration-300"
+                                    className="h-full bg-[#826BF0] transition-all duration-300"
                                     style={{ width: `${((currentIndex) / questions.length) * 100}%` }}
                                 />
                             </div>
@@ -437,7 +437,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                                 <textarea
                                     value={answers[currentIndex] || ''}
                                     onChange={(e) => setAnswers(prev => ({ ...prev, [currentIndex]: e.target.value }))}
-                                    className="w-full h-full p-4 border-2 border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-200 font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none custom-scrollbar"
+                                    className="w-full h-full p-4 border-2 border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-200 font-mono text-sm focus:ring-2 focus:ring-[#826BF0] focus:border-[#826BF0] outline-none resize-none custom-scrollbar"
                                     placeholder="Write your code solution here in any language..."
                                 />
                             </div>
@@ -450,12 +450,12 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                                             key={i}
                                             onClick={() => handleAnswer(opt)}
                                             className={`w-full text-left p-4 border-2 transition-all group relative overflow-hidden ${isSelected
-                                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 shadow-md'
-                                                : 'border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-900'
+                                                ? 'border-[#826BF0] bg-[#826BF0]/5 shadow-md'
+                                                : 'border-slate-200 dark:border-slate-800 hover:border-[#826BF0]/40 dark:hover:border-[#826BF0]/60 hover:bg-slate-50 dark:hover:bg-slate-900'
                                                 }`}
                                         >
                                             <div className="flex gap-4">
-                                                <div className={`w-5 h-5 mt-0.5 shrink-0 border-2 rounded-full flex items-center justify-center transition-colors ${isSelected ? 'border-indigo-600 bg-indigo-600' : 'border-slate-400 dark:border-slate-600 group-hover:border-indigo-400'
+                                                <div className={`w-5 h-5 mt-0.5 shrink-0 border-2 rounded-full flex items-center justify-center transition-colors ${isSelected ? 'border-[#826BF0] bg-[#826BF0]' : 'border-slate-400 dark:border-slate-600 group-hover:border-[#826BF0]/40'
                                                     }`}>
                                                     {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                                                 </div>
@@ -480,7 +480,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                         <button
                             onClick={handleNext}
                             disabled={!answers[currentIndex]}
-                            className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-12 py-4 font-black tracking-widest uppercase hover:invert transition-colors disabled:opacity-30 disabled:hover:invert-0"
+                            className="bg-[#826BF0] text-white px-12 py-4 font-black tracking-widest uppercase hover:invert transition-colors disabled:opacity-30 disabled:hover:invert-0"
                         >
                             {currentIndex < questions.length - 1 ? 'Save & Next' : 'Submit Final Test'}
                         </button>
@@ -500,10 +500,10 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                                     key={idx}
                                     onClick={() => setCurrentIndex(idx)}
                                     className={`w-12 h-12 flex items-center justify-center text-sm font-black rounded-lg transition-all ${isCurrent
-                                        ? 'bg-indigo-600 text-white ring-4 ring-indigo-600/30 border-none'
+                                        ? 'bg-[#826BF0] text-white ring-4 ring-[#826BF0]/30 border-none'
                                         : isAnswered
-                                            ? 'bg-emerald-500 text-white border-none'
-                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-400'
+                                            ? 'bg-[#826BF0]/60 text-white border-none'
+                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-[#826BF0]/40'
                                         }`}
                                 >
                                     {idx + 1}
@@ -514,7 +514,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
 
                     <div className="mt-auto space-y-4 pt-6 pb-4 border-t border-slate-200 dark:border-slate-800">
                         <div className="flex items-center gap-3">
-                            <div className="w-4 h-4 bg-emerald-500 rounded" />
+                            <div className="w-4 h-4 bg-[#826BF0]/60 rounded" />
                             <span className="text-xs font-semi-bold opacity-70 tracking-wide">Answered</span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -522,7 +522,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                             <span className="text-xs font-semi-bold opacity-70 tracking-wide">Unanswered</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="w-4 h-4 bg-indigo-600 rounded" />
+                            <div className="w-4 h-4 bg-[#826BF0] rounded" />
                             <span className="text-xs font-semi-bold opacity-70 tracking-wide">Current Question</span>
                         </div>
 
@@ -533,7 +533,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                                         submitTest();
                                     }
                                 }}
-                                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 font-black tracking-widest uppercase hover:invert transition-colors"
+                                className="w-full bg-[#826BF0] text-white py-4 font-black tracking-widest uppercase hover:invert transition-colors"
                             >
                                 Submit Test
                             </button>

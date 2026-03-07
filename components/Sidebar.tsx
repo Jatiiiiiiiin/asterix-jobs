@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
 import { authService, AuthUser } from '../authService';
 import { usePlan } from '../usePlan';
+import BrandLogo from './BrandLogo';
 import '../App.css';
 
 
@@ -13,9 +14,10 @@ interface SidebarProps {
   onClose?: () => void;
   onAuthRequired?: () => void;
   onTutorialJobsClick?: () => void;
+  isDarkMode?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired, onTutorialJobsClick }) => {
+const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired, onTutorialJobsClick, isDarkMode }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -109,9 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired
         {/* Brand */}
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 px-2" onClick={onClose}>
-            <div className="bg-black dark:bg-white size-10 flex items-center justify-center text-white dark:text-black">
-              <span className="material-symbols-outlined text-2xl">auto_awesome</span>
-            </div>
+            <BrandLogo isDarkMode={isDarkMode} className="size-10" />
             <div className="flex flex-col">
               <h1 className="text-black dark:text-white text-base font-black tracking-tighter">Asterix</h1>
               <p className="text-black/60 dark:text-white/60 text-[10px] font-bold tracking-widest">
@@ -144,7 +144,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired
                 </span>
               )}
               {isPremium && !isStudent && (
-                <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 text-[9px] font-black tracking-widest">
+                <span className="bg-[#826BF0]/10 dark:bg-[#826BF0]/20 text-[#826BF0] px-2 py-1 text-[9px] font-black tracking-widest">
                   Premium
                 </span>
               )}
@@ -161,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired
             )}
 
             {hasAccess && plan !== 'free' && (
-              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-2 text-[#826BF0]">
                 <span className="material-symbols-outlined text-sm">check_circle</span>
                 <span className="text-[9px] font-black tracking-widest">Full access active</span>
               </div>
@@ -204,7 +204,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose, onAuthRequired
             )}
 
             {hasAccess && (
-              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-2 text-[#826BF0]">
                 <span className="material-symbols-outlined text-sm">check_circle</span>
                 <span className="text-[9px] font-black tracking-widest">Pro access active</span>
               </div>

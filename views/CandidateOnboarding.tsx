@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { readSessionUid } from '../authService';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import BrandLogo from '../components/BrandLogo';
 import '../App.css';
 
 
@@ -143,9 +144,7 @@ export default function CandidateOnboarding({
       {/* Header */}
       <header className="px-6 md:px-12 py-8 border-b border-black dark:border-white/10 flex items-center justify-between sticky top-0 bg-white/90 dark:bg-background-dark/90 backdrop-blur-xl z-50">
         <div className="flex items-center gap-4">
-          <div className="bg-black dark:bg-white size-10 flex items-center justify-center text-white dark:text-black">
-            <span className="material-symbols-outlined font-black">auto_awesome</span>
-          </div>
+          <BrandLogo isDarkMode={isDarkMode} className="size-10" />
           <h2 className="text-2xl font-black tracking-tighter">Get Started</h2>
         </div>
         <div className="hidden md:flex gap-4">
@@ -170,7 +169,7 @@ export default function CandidateOnboarding({
 
           {/* Progress */}
           <div className="w-full h-1 bg-black/5 dark:bg-white/5 relative">
-            <div className="absolute h-full bg-emerald-500 transition-all duration-700" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
+            <div className="absolute h-full bg-[#826BF0] transition-all duration-700" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
           </div>
 
           {/* Error */}
@@ -281,7 +280,7 @@ export default function CandidateOnboarding({
                 )}
 
                 {form.skills.length > 0 && (
-                  <p className="text-[9px] font-black tracking-widest text-emerald-500">
+                  <p className="text-[9px] font-black tracking-widest text-[#826BF0]">
                     {form.skills.length} skill{form.skills.length !== 1 ? 's' : ''} selected
                   </p>
                 )}
@@ -383,7 +382,7 @@ export default function CandidateOnboarding({
                   <h3 className="text-4xl md:text-6xl font-black tracking-tighter">05 / Review</h3>
                   <p className="text-xs font-bold tracking-widest opacity-40">Check your info before saving.</p>
                 </div>
-                <div className="border-2 border-emerald-500/30 p-8 bg-black/5 dark:bg-white/5 space-y-6">
+                <div className="border-2 border-[#826BF0]/30 p-8 bg-black/5 dark:bg-white/5 space-y-6">
                   <div className="grid grid-cols-2 gap-6 text-sm">
                     {[
                       ['Name', form.name],
@@ -431,7 +430,7 @@ export default function CandidateOnboarding({
                   type="button"
                   onClick={finalizeOnboarding}
                   disabled={saving}
-                  className="bg-emerald-500 text-white px-12 py-5 text-[10px] font-black tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl disabled:opacity-50 disabled:scale-100 flex items-center gap-2"
+                  className="bg-[#826BF0] text-white px-12 py-5 text-[10px] font-black tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl disabled:opacity-50 disabled:scale-100 flex items-center gap-2"
                 >
                   {saving ? (
                     <>

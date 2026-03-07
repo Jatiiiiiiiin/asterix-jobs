@@ -37,16 +37,16 @@ const STAGE_LABELS: Record<ApplicationStage, string> = {
   submitted: 'Applied',
   reviewing: 'Reviewing',
   interview: 'Interview',
-  offer:     'Offered',
-  rejected:  'Rejected',
+  offer: 'Offered',
+  rejected: 'Rejected',
 };
 
 const STAGE_ICON: Record<ApplicationStage, string> = {
   submitted: 'send',
   reviewing: 'manage_search',
   interview: 'people',
-  offer:     'handshake',
-  rejected:  'cancel',
+  offer: 'handshake',
+  rejected: 'cancel',
 };
 
 function daysSince(dateStr: string | Timestamp | undefined): number {
@@ -61,25 +61,25 @@ function daysSince(dateStr: string | Timestamp | undefined): number {
 function timeAgo(ts: Timestamp | undefined): string {
   if (!ts) return '—';
   const secs = Math.floor((Date.now() - ts.toDate().getTime()) / 1000);
-  if (secs < 60)    return `${secs}s ago`;
-  if (secs < 3600)  return `${Math.floor(secs / 60)}m ago`;
+  if (secs < 60) return `${secs}s ago`;
+  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
   if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
   return `${Math.floor(secs / 86400)}d ago`;
 }
 
 function activityIcon(app: LiveApplication): { icon: string; color: string } {
-  if (app.stage === 'offer')     return { icon: 'handshake',     color: 'text-emerald-500' };
-  if (app.stage === 'rejected')  return { icon: 'person_remove', color: 'text-red-500'     };
-  if (app.stage === 'interview') return { icon: 'people',        color: 'text-blue-400'    };
-  if (app.aiApplied)             return { icon: 'auto_awesome',  color: 'text-purple-400'  };
-  return                                { icon: 'person_add',    color: 'opacity-40'       };
+  if (app.stage === 'offer') return { icon: 'handshake', color: 'text-[#826BF0]' };
+  if (app.stage === 'rejected') return { icon: 'person_remove', color: 'text-red-500' };
+  if (app.stage === 'interview') return { icon: 'people', color: 'text-blue-400' };
+  if (app.aiApplied) return { icon: 'auto_awesome', color: 'text-purple-400' };
+  return { icon: 'person_add', color: 'opacity-40' };
 }
 
 function activityLabel(app: LiveApplication): string {
-  if (app.stage === 'offer')     return 'Offer extended';
-  if (app.stage === 'rejected')  return 'Application closed';
+  if (app.stage === 'offer') return 'Offer extended';
+  if (app.stage === 'rejected') return 'Application closed';
   if (app.stage === 'interview') return 'Interview scheduled';
-  if (app.aiApplied)             return 'Auto-matched & applied';
+  if (app.aiApplied) return 'Auto-matched & applied';
   return 'New application';
 }
 
@@ -92,12 +92,12 @@ const RecruiterReportsPage: React.FC<{
   onToggleTheme: () => void;
   isDarkMode: boolean;
 }> = ({ onToggleTheme, isDarkMode }) => {
-  const [isMenuOpen, setIsMenuOpen]     = useState(false);
-  const [activeTab, setActiveTab]       = useState<'funnel' | 'roles' | 'skills'>('funnel');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'funnel' | 'roles' | 'skills'>('funnel');
   const [applications, setApplications] = useState<LiveApplication[]>([]);
-  const [jobs, setJobs]                 = useState<LiveJob[]>([]);
-  const [loadingApps, setLoadingApps]   = useState(true);
-  const [loadingJobs, setLoadingJobs]   = useState(true);
+  const [jobs, setJobs] = useState<LiveJob[]>([]);
+  const [loadingApps, setLoadingApps] = useState(true);
+  const [loadingJobs, setLoadingJobs] = useState(true);
 
   const recruiterId = readSessionUid();
 
@@ -155,7 +155,7 @@ const RecruiterReportsPage: React.FC<{
   /* Hiring funnel: each stage = everyone who reached AT LEAST that stage */
   const funnelStages = useMemo(() => {
     const active = activeApplications.filter((a) => a.stage !== 'rejected');
-    const total  = activeApplications.length;
+    const total = activeApplications.length;
     return STAGE_ORDER.filter((s) => s !== 'rejected').map((stage) => {
       const reached = active.filter((a) => {
         const ai = STAGE_ORDER.indexOf(a.stage);
@@ -165,9 +165,9 @@ const RecruiterReportsPage: React.FC<{
       return {
         stage,
         label: STAGE_LABELS[stage],
-        icon:  STAGE_ICON[stage],
+        icon: STAGE_ICON[stage],
         count: reached,
-        pct:   total > 0 ? Math.round((reached / total) * 100) : 0,
+        pct: total > 0 ? Math.round((reached / total) * 100) : 0,
       };
     });
   }, [activeApplications]);
@@ -183,10 +183,10 @@ const RecruiterReportsPage: React.FC<{
             : 0;
         return {
           ...job,
-          applicants:   jobApps.length,
+          applicants: jobApps.length,
           avgScore,
-          daysOpen:     daysSince(job.postedDate),
-          isFilled:     job.status === 'filled',
+          daysOpen: daysSince(job.postedDate),
+          isFilled: job.status === 'filled',
           activeOffers: jobApps.filter((a) => a.stage === 'offer').length,
         };
       })
@@ -195,13 +195,13 @@ const RecruiterReportsPage: React.FC<{
 
   /* Source breakdown: AI vs manual */
   const sourceBreakdown = useMemo(() => {
-    const total  = activeApplications.length;
+    const total = activeApplications.length;
     if (total === 0) return [];
-    const ai     = activeApplications.filter((a) => a.aiApplied).length;
+    const ai = activeApplications.filter((a) => a.aiApplied).length;
     const manual = total - ai;
     return [
-      { label: 'Auto-Match (Asterix)', count: ai,     pct: Math.round((ai     / total) * 100), highlight: true  },
-      { label: 'Manual Apply',         count: manual, pct: Math.round((manual / total) * 100), highlight: false },
+      { label: 'Auto-Match (Asterix)', count: ai, pct: Math.round((ai / total) * 100), highlight: true },
+      { label: 'Manual Apply', count: manual, pct: Math.round((manual / total) * 100), highlight: false },
     ];
   }, [activeApplications]);
 
@@ -227,12 +227,12 @@ const RecruiterReportsPage: React.FC<{
   }, [activeApplications]);
 
   /* Top-level KPIs — all from activeApplications */
-  const totalApps     = activeApplications.length;
-  const offeredCount  = activeApplications.filter((a) => a.stage === 'offer').length;
+  const totalApps = activeApplications.length;
+  const offeredCount = activeApplications.filter((a) => a.stage === 'offer').length;
   const rejectedCount = activeApplications.filter((a) => a.stage === 'rejected').length;
   const placementRate = totalApps > 0 ? ((offeredCount / totalApps) * 100).toFixed(1) : '0';
-  const openJobs      = jobs.filter((j) => j.status !== 'filled').length;
-  const avgFill       = jobStats.length > 0
+  const openJobs = jobs.filter((j) => j.status !== 'filled').length;
+  const avgFill = jobStats.length > 0
     ? Math.round(jobStats.reduce((s, j) => s + j.daysOpen, 0) / jobStats.length)
     : 0;
 
@@ -260,13 +260,12 @@ const RecruiterReportsPage: React.FC<{
           </div>
           <div className="flex items-center gap-4">
             <div className={`hidden md:flex items-center gap-2 px-4 py-2 border transition-all
-              ${loading
                 ? 'border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5'
-                : 'border-emerald-500/30 bg-emerald-500/10'}`}>
+                : 'border-[#826BF0]/30 bg-[#826BF0]/10'}`}>
               {loading
                 ? <span className="material-symbols-outlined text-sm animate-spin opacity-40">autorenew</span>
-                : <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />}
-              <span className={`text-[8px] font-black tracking-widest ${loading ? 'opacity-40' : 'text-emerald-500'}`}>
+                : <span className="size-2 rounded-full bg-[#826BF0] animate-pulse" />}
+              <span className={`text-[8px] font-black tracking-widest ${loading ? 'opacity-40' : 'text-[#826BF0]'}`}>
                 {loading ? 'Syncing...' : 'Live Data'}
               </span>
             </div>
@@ -281,10 +280,10 @@ const RecruiterReportsPage: React.FC<{
           {/* ── KPI STATS ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 border border-black dark:border-white/20">
             {[
-              { label: 'Active Applicants', val: loading ? '…' : String(totalApps),             sub: 'Across live mandates',  icon: 'groups'      },
-              { label: 'Offer Rate',        val: loading ? '…' : `${placementRate}%`,            sub: 'Applied → Offered',     icon: 'trending_up' },
-              { label: 'Avg. Days Open',    val: loading ? '…' : avgFill ? `${avgFill}d` : '—', sub: 'Per mandate',           icon: 'schedule'    },
-              { label: 'Open Mandates',     val: loading ? '…' : String(openJobs),               sub: `${jobs.length} total`,  icon: 'work'        },
+              { label: 'Active Applicants', val: loading ? '…' : String(totalApps), sub: 'Across live mandates', icon: 'groups' },
+              { label: 'Offer Rate', val: loading ? '…' : `${placementRate}%`, sub: 'Applied → Offered', icon: 'trending_up' },
+              { label: 'Avg. Days Open', val: loading ? '…' : avgFill ? `${avgFill}d` : '—', sub: 'Per mandate', icon: 'schedule' },
+              { label: 'Open Mandates', val: loading ? '…' : String(openJobs), sub: `${jobs.length} total`, icon: 'work' },
             ].map((s, i) => (
               <div
                 key={i}
@@ -350,12 +349,12 @@ const RecruiterReportsPage: React.FC<{
                               <span className="text-[8px] font-black tracking-widest opacity-40">
                                 {stage.count} candidate{stage.count !== 1 ? 's' : ''}
                               </span>
-                              <span className="text-[9px] font-black text-emerald-500 w-10 text-right">{stage.pct}%</span>
+                              <span className="text-[9px] font-black text-[#826BF0] w-10 text-right">{stage.pct}%</span>
                             </div>
                           </div>
                           <div className="h-8 bg-black/5 dark:bg-white/5 relative overflow-hidden">
                             <div
-                              className="h-full bg-black dark:bg-white group-hover:bg-emerald-500 transition-all duration-700"
+                              className="h-full bg-black dark:bg-white group-hover:bg-[#826BF0] transition-all duration-700"
                               style={{ width: `${stage.pct}%` }}
                             />
                             {i < funnelStages.length - 1 && stage.pct > 0 && (
@@ -407,7 +406,7 @@ const RecruiterReportsPage: React.FC<{
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="text-sm font-black tracking-tight truncate">{job.title}</h4>
                             {job.isFilled ? (
-                              <span className="text-[7px] font-black tracking-widest px-2 py-0.5 bg-emerald-500 text-white shrink-0">Filled</span>
+                              <span className="text-[7px] font-black tracking-widest px-2 py-0.5 bg-[#826BF0] text-white shrink-0">Filled</span>
                             ) : (
                               <span className="text-[7px] font-black tracking-widest px-2 py-0.5 border border-black/20 dark:border-white/20 group-hover:border-white/40 shrink-0">Open</span>
                             )}
@@ -419,19 +418,19 @@ const RecruiterReportsPage: React.FC<{
                           </div>
                           <p className="text-[8px] font-black tracking-widest opacity-40">
                             {job.applicants} applicant{job.applicants !== 1 ? 's' : ''} · {job.daysOpen}d open
-                            {job.location?.city ? ` · ${job.location.city}` : ''}
+                            {typeof job.location !== 'string' && job.location?.city ? ` · ${job.location.city}` : ''}
                           </p>
                         </div>
                         <div className="flex items-center gap-6 shrink-0">
                           <div className="text-right">
                             <p className="text-[7px] font-black tracking-widest opacity-40">Avg Match</p>
-                            <p className={`text-xl font-black ${job.avgScore >= 75 ? 'text-emerald-500' : ''}`}>
+                            <p className={`text-xl font-black ${job.avgScore >= 75 ? 'text-[#826BF0]' : ''}`}>
                               {job.applicants > 0 ? `${job.avgScore}%` : '—'}
                             </p>
                           </div>
                           <div className="w-20 h-2 bg-black/10 dark:bg-white/10 group-hover:bg-white/20 overflow-hidden">
                             <div
-                              className={`h-full transition-all duration-500 ${job.avgScore >= 75 ? 'bg-emerald-500' : 'bg-black dark:bg-white group-hover:bg-white dark:group-hover:bg-black'}`}
+                              className={`h-full transition-all duration-500 ${job.avgScore >= 75 ? 'bg-[#826BF0]' : 'bg-black dark:bg-white group-hover:bg-white dark:group-hover:bg-black'}`}
                               style={{ width: `${job.avgScore}%` }}
                             />
                           </div>
@@ -469,7 +468,7 @@ const RecruiterReportsPage: React.FC<{
                           </div>
                           <div className="h-6 bg-black/5 dark:bg-white/5 overflow-hidden">
                             <div
-                              className="h-full bg-black dark:bg-white group-hover:bg-emerald-500 transition-all duration-700"
+                              className="h-full bg-black dark:bg-white group-hover:bg-[#826BF0] transition-all duration-700"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -494,7 +493,7 @@ const RecruiterReportsPage: React.FC<{
                     {sourceBreakdown.map((s) => (
                       <div key={s.label} className="space-y-2">
                         <div className="flex justify-between text-[9px] font-black tracking-widest">
-                          <span className={s.highlight ? 'text-emerald-400' : 'opacity-70'}>{s.label}</span>
+                          <span className={s.highlight ? 'text-[#826BF0]/80' : 'opacity-70'}>{s.label}</span>
                           <span>
                             {s.pct}%{' '}
                             <span className="opacity-40 text-[7px]">({s.count})</span>
@@ -502,7 +501,7 @@ const RecruiterReportsPage: React.FC<{
                         </div>
                         <div className="h-1.5 bg-white/10 dark:bg-black/10">
                           <div
-                            className={`h-full transition-all duration-700 ${s.highlight ? 'bg-emerald-400' : 'bg-white/40 dark:bg-black/40'}`}
+                            className={`h-full transition-all duration-700 ${s.highlight ? 'bg-[#826BF0]' : 'bg-white/40 dark:bg-black/40'}`}
                             style={{ width: `${s.pct}%` }}
                           />
                         </div>
@@ -521,7 +520,7 @@ const RecruiterReportsPage: React.FC<{
               <div className="border border-black dark:border-white/20 p-6 md:p-8 space-y-6">
                 <div className="flex justify-between items-center">
                   <h4 className="text-[10px] font-black tracking-[0.4em] opacity-40">Live Activity</h4>
-                  <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="size-2 rounded-full bg-[#826BF0] animate-pulse" />
                 </div>
 
                 {recentActivity.length === 0 && !loadingApps ? (

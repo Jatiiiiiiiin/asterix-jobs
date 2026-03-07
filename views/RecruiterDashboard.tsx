@@ -524,7 +524,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
   /* ── Status Badge Component ──────────────────────────────────── */
   const StatusPill = ({ status }: { status: PostedJob['status'] }) => {
     const map = {
-      active: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+      active: 'bg-[#826BF0]/15 text-[#826BF0] border-[#826BF0]/30',
       closed: 'bg-red-500/15 text-red-400 border-red-500/30',
       draft: 'bg-white/10 text-white/40 border-white/10',
     };
@@ -538,7 +538,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
   const ApplicationStatusBadge = ({ status }: { status?: Application['status'] }) => {
     const statusMap: Record<string, { bg: string; border: string; text: string; label: string }> = {
       Submitted: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400', label: 'Submitted' },
-      shortlisted: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', label: 'Shortlisted' },
+      shortlisted: { bg: 'bg-[#826BF0]/10', border: 'border-[#826BF0]/30', text: 'text-[#826BF0]', label: 'Shortlisted' },
       rejected: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', label: 'Rejected' },
     };
     const safeStatus = status && status in statusMap ? status : 'Submitted';
@@ -557,11 +557,11 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
   const CandidateDetailContent = ({ applicant, job }: { applicant: Application; job: PostedJob }) => {
     const scoreColor =
       applicant.matchScore >= 80
-        ? 'text-emerald-400'
+        ? 'text-[#826BF0]'
         : applicant.matchScore >= 60
-          ? 'text-amber-400'
+          ? 'text-[#826BF0]/70'
           : applicant.matchScore > 0
-            ? 'text-red-400'
+            ? 'text-[#826BF0]/50'
             : 'text-white/30';
 
     const initials = (applicant.candidateName?.trim() || '?')[0].toUpperCase();
@@ -577,7 +577,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                 <div className="flex items-center gap-3 md:gap-6">
                   <div
                     className={`size-12 md:size-20 flex items-center justify-center text-xl md:text-3xl font-black border-2 shrink-0 ${isAboveThreshold
-                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                      ? 'bg-[#826BF0]/10 border-[#826BF0]/40 text-[#826BF0]'
                       : 'bg-white/5 border-white/10 text-white/30'
                       }`}
                   >
@@ -596,7 +596,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       </p>
                     )}
                     {applicant.autoApplied && (
-                      <span className="inline-flex items-center gap-1 text-[5px] md:text-[7px] font-black  tracking-[0.3em] text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 mt-1">
+                      <span className="inline-flex items-center gap-1 text-[5px] md:text-[7px] font-black  tracking-[0.3em] text-[#826BF0] border border-[#826BF0]/30 px-1.5 py-0.5 mt-1">
                         <span className="material-symbols-outlined text-[8px] md:text-[9px]">auto_awesome</span>
                         Auto
                       </span>
@@ -613,7 +613,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                   {job.matchThreshold != null && applicant.matchScore > 0 && (
                     <div
                       className={`inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2 md:py-1 text-[5px] md:text-[7px] font-black  tracking-widest ${isAboveThreshold
-                        ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                        ? 'bg-[#826BF0]/10 border border-[#826BF0]/30 text-[#826BF0]'
                         : 'bg-red-500/10 border border-red-500/20 text-red-400'
                         }`}
                     >
@@ -638,7 +638,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               <button
                 onClick={() => setDetailTab('profile')}
                 className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black  tracking-widest transition-all border-b-2 ${detailTab === 'profile'
-                  ? 'text-white border-b-emerald-400'
+                  ? 'text-white border-b-[#826BF0]'
                   : 'text-white/40 border-b-transparent hover:text-white/70'
                   }`}
               >
@@ -651,7 +651,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
               <button
                 onClick={() => setDetailTab('resume')}
                 className={`flex-1 px-6 md:px-8 py-3 md:py-4 text-[8px] md:text-[9px] font-black  tracking-widest transition-all border-b-2 ${detailTab === 'resume'
-                  ? 'text-white border-b-emerald-400'
+                  ? 'text-white border-b-[#826BF0]'
                   : 'text-white/40 border-b-transparent hover:text-white/70'
                   }`}
               >
@@ -695,7 +695,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                         {applicant.candidateSkills!.map((s) => (
                           <span
                             key={s}
-                            className="text-[8px] md:text-[9px] font-black  tracking-widest px-3 md:px-4 py-1.5 md:py-2 border border-white/10 text-white/60 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors"
+                            className="text-[8px] md:text-[9px] font-black  tracking-widest px-3 md:px-4 py-1.5 md:py-2 border border-white/10 text-white/60 hover:border-[#826BF0]/50 hover:text-[#826BF0] transition-colors"
                           >
                             {s}
                           </span>
@@ -784,7 +784,7 @@ const RecruiterDashboard: React.FC<{ onToggleTheme: () => void; isDarkMode: bool
                       <button
                         onClick={() => handleShortlist(applicant)}
                         disabled={!!actionInProgress}
-                        className="flex-1 bg-emerald-500 text-white py-2.5 md:py-3.5 text-[8px] md:text-[9px] font-black  tracking-widest hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                        className="flex-1 bg-[#826BF0] text-white py-2.5 md:py-3.5 text-[8px] md:text-[9px] font-black  tracking-widest hover:bg-[#826BF0]/80 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                       >
                         <span className="material-symbols-outlined text-sm">
                           {actionInProgress === 'shortlist' ? 'hourglass_empty' : 'verified'}

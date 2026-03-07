@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, onSnapshot, doc } from 'firebase/firestore';
+import BrandLogo from '../components/BrandLogo';
+
 
 interface LandingPageProps {
   onToggleTheme: () => void;
   isDarkMode: boolean;
 }
-
 
 const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -78,6 +78,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
     setIsMobileMenuOpen(false);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   /* ════════════════════════════════════════════════════════════════
      PAYMENT HANDLERS - Simple flow to /confirm-payment
   ════════════════════════════════════════════════════════════════ */
@@ -98,81 +102,84 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
   /* ════════════════════════════════════════════════════════════════ */
 
   const FeatureCard = ({ icon, title, desc }: { icon: string, title: string, desc: string }) => (
-    <div className="group border border-black dark:border-white/20 p-6 sm:p-8 md:p-10 hover:bg-black dark:hover:bg-white transition-all duration-500 flex flex-col gap-5 md:gap-6 h-full">
-      <div className="size-10 md:size-12 border border-black dark:border-white flex items-center justify-center group-hover:bg-white dark:group-hover:bg-black group-hover:text-black dark:group-hover:text-white transition-colors duration-500">
-        <span className="material-symbols-outlined text-xl md:text-2xl">{icon}</span>
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-[30px] p-8 md:p-10 flex flex-col gap-6 group hover:-translate-y-2 transition-transform duration-500 shadow-xl border border-black/5 dark:border-white/5">
+      <div className="size-16 rounded-full bg-[#826BF0]/10 text-[#826BF0] flex items-center justify-center group-hover:bg-[#826BF0] group-hover:text-white transition-colors duration-500">
+        <span className="material-symbols-outlined text-3xl">{icon}</span>
       </div>
-      <h3 className="text-xl md:text-2xl font-black  tracking-tighter group-hover:text-white dark:group-hover:text-black transition-colors duration-500">
+      <h3 className="text-2xl md:text-3xl font-bold tracking-tighter text-black dark:text-white">
         {title}
       </h3>
-      <p className="text-[10px] md:text-xs font-bold  tracking-widest text-black/50 dark:text-white/50 group-hover:text-white/70 dark:group-hover:text-black/70 leading-relaxed transition-colors duration-500">
+      <p className="text-sm font-medium tracking-wide text-gray-500 leading-relaxed">
         {desc}
       </p>
     </div>
   );
 
   return (
-    <div className="flex flex-col scroll-smooth bg-white dark:bg-background-dark text-black dark:text-white overflow-x-hidden">
-      {/* Navigation */}
-      <header className="fixed top-0 w-full z-[130] glass-nav border-b border-black dark:border-white/10">
-        <div className="max-w-[1440px] mx-auto px-5 sm:px-6 md:px-10 h-20 md:h-24 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="size-9 md:size-12 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black hover:rotate-90 transition-transform duration-500 cursor-pointer">
-              <span className="material-symbols-outlined text-xl md:text-3xl font-black">auto_awesome</span>
-            </div>
-            <h2 className="text-xl md:text-3xl font-black tracking-tighter  leading-none">Asterix</h2>
+    <div className={`flex flex-col min-h-screen bg-[#F0F2F5] dark:bg-background-dark text-black dark:text-white overflow-x-hidden font-sans ${isDarkMode ? 'dark' : ''}`}>
+
+      {/* 
+        =================
+        HEADER
+        =================
+      */}
+      <header className="fixed top-0 w-full z-[130] bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-black/5 dark:border-white/5">
+        <div className="max-w-[1440px] mx-auto px-6 h-20 md:h-24 flex items-center justify-between">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={scrollToTop}>
+            <BrandLogo isDarkMode={isDarkMode} className="size-10" />
+            <h2 className="text-2xl font-black tracking-tighter leading-none hidden sm:block">Asterix</h2>
           </div>
 
-          <nav className="hidden lg:flex items-center gap-10 xl:gap-12">
+          <nav className="hidden lg:flex items-center gap-10">
             {['Features', 'Process', 'Pricing', 'Network'].map(item => (
               <button
                 key={item}
                 onClick={() => scrollToSection(item.toLowerCase())}
-                className="text-[10px] xl:text-[11px] font-black  tracking-[0.25em] hover:opacity-50 transition-opacity"
+                className="text-xs font-bold tracking-[0.2em] uppercase hover:text-[#826BF0] transition-colors"
               >
                 {item}
               </button>
             ))}
           </nav>
 
-          <div className="flex items-center gap-3 md:gap-6">
-            <button onClick={onToggleTheme} className="p-2 md:p-3 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
-              <span className="material-symbols-outlined text-[18px] md:text-[24px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+          <div className="flex items-center gap-4">
+            <button onClick={onToggleTheme} className="p-2 border border-black/10 dark:border-white/10 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+              <span className="material-symbols-outlined text-sm">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
             </button>
             <button
               onClick={handleFreeSignup}
-              className="bg-black dark:bg-white text-white dark:text-black px-5 md:px-10 py-2.5 md:py-4 text-[10px] md:text-[11px] font-black  tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl"
+              className="hidden md:block px-6 py-2.5 rounded-full border border-black dark:border-white text-xs font-bold uppercase tracking-[0.1em] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
             >
               Sign In
             </button>
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden size-10 flex items-center justify-center border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all relative z-[140]"
+              onClick={() => handleUpgradePlan('recruiter')}
+              className="bg-black text-white dark:bg-white dark:text-black px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-[0.1em] hover:opacity-80 transition-opacity whitespace-nowrap"
             >
-              <span className="material-symbols-outlined text-2xl">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+              Hire Talent
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-full border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            >
+              <span className="material-symbols-outlined text-xl">{isMobileMenuOpen ? 'close' : 'menu'}</span>
             </button>
           </div>
         </div>
-
       </header>
 
       {/* Mobile Nav Overlay */}
-      <div
-        className={`fixed inset-0 z-[150] lg:hidden bg-white dark:bg-black transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}
-      >
-        {/* Mobile Menu Header */}
-        <div className="absolute top-0 w-full h-20 md:h-24 flex items-center justify-between px-5 sm:px-6 border-b border-black/5 dark:border-white/5">
+      <div className={`fixed inset-0 z-[150] lg:hidden bg-white dark:bg-black transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
+        <div className="absolute top-0 w-full h-20 md:h-24 flex items-center justify-between px-6 border-b border-black/5 dark:border-white/5">
           <div className="flex items-center gap-3">
-            <div className="size-9 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
-              <span className="material-symbols-outlined text-xl font-black">auto_awesome</span>
-            </div>
-            <h2 className="text-xl font-black tracking-tighter leading-none">Asterix</h2>
+            <BrandLogo isDarkMode={isDarkMode} className="size-10" />
+            <h2 className="text-2xl font-black tracking-tighter leading-none">Asterix</h2>
           </div>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="size-10 flex items-center justify-center border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+            className="p-2 rounded-full border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
           >
-            <span className="material-symbols-outlined text-2xl">close</span>
+            <span className="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
@@ -185,150 +192,173 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
                 className={`group flex items-end gap-4 text-4xl sm:text-6xl font-black tracking-tighter text-left border-b border-black/5 dark:border-white/5 pb-4 transition-all duration-700 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}
                 style={{ transitionDelay: `${idx * 100}ms` }}
               >
-                <span className="text-black/20 dark:text-white/20 text-lg sm:text-2xl mb-2 sm:mb-4 font-mono">0{idx + 1}</span>
+                <span className="text-black/20 dark:text-white/20 text-lg sm:text-2xl mb-2 sm:mb-4 font-mono font-bold">0{idx + 1}</span>
                 <span className="group-hover:translate-x-3 transition-transform duration-500">{item}</span>
               </button>
             ))}
 
             <button
               onClick={handleFreeSignup}
-              className={`inline-flex items-center gap-4 text-xl font-black tracking-[0.2em] mt-8 bg-black dark:bg-white text-white dark:text-black px-8 py-5 transition-all duration-1000 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+              className={`inline-flex rounded-full items-center justify-center gap-4 text-sm font-bold tracking-[0.2em] uppercase mt-8 bg-[#826BF0] text-white px-8 py-5 transition-all duration-1000 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
               style={{ transitionDelay: '500ms' }}
             >
               GET STARTED <span className="material-symbols-outlined animate-bounce-x">arrow_forward</span>
             </button>
           </div>
-
-          {/* Mobile Menu Footer */}
-          <div className={`mt-12 pt-8 border-t border-black/5 dark:border-white/5 transition-all duration-1000 delay-700 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <p className="text-[10px] font-black tracking-[0.3em] text-black/40 dark:text-white/40 mb-6 uppercase">Connect with us</p>
-            <div className="flex items-center gap-4">
-              {[
-                { icon: 'link', label: 'LinkedIn', href: '#' },
-                { icon: 'code', label: 'GitHub', href: '#' },
-                { icon: 'alternate_email', label: 'Twitter', href: '#' },
-              ].map(s => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  className="size-12 border border-black/10 dark:border-white/10 flex items-center justify-center text-black/60 dark:text-white/60 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
-                >
-                  <span className="material-symbols-outlined text-xl">{s.icon}</span>
-                </a>
-              ))}
-            </div>
-            <div className="mt-8 flex flex-col gap-2">
-              <span className="text-[9px] font-black tracking-widest text-black/30 dark:text-white/30 uppercase">Inquiries</span>
-              <a href="mailto:hello@asterix-jobs.in" className="text-sm font-bold hover:opacity-50 transition-opacity">hello@asterix-jobs.in</a>
-            </div>
-          </div>
         </div>
       </div>
 
-      <main className="pt-20 md:pt-24">
-        {/* Hero Section */}
-        <section className={`relative pt-32 sm:pt-40 md:pt-48 pb-20 sm:pb-32 md:pb-48 transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
-            <div className="inline-flex items-center gap-2 md:gap-3 border border-black/10 dark:border-white/10 px-4 md:px-6 py-2 text-[8px] md:text-[11px] font-black  tracking-[0.4em] mb-8 md:mb-12">
-              <span className="size-1.5 bg-black dark:bg-white animate-ping"></span>
-              Neural Protocol Active
+      <main className="pt-20 md:pt-24 flex-grow">
+
+        {/* 
+          =================
+          HERO SECTION
+          =================
+        */}
+        <div className={`relative pt-16 pb-20 md:pt-24 md:pb-24 min-h-[90vh] flex items-center transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+          {/* Left Purple Sidebar Element */}
+          <div className="hidden lg:flex absolute top-0 left-0 h-[85vh] w-16 bg-[#826BF0] rounded-br-[40px] items-end pb-12 z-10">
+            <div className="w-full relative h-[300px]">
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 whitespace-nowrap -rotate-90 origin-left text-white font-bold text-[12px] tracking-[0.2em] uppercase">
+                Neural Protocol Active
+              </span>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-16 bg-white/30"></div>
             </div>
+          </div>
 
-            <h1 className="text-[11vw] xs:text-[10vw] sm:text-[9vw] md:text-[8vw] lg:text-[7vw] font-black tracking-tighter leading-[1] mb-12 sm:mb-16  break-words">
-              The <span className="text-black/5 dark:text-white/5 outline-text">Purest</span><br />
-              Intelligence Match
-            </h1>
+          {/* Main Hero Layout */}
+          <div className="w-full max-w-[1400px] mx-auto px-6 sm:px-16 md:px-24 flex flex-col md:flex-row items-center relative z-20">
 
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 md:gap-12 lg:gap-20">
-              <p className="text-lg sm:text-xl md:text-2xl text-black/50 dark:text-white/40 max-w-xl font-medium  tracking-tight leading-tight">
+            {/* Left Text */}
+            <div className="w-full md:w-1/2 flex flex-col items-start relative z-30">
+              <div className="inline-flex lg:hidden items-center gap-2 border border-black/10 dark:border-white/10 rounded-full px-4 py-2 text-[10px] font-bold tracking-[0.2em] uppercase mb-8">
+                <span className="size-1.5 rounded-full bg-[#826BF0] animate-ping"></span>
+                Neural Protocol Active
+              </div>
+
+              <h1 className="text-[12vw] sm:text-[10vw] md:text-[8vw] xl:text-[7vw] font-black leading-[0.85] tracking-tighter uppercase text-black dark:text-white">
+                The<br />Purest<br />
+                <span className="text-black/5 dark:text-white/5 outline-text">Match</span>
+              </h1>
+
+              <p className="mt-8 text-base md:text-lg text-gray-500 dark:text-gray-400 font-medium tracking-tight leading-relaxed max-w-md">
                 Stop wasting hours on job boards that never reply. Asterix matches you to the right roles based on your actual skills — and applies on your behalf.
               </p>
-              <div className="flex flex-col sm:flex-row items-stretch gap-4 md:gap-6 w-full lg:w-auto">
+
+              {/* Status Pill */}
+              <div className="mt-8 bg-white dark:bg-black rounded-full shadow-lg border border-black/5 dark:border-white/5 p-2 pr-6 flex flex-wrap items-center gap-4 animate-fade-in-up">
+                <div className="flex -space-x-3">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop" alt="User" className="w-10 h-10 rounded-full border-2 border-white dark:border-black object-cover" />
+                  <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop" alt="User" className="w-10 h-10 rounded-full border-2 border-white dark:border-black object-cover" />
+                  <div className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-[#826BF0] flex items-center justify-center text-white text-xs font-bold">+</div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-black leading-none tracking-tight">
+                    {liveMembers !== null ? (liveMembers >= 1000 ? `${(liveMembers / 1000).toFixed(1)}K+` : `${liveMembers}+`) : '87K+'}
+                  </span>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">People Hired</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch gap-4 mt-12 w-full lg:w-auto">
                 <button
                   onClick={handleFreeSignup}
-                  className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black px-10 md:px-16 py-5 md:py-6 text-xs md:text-sm font-black  tracking-[0.25em] hover:invert transition-all text-center cursor-pointer"
+                  className="bg-[#826BF0] hover:opacity-90 text-white px-10 py-4 rounded-full text-xs font-bold uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#826BF0]/30"
                 >
                   Find a Job
                 </button>
                 <button
-                  onClick={handleFreeSignup}
-                  className="flex-1 sm:flex-none border-2 border-black dark:border-white px-10 md:px-16 py-5 md:py-6 text-xs md:text-sm font-black  tracking-[0.25em] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-center cursor-pointer"
+                  onClick={() => handleUpgradePlan('recruiter')}
+                  className="bg-transparent border-2 border-black dark:border-white px-10 py-4 rounded-full text-xs font-bold uppercase tracking-[0.2em] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                 >
                   Hire Talent
                 </button>
               </div>
             </div>
+
+            {/* Right Image Container */}
+            <div className="w-full md:w-1/2 relative mt-16 md:mt-0 flex justify-center md:justify-end pr-0 lg:pr-12">
+              <div className="relative z-10 w-full max-w-[500px]">
+                <img
+                  src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1740&auto=format&fit=crop"
+                  alt="Happy Professional"
+                  className="w-full object-cover rounded-[40px] aspect-[4/5] shadow-2xl"
+                />
+
+                {/* NO.1 Badge Floating */}
+                <div className="absolute top-10 -right-4 md:-right-8 size-24 rounded-full bg-gradient-to-tr from-blue-400 to-[#826BF0] flex flex-col items-center justify-center shadow-2xl shadow-[#826BF0]/50 animate-bounce-slow border-4 border-white dark:border-background-dark">
+                  <span className="text-white font-black text-2xl tracking-tighter leading-none">98%</span>
+                  <span className="text-white/80 font-bold text-[8px] uppercase tracking-widest leading-none mt-1">Accuracy</span>
+                </div>
+              </div>
+
+              {/* Background design element */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] rounded-[50px] border-2 border-[#826BF0]/20 -rotate-6 z-0"></div>
+            </div>
           </div>
-        </section>
+        </div>
 
         {/* Logo Ticker */}
-        <section className="py-10 md:py-20 border-y border-black/5 dark:border-white/5 overflow-hidden bg-black/[0.01] dark:bg-white/[0.01]">
-          <div className="flex whitespace-nowrap gap-12 md:gap-24 animate-marquee">
+        <section className="py-12 border-y border-black/5 dark:border-white/5 overflow-hidden bg-white/50 dark:bg-black/50 backdrop-blur-sm">
+          <div className="flex whitespace-nowrap gap-16 md:gap-32 animate-marquee items-center">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <span key={i} className="text-2xl sm:text-3xl md:text-5xl font-black  tracking-tighter opacity-10 select-none">Partner Company {i}</span>
+              <span key={i} className="text-2xl sm:text-4xl font-black tracking-tighter opacity-20 dark:opacity-40 select-none grayscale uppercase">Partner {i}</span>
             ))}
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <span key={i + 'copy'} className="text-2xl sm:text-3xl md:text-5xl font-black  tracking-tighter opacity-10 select-none">Partner Company {i}</span>
+              <span key={i + 'copy'} className="text-2xl sm:text-4xl font-black tracking-tighter opacity-20 dark:opacity-40 select-none grayscale uppercase">Partner {i}</span>
             ))}
           </div>
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-20 sm:py-32 md:py-40 bg-white dark:bg-background-dark">
-          <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
+        <section id="features" className="py-20 sm:py-32">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-16 md:px-24">
             <div className="flex flex-col lg:flex-row justify-between items-start gap-8 lg:gap-20 mb-16 md:mb-24">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-black  tracking-tighter leading-[0.9]">More  Than<br />a  Job  Board</h2>
-              <p className="max-w-xl text-base sm:text-lg font-bold  tracking-widest text-black/50 dark:text-white/50 leading-relaxed">
+              <h2 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-[0.9]">More Than<br />a Job Board</h2>
+              <p className="max-w-xl text-sm md:text-base font-medium tracking-wide text-gray-500 leading-relaxed">
                 Not a Regular job site that just search for keywords in your resume. Asterix actually understands what you're good at — and finds companies where you'll genuinely thrive.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 border-t md:border-l border-black/5 dark:border-white/10 items-stretch">
-              <div className="border-r border-b border-black/5 dark:border-white/10 flex">
-                <FeatureCard
-                  icon="bolt"
-                  title="Smart Matching"
-                  desc="We score every match across 40+ factors — not just your job title, but your actual skills, work style, and what each company really needs."
-                />
-              </div>
-              <div className="border-r border-b border-black/5 dark:border-white/10 flex">
-                <FeatureCard
-                  icon="psychology"
-                  title="Reads Between the Lines"
-                  desc="Our AI knows that the same job title means very different things at different companies. It matches you to roles where your experience will actually count."
-                />
-              </div>
-              <div className="border-r border-b border-black/5 dark:border-white/10 flex">
-                <FeatureCard
-                  icon="rocket_launch"
-                  title="Applies for You"
-                  desc="Our AI handles the repetitive applying and scheduling so you can spend your energy on the interviews that actually matter."
-                />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+              <FeatureCard
+                icon="bolt"
+                title="Smart Matching"
+                desc="We score every match across 40+ factors — not just your job title, but your actual skills, work style, and what each company really needs."
+              />
+              <FeatureCard
+                icon="psychology"
+                title="Reads Between"
+                desc="Our AI knows that the same job title means very different things at different companies. It matches you to roles where your experience will actually count."
+              />
+              <FeatureCard
+                icon="rocket_launch"
+                title="Applies for You"
+                desc="Our AI handles the repetitive applying and scheduling so you can spend your energy on the interviews that actually matter."
+              />
             </div>
           </div>
         </section>
 
         {/* Process Section */}
-        <section id="process" className="py-20 sm:py-32 md:py-40 bg-black text-white dark:bg-white dark:text-black">
-          <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
-            <div className="mb-16 md:mb-24">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-black  tracking-tighter leading-none">How It Works</h2>
-              <p className="text-[10px] md:text-sm font-black  tracking-[0.4em] opacity-40 mt-4">Three simple steps to your next role</p>
+        <section id="process" className="py-20 sm:py-32 bg-black text-white dark:bg-[#0A0A0A] rounded-[40px] mx-4 md:mx-10 mb-20 shadow-2xl">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-12 md:px-20">
+            <div className="mb-16 md:mb-24 text-center">
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-none text-white">How It Works</h2>
+              <p className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase opacity-40 mt-6 text-[#826BF0]">Three simple steps to your next role</p>
             </div>
 
-            <div className="space-y-16 sm:space-y-24 md:space-y-32">
+            <div className="space-y-12">
               {[
-                { step: '01', title: 'Upload Your Resume', desc: 'Just drop in your resume or LinkedIn profile. We read your experience, skills, and career history to build a complete picture of who you are professionally.' },
-                { step: '02', title: 'We Analyse Your Profile', desc: 'Our AI studies your background and compares it against thousands of open roles in real time — looking at skills, growth potential, and team fit, not just job titles.' },
-                { step: '03', title: 'See Your Matches', desc: 'Within seconds, your personal dashboard shows the jobs where you have the best shot — ranked by how well they fit you, with a clear score explaining why.' }
+                { step: '01', title: 'Upload Resume', desc: 'Just drop in your resume or LinkedIn profile. We read your experience, skills, and career history to build a complete picture of who you are.' },
+                { step: '02', title: 'AI Analysis', desc: 'Our AI studies your background and compares it against thousands of open roles in real time — looking at skills, growth potential, and team fit.' },
+                { step: '03', title: 'Get Matches', desc: 'Within seconds, your personal dashboard shows the jobs where you have the best shot — ranked by how well they fit you.' }
               ].map((item, i) => (
-                <div key={i} className="flex flex-col md:flex-row items-start gap-8 md:gap-12 border-t border-white/20 dark:border-black/20 pt-8 md:pt-12 group">
-                  <span className="text-6xl sm:text-7xl md:text-8xl font-black leading-none opacity-20 group-hover:opacity-100 transition-opacity duration-500">{item.step}</span>
-                  <div className="flex-grow max-w-2xl">
-                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black  tracking-tighter mb-4 md:mb-6">{item.title}</h3>
-                    <p className="text-lg sm:text-xl font-medium  tracking-tight opacity-70 leading-relaxed group-hover:opacity-100 transition-opacity duration-500">{item.desc}</p>
+                <div key={i} className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12 bg-white/5 dark:bg-white/5 rounded-[30px] p-8 md:p-12 border border-white/10 group hover:-translate-y-2 hover:bg-white/10 transition-all duration-300">
+                  <span className="text-6xl md:text-8xl font-black leading-none text-[#826BF0] opacity-50 group-hover:opacity-100 transition-opacity">{item.step}</span>
+                  <div className="flex-grow text-center md:text-left mt-2 md:mt-0">
+                    <h3 className="text-2xl md:text-4xl font-bold tracking-tighter mb-4 uppercase">{item.title}</h3>
+                    <p className="text-sm md:text-base font-medium text-gray-400 leading-relaxed">{item.desc}</p>
                   </div>
-                  <div className="hidden lg:block size-32 xl:size-40 bg-white/5 dark:bg-black/5 border border-white/10 dark:border-black/10 shrink-0 group-hover:bg-white/10 dark:group-hover:bg-black/10 transition-all"></div>
                 </div>
               ))}
             </div>
@@ -336,314 +366,169 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="py-20 sm:py-32 md:py-40 border-t border-black/5 dark:border-white/10">
-          <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
-            <div className="flex flex-col items-center text-center mb-16 md:mb-32">
-              <h2 className="text-4xl sm:text-5xl md:text-7xl font-black  tracking-tighter mb-6 md:mb-8 leading-none">
+        <section id="pricing" className="py-20 sm:py-32">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-16 md:px-24">
+            <div className="flex flex-col items-center text-center mb-16 md:mb-24">
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-6 leading-none">
                 Pick Your Plan
               </h2>
-              <p className="text-[10px] sm:text-xs md:text-sm text-black/50 dark:text-white/50 font-black  tracking-[0.3em]">
+              <p className="text-xs md:text-sm text-gray-500 font-bold tracking-[0.2em] uppercase">
                 Simple plans for job seekers and hiring teams
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
               {/* Job Seeker Plan */}
-              <div className="border border-black dark:border-white/20 p-8 sm:p-12 md:p-16 flex flex-col justify-between hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-500 group">
-                <div className="space-y-8">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-[40px] p-8 md:p-16 flex flex-col justify-between border border-black/5 dark:border-white/5 shadow-xl hover:-translate-y-2 transition-transform duration-500 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#826BF0]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+                <div className="space-y-8 relative z-10">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black  tracking-tighter">
-                      Job Seeker
-                    </h3>
-                    <div className="text-[8px] sm:text-[9px] font-black  border border-black/20 dark:border-white/20 group-hover:border-white/30 dark:group-hover:border-black/30 px-3 py-1.5 tracking-[0.25em]">
+                    <h3 className="text-2xl md:text-3xl font-black tracking-tighter uppercase">Job Seeker</h3>
+                    <div className="text-[10px] font-bold bg-[#826BF0]/10 text-[#826BF0] px-4 py-2 rounded-full tracking-[0.2em] uppercase">
                       Popular
                     </div>
                   </div>
 
-                  <div className="text-6xl sm:text-7xl md:text-8xl font-black leading-none  tracking-tighter">
-                    ₹99
+                  <div className="text-5xl md:text-7xl font-black leading-none tracking-tighter text-[#826BF0]">
+                    ₹99<span className="text-lg text-gray-400">/mo</span>
                   </div>
-                  <p className="text-[8px] font-black  tracking-widest opacity-60">
-                    Per Month
-                  </p>
 
-                  <ul className="space-y-4 md:space-y-6">
+                  <ul className="space-y-4 pt-4">
                     {[
                       'Auto-apply to 30+ jobs every day',
                       'Get noticed by recruiters first',
                       'Matches even for entry-level profiles',
-                      'Apply manually whenever you want',
-                      'Tips to improve your profile',
                       'Track all your applications',
-                      'Email alerts for new matches',
-                      'Fast support when you need help'
+                      'Email alerts for new matches'
                     ].map(feature => (
-                      <li
-                        key={feature}
-                        className="text-[9px] sm:text-[10px] md:text-xs font-black  tracking-[0.15em] flex items-center gap-3 md:gap-4"
-                      >
-                        <span className="size-1.5 md:size-2 bg-black dark:bg-white group-hover:bg-white dark:group-hover:bg-black transition-colors"></span>
+                      <li key={feature} className="text-xs md:text-sm font-bold tracking-wide text-gray-600 dark:text-gray-300 flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#826BF0] text-lg">check_circle</span>
                         {feature}
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="flex flex-col gap-4 mt-12 md:mt-20">
-                  {/* Free Button */}
-                  <button
-                    onClick={handleFreeSignup}
-                    className="block w-full text-center border-2 border-black dark:border-white py-5 md:py-6 text-[10px] md:text-xs font-black  tracking-[0.2em] group-hover:bg-white group-hover:text-black dark:group-hover:bg-black dark:group-hover:text-white transition-all cursor-pointer"
-                  >
+                <div className="flex flex-col gap-4 mt-12 relative z-10">
+                  <button onClick={handleFreeSignup} className="block w-full text-center border-2 border-[#826BF0] text-[#826BF0] py-4 rounded-full text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#826BF0] hover:text-white transition-colors">
                     Start for Free
                   </button>
-
-                  {/* Premium Button */}
-                  <button
-                    onClick={() => handleUpgradePlan('student')}
-                    className="block w-full text-center border-2 border-black dark:border-white py-5 md:py-6 text-[10px] md:text-xs font-black  tracking-[0.2em] group-hover:bg-white group-hover:text-black dark:group-hover:bg-black dark:group-hover:text-white transition-all cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-sm">lock</span>
-                    Upgrade to Premium (₹99/mo)
+                  <button onClick={() => handleUpgradePlan('student')} className="block w-full text-center bg-[#826BF0] text-white py-4 rounded-full text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#6c56d6] transition-colors shadow-lg shadow-[#826BF0]/30 flex items-center justify-center gap-2">
+                    <span className="material-symbols-outlined text-sm">lock_open</span> Upgrade Premium
                   </button>
                 </div>
               </div>
 
               {/* Recruiter Plan */}
-              <div className="bg-black dark:bg-white text-white dark:text-black p-8 sm:p-12 md:p-16 flex flex-col justify-between relative shadow-2xl md:scale-105 z-10 transition-transform duration-500">
-                <div className="absolute top-6 sm:top-8 right-6 sm:right-8 text-[8px] sm:text-[10px] font-black  border border-white/20 dark:border-black/20 px-3 md:px-4 py-1.5 md:py-2 tracking-[0.25em] bg-white/10 dark:bg-black/10">
+              <div className="bg-black dark:bg-[#0A0A0A] text-white rounded-[40px] p-8 md:p-16 flex flex-col justify-between shadow-2xl md:scale-105 z-10 border border-white/10 hover:-translate-y-2 transition-transform duration-500 relative overflow-hidden">
+                <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#826BF0]/10 rounded-full blur-3xl translate-y-1/2 translate-x-1/4"></div>
+                <div className="absolute top-8 right-8 text-[10px] font-bold border border-white/20 px-4 py-2 rounded-full tracking-[0.2em] uppercase text-white/80">
                   For Teams
                 </div>
 
-                <div className="space-y-8">
-                  <h3 className="text-xl sm:text-2xl md:text-3xl font-black  tracking-tighter">
-                    Recruiter Pro
-                  </h3>
+                <div className="space-y-8 relative z-10">
+                  <h3 className="text-2xl md:text-3xl font-black tracking-tighter uppercase">Recruiter Pro</h3>
 
-                  <div className="text-5xl sm:text-6xl md:text-7xl font-black leading-none  tracking-tighter">
-                    ₹1,999
+                  <div className="text-5xl md:text-7xl font-black leading-none tracking-tighter">
+                    ₹1,999<span className="text-lg text-gray-500">/mo</span>
                   </div>
-                  <p className="text-[8px] font-black  tracking-widest opacity-60">
-                    Per Month
-                  </p>
 
-                  <ul className="space-y-4 md:space-y-6">
+                  <ul className="space-y-4 pt-4">
                     {[
                       'Unlimited job postings',
                       'Advanced candidate matching',
-                      'AI-powered screening',
                       'Access to highlighted students',
-                      'Custom filters & search',
-                      'Analytics dashboard',
                       'Team collaboration tools',
-                      'Priority listing',
-                      'Dedicated account manager',
-                      'Interview scheduling'
+                      'Priority listing & Support'
                     ].map(feature => (
-                      <li
-                        key={feature}
-                        className="text-[9px] sm:text-[10px] md:text-xs font-black  tracking-[0.15em] flex items-center gap-3 md:gap-4"
-                      >
-                        <span className="size-1.5 md:size-2 bg-white dark:bg-black"></span>
+                      <li key={feature} className="text-xs md:text-sm font-bold tracking-wide text-gray-300 flex items-center gap-3">
+                        <span className="material-symbols-outlined text-white text-lg">check_circle</span>
                         {feature}
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <button
-                  onClick={() => handleUpgradePlan('recruiter')}
-                  className="block w-full text-center border-2 border-white dark:border-black py-5 md:py-6 text-[10px] md:text-xs font-black  tracking-[0.2em] mt-6 hover:invert transition-all cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-sm">lock</span>
-                  Upgrade to Pro (₹1,999/mo)
+                <button onClick={() => handleUpgradePlan('recruiter')} className="relative z-10 block w-full text-center bg-white text-black py-4 rounded-full text-xs font-bold uppercase tracking-[0.2em] mt-12 hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-sm">rocket_launch</span> Upgrade to Pro
                 </button>
               </div>
-            </div>
-
-            {/* Additional Info */}
-            <div className="mt-16 md:mt-24 text-center">
-              <p className="text-[9px] sm:text-[10px] md:text-xs text-black/50 dark:text-white/50 font-black  tracking-[0.2em]">
-                All plans include 24/7 support • Cancel anytime • Payments are secure
-              </p>
             </div>
           </div>
         </section>
 
         {/* Network Section */}
-        <section id="network" className="py-20 sm:py-32 md:py-40 bg-black text-white dark:bg-white dark:text-black">
-          <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10 text-center">
-            <h2 className="text-3xl sm:text-5xl md:text-8xl font-black  tracking-tighter mb-12 sm:mb-20 leading-[0.9]">Built for<br />Real Careers</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 md:gap-12 lg:gap-16 mt-12 md:mt-20 border-t border-white/10 dark:border-black/10 pt-12 md:pt-20">
-              <div className="space-y-2">
-                <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none whitespace-nowrap">
+        <section id="network" className="py-20 sm:py-32">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-16 md:px-24">
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-16 text-center leading-[0.9]">Built for<br />Real Careers</h2>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12 bg-white dark:bg-[#1A1A1A] rounded-[40px] p-8 md:p-12 shadow-xl border border-black/5 dark:border-white/5">
+              <div className="flex flex-col items-center justify-center text-center space-y-2">
+                <p className="text-4xl sm:text-5xl md:text-6xl font-black leading-none text-[#826BF0]">
                   {liveMembers !== null ? `${liveMembers.toLocaleString()}` : '20+'}
                 </p>
-                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black  tracking-widest opacity-50">Talents Registered</p>
+                <p className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-gray-500">Talents</p>
               </div>
-              <div className="space-y-2">
-                <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none whitespace-nowrap">
-                  98.2%
+              <div className="flex flex-col items-center justify-center text-center space-y-2 border-l border-black/5 dark:border-white/5">
+                <p className="text-4xl sm:text-5xl md:text-6xl font-black leading-none text-[#826BF0]">
+                  {liveJobsMatched !== null ? `${liveJobsMatched.toLocaleString()}` : '98%'}
                 </p>
-                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black  tracking-widest opacity-50">Match Accuracy</p>
+                <p className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-gray-500">Accuracy</p>
               </div>
-              <div className="space-y-2">
-                <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none whitespace-nowrap">
+              <div className="flex flex-col items-center justify-center text-center space-y-2 border-l-0 lg:border-l border-t lg:border-t-0 border-black/5 dark:border-white/5 pt-6 lg:pt-0">
+                <p className="text-4xl sm:text-5xl md:text-6xl font-black leading-none text-[#826BF0]">
                   {liveCompanies !== null ? `${liveCompanies.toLocaleString()}` : '1+'}
                 </p>
-                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black  tracking-widest opacity-50">Hiring Companies</p>
+                <p className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-gray-500">Companies</p>
               </div>
-              <div className="space-y-2">
-                <p className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-none">2ms</p>
-                <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-black  tracking-widest opacity-50">Match Speed</p>
+              <div className="flex flex-col items-center justify-center text-center space-y-2 border-l border-t lg:border-t-0 border-black/5 dark:border-white/5 pt-6 lg:pt-0">
+                <p className="text-4xl sm:text-5xl md:text-6xl font-black leading-none text-[#826BF0]">1s</p>
+                <p className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-gray-500">Speed</p>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-black dark:border-white/10 bg-white dark:bg-background-dark">
-        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-10">
+      {/* 
+        =================
+        FOOTER
+        =================
+      */}
+      <div className="flex justify-center -mb-8 relative z-20">
+        <button onClick={scrollToTop} className="size-16 rounded-full bg-gradient-to-t from-[#6c56d6] to-[#826BF0] text-white flex items-center justify-center shadow-lg hover:-translate-y-2 transition-transform">
+          <span className="material-symbols-outlined">arrow_upward</span>
+        </button>
+      </div>
 
-          {/* Main grid */}
-          <div className="py-16 md:py-24 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-8 gap-y-12">
+      <footer className="bg-black text-white dark:bg-[#0A0A0A] pt-24 pb-12 px-6 sm:px-16 md:px-24 mx-4 md:mx-10 rounded-t-[40px] md:rounded-t-[60px] relative z-10 shadow-2xl">
+        <div className="max-w-[1200px] mx-auto flex flex-col items-center">
 
-            {/* Brand col — spans 2 on lg */}
-            <div className="col-span-2 md:col-span-3 lg:col-span-2 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="size-9 bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
-                  <span className="material-symbols-outlined text-xl">auto_awesome</span>
-                </div>
-                <span className="text-xl font-black  tracking-tighter">Asterix</span>
-              </div>
-              <p className="text-sm text-black/50 dark:text-white/50 leading-relaxed max-w-xs">
-                AI-powered job matching and auto-application platform. We match you to the right roles — and apply on your behalf.
-              </p>
-              {/* Social links */}
-              <div className="flex items-center gap-3">
-                {[
-                  { icon: 'link', label: 'LinkedIn', href: 'https://linkedin.com/company/asterix-jobs' },
-                  { icon: 'code', label: 'GitHub', href: 'https://github.com/asterix-jobs' },
-                  { icon: 'alternate_email', label: 'Twitter', href: 'https://x.com/asterixjobs' },
-                  { icon: 'camera_alt', label: 'Instagram', href: 'https://instagram.com/asterixjobs' },
-                ].map(s => (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    title={s.label}
-                    className="size-8 border border-black/15 dark:border-white/15 flex items-center justify-center text-black/40 dark:text-white/40 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-all"
-                  >
-                    <span className="material-symbols-outlined text-sm">{s.icon}</span>
-                  </a>
-                ))}
-              </div>
-              {/* Contact shortcut */}
-              <a href="mailto:hello@asterix-jobs.in" className="inline-flex items-center gap-2 text-[9px] font-black  tracking-widest text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white transition-colors">
-                <span className="material-symbols-outlined text-sm">mail</span>
-                hello@asterix-jobs.in
-              </a>
-            </div>
-
-            {/* Product */}
-            <div className="space-y-5">
-              <h5 className="text-[9px] font-black  tracking-[0.4em] text-black/40 dark:text-white/40">Product</h5>
-              <div className="flex flex-col gap-3 text-[10px] font-black  tracking-widest">
-                <button onClick={() => scrollToSection('features')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Features</button>
-                <button onClick={() => scrollToSection('process')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">How It Works</button>
-                <button onClick={() => scrollToSection('pricing')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Pricing</button>
-                <button onClick={() => scrollToSection('network')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Network</button>
-              </div>
-            </div>
-
-            {/* Job Seekers */}
-            <div className="space-y-5">
-              <h5 className="text-[9px] font-black  tracking-[0.4em] text-black/40 dark:text-white/40">Job Seekers</h5>
-              <div className="flex flex-col gap-3 text-[10px] font-black  tracking-widest">
-                <Link to="/signup" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Create Account</Link>
-                <Link to="/signup" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Upload Resume</Link>
-                <Link to="/candidate/jobs" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Browse Jobs</Link>
-                <Link to="/candidate" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Dashboard</Link>
-                <Link to="/candidate/applications" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">My Applications</Link>
-              </div>
-            </div>
-
-            {/* Recruiters */}
-            <div className="space-y-5">
-              <h5 className="text-[9px] font-black  tracking-[0.4em] text-black/40 dark:text-white/40">Recruiters</h5>
-              <div className="flex flex-col gap-3 text-[10px] font-black  tracking-widest">
-                <Link to="/signup" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Post a Job</Link>
-                <Link to="/recruiter" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Recruiter Portal</Link>
-                <Link to="/recruiter/talent" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Talent Pipeline</Link>
-                <Link to="/recruiter/reports" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Analytics</Link>
-                <button onClick={() => handleUpgradePlan('recruiter')} className="text-left hover:text-black/60 dark:hover:text-white/60 transition-colors">Upgrade to Pro</button>
-              </div>
-            </div>
-
-            {/* Company */}
-            <div className="space-y-5">
-              <h5 className="text-[9px] font-black  tracking-[0.4em] text-black/40 dark:text-white/40">Company</h5>
-              <div className="flex flex-col gap-3 text-[10px] font-black  tracking-widest">
-                <Link to="/about" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">About Us</Link>
-                <Link to="/contact" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Contact</Link>
-                <a href="mailto:careers@asterix-jobs.in" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Careers</a>
-                <a href="mailto:press@asterix-jobs.in" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Press / Media</a>
-                <a href="mailto:partnerships@asterix-jobs.in" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Partnerships</a>
-              </div>
-            </div>
+          <div className="flex items-center justify-center gap-3 mb-16 cursor-pointer" onClick={scrollToTop}>
+            <BrandLogo isDarkMode={true} className="size-10" />
+            <span className="text-2xl font-black tracking-tighter uppercase">Asterix</span>
           </div>
 
-          {/* Trust badges */}
-          <div className="py-6 border-t border-black/5 dark:border-white/5 flex flex-wrap items-center gap-6">
-            {[
-              { icon: 'lock', text: 'Payments Secured by Cashfree' },
-              { icon: 'verified_user', text: 'Firebase Auth' },
-              { icon: 'privacy_tip', text: 'GDPR Compliant' },
-              { icon: 'https', text: 'SSL Encrypted' },
-            ].map(b => (
-              <div key={b.text} className="flex items-center gap-1.5 text-[8px] font-black  tracking-widest text-black/30 dark:text-white/30">
-                <span className="material-symbols-outlined text-xs">{b.icon}</span>
-                {b.text}
-              </div>
-            ))}
+          <div className="flex flex-wrap justify-center gap-8 md:gap-16 lg:gap-32 text-xs font-bold tracking-[0.2em] uppercase mb-16 text-gray-400">
+            <button onClick={() => scrollToSection('features')} className="hover:text-white transition-colors">Features</button>
+            <button onClick={() => scrollToSection('process')} className="hover:text-white transition-colors">How It Works</button>
+            <button onClick={() => scrollToSection('pricing')} className="hover:text-white transition-colors">Pricing</button>
+            <button onClick={() => scrollToSection('network')} className="hover:text-white transition-colors">Network</button>
           </div>
 
-          {/* Bottom bar */}
-          <div className="py-6 border-t border-black/5 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-[8px] font-black  tracking-[0.4em] text-black/30 dark:text-white/30">
-              © {new Date().getFullYear()} Asterix Technologies. All rights reserved.
-            </p>
-            <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black  tracking-[0.3em] text-black/30 dark:text-white/30">
-              <Link to="/privacy" className="hover:text-black dark:hover:text-white transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="hover:text-black dark:hover:text-white transition-colors">Terms of Service</Link>
-              <a href="mailto:hello@asterix-jobs.in" className="hover:text-black dark:hover:text-white transition-colors">Contact</a>
-              <Link to="/about" className="hover:text-black dark:hover:text-white transition-colors">About</Link>
+          <div className="w-full flex flex-col items-center gap-6 text-[10px] font-bold tracking-widest text-gray-600 uppercase border-t border-white/10 pt-8">
+            <div className="flex items-center gap-6">
+              <Link to="/about" className="hover:text-gray-300 transition-colors">About</Link>
+              <Link to="/contact" className="hover:text-gray-300 transition-colors">Contact</Link>
+              <Link to="/privacy" className="hover:text-gray-300 transition-colors">Privacy</Link>
+              <Link to="/terms" className="hover:text-gray-300 transition-colors">Terms</Link>
             </div>
+            <p>© {new Date().getFullYear()} ASTERIX TECHNOLOGIES. ALL RIGHTS RESERVED.</p>
           </div>
 
         </div>
       </footer>
 
-
-
-
       <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          animation: marquee 40s linear infinite;
-        }
-        @keyframes bounce-x {
-          0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(5px); }
-        }
-        .animate-bounce-x {
-          animation: bounce-x 1s infinite;
-        }
         .outline-text {
           -webkit-text-stroke: 1px black;
         }
@@ -660,6 +545,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
             -webkit-text-stroke: 2px white;
           }
         }
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 40s linear infinite;
+        }
+        @keyframes fade-in-up {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 1s ease-out forwards;
+        }
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-slow {
+          animation: bounce-slow 4s ease-in-out infinite;
+        }
         .no-scrollbar::-webkit-scrollbar {
           display: none;
         }
@@ -667,18 +573,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
-        .glass-nav {
-          background-color: rgba(255, 255, 255, 0.8) !important;
-          backdrop-filter: blur(10px);
-        }
-        .dark .glass-nav {
-          background-color: rgba(0, 0, 0, 0.8) !important;
-        }
-        .dark .glass-nav {
-          background-color: rgba(0, 0, 0, 0.8) !important;
-        }
       `}</style>
-    </div >
+    </div>
   );
 };
 

@@ -252,7 +252,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
           <div className="hidden md:flex items-center gap-2">
             <div className="w-24 h-1 bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-emerald-500 transition-all duration-500"
+                className="h-full bg-[#826BF0] transition-all duration-500"
                 style={{ width: `${completePct}%` }}
               />
             </div>
@@ -363,7 +363,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
                   type="button"
                   onClick={toggle('remoteAllowed')}
                   className={`w-full px-5 py-4 text-[9px] font-black tracking-widest border transition-colors ${form.remoteAllowed
-                    ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
+                    ? 'border-[#826BF0] text-[#826BF0] bg-[#826BF0]/10'
                     : 'border-white/10 text-white/30 hover:border-white/20'
                     }`}
                 >
@@ -480,7 +480,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
                 {splitCommas(form.requiredSkills).map(s => (
                   <span
                     key={s}
-                    className="text-[7px] font-black tracking-widest px-2.5 py-1 border border-emerald-500/30 text-emerald-400"
+                    className="text-[7px] font-black tracking-widest px-2.5 py-1 border border-[#826BF0]/30 text-[#826BF0]"
                   >
                     {s}
                   </span>
@@ -496,7 +496,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
                 <label className="text-[9px] font-black tracking-widest text-white/40">
                   Auto-shortlist Threshold
                 </label>
-                <span className="text-2xl font-black text-emerald-400">{form.matchThreshold}%</span>
+                <span className="text-2xl font-black text-[#826BF0]">{form.matchThreshold}%</span>
               </div>
               <input
                 type="range"
@@ -505,7 +505,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
                 step="5"
                 value={form.matchThreshold}
                 onChange={(e) => setForm(prev => ({ ...prev, matchThreshold: parseInt(e.target.value) }))}
-                className="w-full h-0.5 appearance-none bg-white/10 accent-emerald-500"
+                className="w-full h-0.5 appearance-none bg-white/10 accent-[#826BF0]"
               />
               <p className="text-[8px] font-medium text-white/20 leading-relaxed">
                 Candidates scoring above this threshold will be auto-shortlisted. Lower = broader pool.
@@ -526,7 +526,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
               onClick={activate}
               disabled={status === 'saving' || status === 'saved'}
               className={`flex-1 py-5 text-[9px] font-black tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-2 ${status === 'saved'
-                ? 'bg-emerald-500 text-white'
+                ? 'bg-[#826BF0] text-white'
                 : 'bg-white text-black hover:bg-white/80'
                 }`}
             >
@@ -552,7 +552,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
 
           {/* AI Analysis panel */}
           <div className="border border-white/5 bg-white/[0.01] p-6 space-y-6">
-            <div className="flex items-center gap-2 text-emerald-400">
+            <div className="flex items-center gap-2 text-[#826BF0]">
               <span className={`material-symbols-outlined text-base ${isAnalyzing ? 'animate-pulse' : ''}`}>
                 auto_awesome
               </span>
@@ -574,7 +574,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
                   </div>
                   <div>
                     <p className="text-[7px] font-black tracking-widest text-white/30 mb-1">Threshold</p>
-                    <p className="text-3xl font-black text-emerald-400">{form.matchThreshold}%</p>
+                    <p className="text-3xl font-black text-[#826BF0]">{form.matchThreshold}%</p>
                   </div>
                 </div>
                 {(aiAnalysis.requirements ?? []).length > 0 && (
@@ -611,7 +611,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
               {sections.map((sec, i) => (
                 <div key={sec} className="flex items-center gap-3">
                   <div
-                    className={`size-1.5 rounded-full shrink-0 transition-colors ${filled[i] ? 'bg-emerald-500' : 'bg-white/10'
+                    className={`size-1.5 rounded-full shrink-0 transition-colors ${filled[i] ? 'bg-[#826BF0]' : 'bg-white/10'
                       }`}
                   />
                   <span
@@ -625,7 +625,7 @@ const PostJobPage: React.FC<PostJobPageProps> = ({ onToggleTheme, isDarkMode, is
             </div>
             <div className="h-0.5 bg-white/5 overflow-hidden">
               <div
-                className="h-full bg-emerald-500 transition-all duration-500"
+                className="h-full bg-[#826BF0] transition-all duration-500"
                 style={{ width: `${completePct}%` }}
               />
             </div>

@@ -30,7 +30,7 @@ const CandidateModal: React.FC<CandidateModalProps> = ({ candidate, onClose }) =
           <div className="flex items-center gap-6">
             <div className="size-16 md:size-24 bg-black dark:bg-white shrink-0 relative border border-black/10">
               <img src={candidate.avatarUrl} className="size-full object-cover" alt="" />
-              <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white size-8 flex items-center justify-center text-[10px] font-black tracking-tighter">AI</div>
+              <div className="absolute -bottom-2 -right-2 bg-[#826BF0] text-white size-8 flex items-center justify-center text-[10px] font-black tracking-tighter">AI</div>
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-3">
@@ -48,7 +48,7 @@ const CandidateModal: React.FC<CandidateModalProps> = ({ candidate, onClose }) =
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20">
             <div className="lg:col-span-7 space-y-12">
               <section className="bg-black text-white dark:bg-white dark:text-black p-8 md:p-10 space-y-8">
-                <div className="flex items-center gap-3 text-emerald-500">
+                <div className="flex items-center gap-3 text-[#826BF0]">
                   <span className="material-symbols-outlined animate-pulse">auto_awesome</span>
                   <h2 className="text-[10px] font-black tracking-[0.4em]">Neural Match Reasoning</h2>
                 </div>
@@ -92,17 +92,17 @@ const CandidateModal: React.FC<CandidateModalProps> = ({ candidate, onClose }) =
                       <div key={skill} className="space-y-3 group cursor-default">
                         <div className="flex justify-between text-[10px] font-black tracking-widest">
                           <span className="opacity-60 group-hover:opacity-100 transition-opacity">{skill}</span>
-                          <span className="group-hover:text-emerald-500 transition-colors">{val}%</span>
+                          <span className="group-hover:text-[#826BF0] transition-colors">{val}%</span>
                         </div>
                         <div className="w-full h-3 border border-black/10 dark:border-white/10 p-0.5">
-                          <div className="h-full bg-black dark:bg-white group-hover:bg-emerald-500 transition-all origin-left" style={{ width: `${val}%` }}></div>
+                          <div className="h-full bg-black dark:bg-white group-hover:bg-[#826BF0] transition-all origin-left" style={{ width: `${val}%` }}></div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </section>
-              
+
               <button className="w-full py-6 border border-black dark:border-white text-[10px] font-black tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-3">
                 <span className="material-symbols-outlined text-lg">download</span>
                 Download Data Sheet

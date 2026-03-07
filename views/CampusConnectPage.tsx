@@ -124,7 +124,7 @@ const CampusConnectPage: React.FC<CampusConnectPageProps> = ({ onToggleTheme, is
                                             value={digit}
                                             onChange={(e) => handleCodeChange(idx, e.target.value)}
                                             onKeyDown={(e) => handleKeyDown(idx, e)}
-                                            className="w-12 h-14 bg-white dark:bg-black border border-black/20 dark:border-white/20 rounded-xl text-center text-2xl font-black outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-sm"
+                                            className="w-12 h-14 bg-white dark:bg-black border border-black/20 dark:border-white/20 rounded-xl text-center text-2xl font-black outline-none focus:border-[#826BF0] focus:ring-2 focus:ring-[#826BF0]/20 transition-all shadow-sm"
                                         />
                                     ))}
                                 </div>
@@ -149,9 +149,9 @@ const CampusConnectPage: React.FC<CampusConnectPageProps> = ({ onToggleTheme, is
                         </p>
                     </div>
                 ) : (
-                    <div className="w-full max-w-lg flex flex-col items-center text-center space-y-6 bg-emerald-500/5 border border-emerald-500/20 p-12">
-                        <CheckCircle2 className="w-24 h-24 text-emerald-500" />
-                        <h2 className="text-3xl font-black tracking-tighter text-emerald-600 dark:text-emerald-400">ACCESS GRANTED</h2>
+                    <div className="w-full max-w-lg flex flex-col items-center text-center space-y-6 bg-[#826BF0]/5 border border-[#826BF0]/20 p-12">
+                        <CheckCircle2 className="w-24 h-24 text-[#826BF0]" />
+                        <h2 className="text-3xl font-black tracking-tighter text-[#826BF0] dark:text-[#826BF0]/80">ACCESS GRANTED</h2>
                         <p className="text-sm font-black tracking-widest opacity-70">
                             Your college ({selectedCollege}) has been successfully verified.
                         </p>

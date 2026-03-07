@@ -49,13 +49,13 @@ const STAGES: {
   activeColor: string;
   accentText: string;
 }[] = [
-  { key: "submitted", label: "Submitted",   icon: "send",          activeColor: "bg-sky-500",     accentText: "text-sky-400"     },
-  { key: "reviewing", label: "Shortlisted", icon: "manage_search", activeColor: "bg-amber-400",   accentText: "text-amber-400"   },
-  { key: "interview", label: "Interview",   icon: "groups",        activeColor: "bg-violet-500",  accentText: "text-violet-400"  },
-  { key: "offer",     label: "Offer",       icon: "verified",      activeColor: "bg-emerald-500", accentText: "text-emerald-400" },
-  { key: "hired",     label: "Hired",       icon: "emoji_events",  activeColor: "bg-emerald-600", accentText: "text-emerald-300" },
-  { key: "rejected",  label: "Declined",    icon: "cancel",        activeColor: "bg-red-500",     accentText: "text-red-400"     },
-];
+    { key: "submitted", label: "Submitted", icon: "send", activeColor: "bg-sky-500", accentText: "text-sky-400" },
+    { key: "reviewing", label: "Shortlisted", icon: "manage_search", activeColor: "bg-amber-400", accentText: "text-amber-400" },
+    { key: "interview", label: "Interview", icon: "groups", activeColor: "bg-violet-500", accentText: "text-violet-400" },
+    { key: "offer", label: "Offer", icon: "verified", activeColor: "bg-[#826BF0]", accentText: "text-[#826BF0]" },
+    { key: "hired", label: "Hired", icon: "emoji_events", activeColor: "bg-[#826BF0]", accentText: "text-[#826BF0]" },
+    { key: "rejected", label: "Declined", icon: "cancel", activeColor: "bg-red-500", accentText: "text-red-400" },
+  ];
 
 // The linear progression (excluding rejected which is a branch-off)
 const STAGE_ORDER: ApplicationStage[] = ["submitted", "reviewing", "interview", "offer", "hired"];
@@ -66,20 +66,20 @@ const STAGE_ORDER: ApplicationStage[] = ["submitted", "reviewing", "interview", 
 function pipelineStageToAppStage(ps: string): ApplicationStage {
   switch (ps) {
     case "shortlisted": return "reviewing";
-    case "interview":   return "interview";
-    case "offer":       return "offer";
-    case "hired":       return "hired";
-    default:            return "submitted";
+    case "interview": return "interview";
+    case "offer": return "offer";
+    case "hired": return "hired";
+    default: return "submitted";
   }
 }
 
 function deriveStageFromStatus(status: string): ApplicationStage {
   const s = (status || "").toLowerCase();
-  if (s === "hired")                                   return "hired";
-  if (s.includes("offer"))                             return "offer";
-  if (s.includes("interview"))                         return "interview";
+  if (s === "hired") return "hired";
+  if (s.includes("offer")) return "offer";
+  if (s.includes("interview")) return "interview";
   if (s.includes("shortlist") || s.includes("reviewing") || s.includes("screen")) return "reviewing";
-  if (s.includes("reject") || s.includes("declined") || s.includes("closed"))    return "rejected";
+  if (s.includes("reject") || s.includes("declined") || s.includes("closed")) return "rejected";
   return "submitted";
 }
 
@@ -108,17 +108,17 @@ const PipelineBar = ({
   recruiterName?: string;
 }) => {
   const isRejected = stage === "rejected";
-  const activeIdx  = isRejected ? -1 : STAGE_ORDER.indexOf(stage);
+  const activeIdx = isRejected ? -1 : STAGE_ORDER.indexOf(stage);
 
   return (
     <div className="mt-6 pt-6 border-t border-black/10 dark:border-white/10">
       {/* Desktop */}
       <div className="hidden sm:flex items-center gap-0 w-full">
         {STAGE_ORDER.map((s, i) => {
-          const cfg      = STAGES.find((x) => x.key === s)!;
-          const isDone   = !isRejected && i <= activeIdx;
+          const cfg = STAGES.find((x) => x.key === s)!;
+          const isDone = !isRejected && i <= activeIdx;
           const isActive = !isRejected && i === activeIdx;
-          const isLast   = i === STAGE_ORDER.length - 1;
+          const isLast = i === STAGE_ORDER.length - 1;
 
           return (
             <React.Fragment key={s}>
@@ -167,8 +167,8 @@ const PipelineBar = ({
       {/* Mobile chips */}
       <div className="sm:hidden flex gap-2 flex-wrap">
         {(isRejected ? [...STAGE_ORDER, "rejected" as ApplicationStage] : STAGE_ORDER).map((s, i) => {
-          const cfg      = STAGES.find((x) => x.key === s)!;
-          const isDone   = s === "rejected" ? isRejected : !isRejected && i <= activeIdx;
+          const cfg = STAGES.find((x) => x.key === s)!;
+          const isDone = s === "rejected" ? isRejected : !isRejected && i <= activeIdx;
           const isActive = s === "rejected" ? isRejected : !isRejected && i === activeIdx;
           return (
             <div
@@ -193,18 +193,18 @@ const PipelineBar = ({
 const ApplicationCard = ({ app }: { app: Application }) => {
   const [expanded, setExpanded] = useState(false);
 
-  const stage       = resolveStage(app);
+  const stage = resolveStage(app);
   const stageConfig = STAGES.find((s) => s.key === stage) ?? STAGES[0];
-  const isRejected  = stage === "rejected";
-  const isOffer     = stage === "offer";
-  const isHired     = stage === "hired";
+  const isRejected = stage === "rejected";
+  const isOffer = stage === "offer";
+  const isHired = stage === "hired";
 
   return (
     <div
       className={`
         border bg-white dark:bg-background-dark transition-all duration-300 group
-        ${isHired  ? "border-2 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]" : "border-black dark:border-white/10"}
-        ${isOffer  ? "border-l-8 border-l-emerald-500" : ""}
+        ${isHired ? "border-2 border-[#826BF0] shadow-[0_0_30px_rgba(130,107,240,0.1)]" : "border-black dark:border-white/10"}
+        ${isOffer ? "border-l-8 border-l-[#826BF0]" : ""}
         ${isRejected ? "opacity-50" : ""}
       `}
     >
@@ -227,7 +227,7 @@ const ApplicationCard = ({ app }: { app: Application }) => {
             </span>
 
             {app.aiApplied && (
-              <span className="flex items-center gap-1 text-[9px] font-black tracking-widest text-emerald-500">
+              <span className="flex items-center gap-1 text-[9px] font-black tracking-widest text-[#826BF0]">
                 <span className="material-symbols-outlined text-xs">auto_awesome</span>
                 AI Applied
               </span>
@@ -277,7 +277,7 @@ const ApplicationCard = ({ app }: { app: Application }) => {
 
           {/* Hired celebration */}
           {isHired && (
-            <div className="flex items-center gap-2 text-emerald-500">
+            <div className="flex items-center gap-2 text-[#826BF0]">
               <span className="material-symbols-outlined text-lg animate-bounce">emoji_events</span>
               <span className="text-[10px] font-black tracking-widest">Offer accepted — congratulations!</span>
             </div>
@@ -383,9 +383,9 @@ const ApplicationsPage: React.FC<{
   onToggleTheme: () => void;
   isDarkMode: boolean;
 }> = ({ onToggleTheme, isDarkMode }) => {
-  const [isMenuOpen, setIsMenuOpen]       = useState(false);
-  const [applications, setApplications]   = useState<Application[]>([]);
-  const [activeFilter, setActiveFilter]   = useState<ApplicationStage | "all" | "ai" | "manual">("all");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [activeFilter, setActiveFilter] = useState<ApplicationStage | "all" | "ai" | "manual">("all");
 
   /* ================= REALTIME FETCH ================= */
 
@@ -410,23 +410,23 @@ const ApplicationsPage: React.FC<{
         const data: Application[] = snapshot.docs.map((docSnap) => {
           const raw = docSnap.data();
           return {
-            id:            docSnap.id,
-            role:          raw.jobTitle      ?? raw.role      ?? "Unknown Role",
-            company:       raw.companyName   ?? raw.company   ?? "Unknown Company",
-            status:        raw.status        ?? "applied",
-            progress:      typeof raw.matchScore === "number" ? raw.matchScore : (raw.progress ?? 0),
-            aiApplied:     Boolean(raw.autoApplied ?? raw.aiApplied),
-            mailNotified:  raw.mailNotified  ?? false,
-            date:          raw.appliedAt?.toDate?.().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) ?? raw.date,
-            stage:         raw.stage         as ApplicationStage ?? undefined,
+            id: docSnap.id,
+            role: raw.jobTitle ?? raw.role ?? "Unknown Role",
+            company: raw.companyName ?? raw.company ?? "Unknown Company",
+            status: raw.status ?? "applied",
+            progress: typeof raw.matchScore === "number" ? raw.matchScore : (raw.progress ?? 0),
+            aiApplied: Boolean(raw.autoApplied ?? raw.aiApplied),
+            mailNotified: raw.mailNotified ?? false,
+            date: raw.appliedAt?.toDate?.().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) ?? raw.date,
+            stage: raw.stage as ApplicationStage ?? undefined,
             pipelineStage: raw.pipelineStage ?? undefined,
             recruiterName: raw.recruiterName ?? undefined,
             recruiterTitle: raw.recruiterTitle ?? undefined,
-            location:      raw.location      ?? undefined,
-            salaryRange:   raw.salaryRange   ?? undefined,
+            location: raw.location ?? undefined,
+            salaryRange: raw.salaryRange ?? undefined,
             employmentType: raw.employmentType ?? undefined,
-            lastActivity:  raw.lastActivity  ?? undefined,
-            notes:         raw.notes         ?? undefined,
+            lastActivity: raw.lastActivity ?? undefined,
+            notes: raw.notes ?? undefined,
           };
         });
 
@@ -452,25 +452,25 @@ const ApplicationsPage: React.FC<{
   /* ================= FILTER ================= */
 
   const filtered = applications.filter((a) => {
-    if (activeFilter === "all")    return true;
-    if (activeFilter === "ai")     return a.aiApplied;
+    if (activeFilter === "all") return true;
+    if (activeFilter === "ai") return a.aiApplied;
     if (activeFilter === "manual") return !a.aiApplied;
     return resolveStage(a) === activeFilter;
   });
 
-  const autoApplied   = filtered.filter((a) => a.aiApplied);
+  const autoApplied = filtered.filter((a) => a.aiApplied);
   const manualApplied = filtered.filter((a) => !a.aiApplied);
 
   const FILTER_TABS: { key: typeof activeFilter; label: string }[] = [
-    { key: "all",       label: "All"        },
-    { key: "ai",        label: "AI Applied" },
-    { key: "manual",    label: "Manual"     },
-    { key: "submitted", label: "Submitted"  },
-    { key: "reviewing", label: "Shortlisted"},
-    { key: "interview", label: "Interview"  },
-    { key: "offer",     label: "Offer"      },
-    { key: "hired",     label: "Hired"      },
-    { key: "rejected",  label: "Declined"   },
+    { key: "all", label: "All" },
+    { key: "ai", label: "AI Applied" },
+    { key: "manual", label: "Manual" },
+    { key: "submitted", label: "Submitted" },
+    { key: "reviewing", label: "Shortlisted" },
+    { key: "interview", label: "Interview" },
+    { key: "offer", label: "Offer" },
+    { key: "hired", label: "Hired" },
+    { key: "rejected", label: "Declined" },
   ];
 
   /* ================= UI ================= */

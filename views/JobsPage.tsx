@@ -461,7 +461,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                 </div>
               </div>
 
-              <div className="bg-emerald-500 text-white p-6 space-y-4 shadow-xl">
+              <div className="bg-[#826BF0] text-white p-6 space-y-4 shadow-xl">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-lg animate-pulse">auto_awesome</span>
                   <h4 className="text-[9px] font-black  tracking-widest">Auto-Pilot</h4>
@@ -472,7 +472,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
                 <button
                   id="jobspage-recalibrate-btn"
                   onClick={handleInitializeAutoPilot}
-                  className={`w-full py-3 text-[9px] font-black  tracking-widest border-2 border-white transition-all ${isAutoPilotActive ? 'bg-white text-emerald-500' : 'hover:bg-white hover:text-emerald-500'}`}
+                  className={`w-full py-3 text-[9px] font-black  tracking-widest border-2 border-white transition-all ${isAutoPilotActive ? 'bg-white text-[#826BF0]' : 'hover:bg-white hover:text-[#826BF0]'}`}
                 >
                   {isAutoPilotActive ? '✓ Active' : 'Start Auto-Pilot'}
                 </button>
@@ -483,7 +483,7 @@ const JobsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean }> = (
           <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-16 custom-scrollbar">
             {isVectorizing && (
               <div className="fixed top-[73px] left-0 right-0 h-1 bg-black/5 dark:bg-white/5 z-20">
-                <div className="absolute inset-0 bg-emerald-500 animate-marquee" style={{ width: '30%' }} />
+                <div className="absolute inset-0 bg-[#826BF0] animate-marquee" style={{ width: '30%' }} />
               </div>
             )}
 
@@ -683,7 +683,7 @@ const JobCard: React.FC<{
       {(job.matchScore !== undefined || job.analyzing) && (
         <div className="h-[2px] w-full bg-black/5 dark:bg-white/5">
           <div
-            className={`h-full transition-all duration-1000 ease-out ${job.analyzing ? 'bg-emerald-500 animate-marquee' : 'bg-[#ffb800]'}`}
+            className={`h-full transition-all duration-1000 ease-out ${job.analyzing ? 'bg-[#826BF0] animate-marquee' : 'bg-[#ffb800]'}`}
             style={{ width: job.analyzing ? '30%' : `${score}%` }}
           />
         </div>
@@ -703,7 +703,7 @@ const JobCard: React.FC<{
           {/* AI Audit */}
           <button
             onClick={(e) => { e.stopPropagation(); onAIAudit(); }}
-            className="px-4 py-2 flex items-center gap-2 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all font-bold tracking-widest text-[9px] uppercase hover:shadow-lg"
+            className="px-4 py-2 flex items-center gap-2 border border-[#826BF0]/30 text-[#826BF0] dark:text-[#826BF0] hover:bg-[#826BF0]/5 dark:hover:bg-[#826BF0]/10 transition-all font-bold tracking-widest text-[9px] uppercase hover:shadow-lg"
           >
             <span className="material-symbols-outlined text-sm">robot_2</span>
             AI Audit
@@ -713,7 +713,7 @@ const JobCard: React.FC<{
         <div className="flex items-center gap-3 w-full sm:w-auto">
           {isApplied ? (
             <div className={`flex items-center gap-2 justify-center px-5 py-3 sm:py-2.5 text-[9px] sm:text-[10px] font-black tracking-widest uppercase w-full sm:w-auto
-              ${job.isAdminPosted ? 'bg-indigo-600 text-white' : 'bg-[#00d1a0] text-white dark:text-black'}`}>
+              ${job.isAdminPosted ? 'bg-[#826BF0] text-white' : 'bg-[#826BF0] text-white'}`}>
               <span className="material-symbols-outlined text-lg">check_circle</span>
               Applied
             </div>

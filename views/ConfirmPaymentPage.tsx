@@ -208,8 +208,8 @@ const ConfirmPaymentPage: React.FC<ConfirmPaymentPageProps> = ({ onPaymentSucces
                         <ul className="space-y-4">
                             {plan.features.map((feature, i) => (
                                 <li key={i} className="flex items-center gap-3 group">
-                                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-[12px] text-emerald-400">check</span>
+                                    <div className="w-5 h-5 rounded-full bg-[#826BF0]/20 border border-[#826BF0]/40 flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-[12px] text-[#826BF0]">check</span>
                                     </div>
                                     <span className="text-sm font-bold tracking-widest text-gray-300 group-hover:text-white transition-colors">
                                         {feature}

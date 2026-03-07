@@ -361,7 +361,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
                     <button
                       onClick={handleSave}
                       disabled={isSaving}
-                      className="flex-1 sm:flex-none px-6 py-2 text-[9px] font-black tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                      className="flex-1 sm:flex-none px-6 py-2 text-[9px] font-black tracking-widest bg-[#826BF0] text-white hover:bg-[#826BF0]/80 transition-colors disabled:opacity-50"
                     >
                       {isSaving ? 'Saving...' : 'Save All Changes'}
                     </button>
@@ -717,7 +717,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onToggleTheme, isDarkMode }) 
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex-1 md:flex-none px-4 py-2 text-[8px] md:text-[9px] font-black tracking-widest bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
+              className="flex-1 md:flex-none px-4 py-2 text-[8px] md:text-[9px] font-black tracking-widest bg-[#826BF0] text-white hover:bg-[#826BF0]/80 transition-colors disabled:opacity-50"
             >
               {isSaving ? 'Saving...' : 'Save Now'}
             </button>

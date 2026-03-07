@@ -785,8 +785,8 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             <div
               key={n.id}
               className={`pointer-events-auto border-l-4 p-5 md:p-6 shadow-[0_30px_60px_rgba(0,0,0,0.25)] animate-in slide-in-from-right-full duration-500 flex flex-col gap-3
-                ${n.type === 'success' ? 'bg-emerald-500 text-white border-white' :
-                  n.type === 'alert' ? 'bg-black text-white border-emerald-500 dark:bg-white dark:text-black' :
+                ${n.type === 'success' ? 'bg-[#826BF0] text-white border-white' :
+                  n.type === 'alert' ? 'bg-black text-white border-[#826BF0] dark:bg-white dark:text-black' :
                     'bg-white text-black border-black dark:bg-zinc-900 dark:text-white dark:border-white'}`}
             >
               <div className="flex justify-between items-start gap-4">
@@ -821,15 +821,15 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             {/* Plan badge inline */}
             {!isPlanLoading && (
               canManualApply ? (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 border border-emerald-500/40 bg-emerald-500/5">
-                  <span className="material-symbols-outlined text-xs text-emerald-500">verified</span>
-                  <span className="text-[7px] font-black  tracking-widest text-emerald-500">Student Plan</span>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 border border-[#826BF0]/40 bg-[#826BF0]/5">
+                  <span className="material-symbols-outlined text-xs text-[#826BF0]">verified</span>
+                  <span className="text-[7px] font-black  tracking-widest text-[#826BF0]">Student Plan</span>
                 </div>
               ) : (
                 <button onClick={() => setShowUpgradeModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 border border-black/10 dark:border-white/10 hover:border-emerald-500 transition-all group">
-                  <span className="material-symbols-outlined text-xs opacity-30 group-hover:text-emerald-500 group-hover:opacity-100 transition-all">lock</span>
-                  <span className="text-[7px] font-black  tracking-widest opacity-30 group-hover:opacity-100 group-hover:text-emerald-500 transition-all">Free Plan</span>
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-black/10 dark:border-white/10 hover:border-[#826BF0] transition-all group">
+                  <span className="material-symbols-outlined text-xs opacity-30 group-hover:text-[#826BF0] group-hover:opacity-100 transition-all">lock</span>
+                  <span className="text-[7px] font-black  tracking-widest opacity-30 group-hover:opacity-100 group-hover:text-[#826BF0] transition-all">Free Plan</span>
                 </button>
               )
             )}
@@ -840,13 +840,13 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
             {/* Auto-pilot */}
             <div className={`flex items-center gap-2 px-3 py-1.5 border shrink-0 transition-all
-              ${isAutoPilotOn ? 'border-emerald-500 bg-emerald-500/5' : 'border-black/10 dark:border-white/10'}`}>
-              <span className={`text-[8px] font-black  tracking-widest ${isAutoPilotOn ? 'text-emerald-500' : 'opacity-40'}`}>
+              ${isAutoPilotOn ? 'border-[#826BF0] bg-[#826BF0]/5' : 'border-black/10 dark:border-white/10'}`}>
+              <span className={`text-[8px] font-black  tracking-widest ${isAutoPilotOn ? 'text-[#826BF0]' : 'opacity-40'}`}>
                 Agent {isAutoPilotOn ? 'Active' : 'Offline'}
               </span>
               <button onClick={toggleAutoPilot}
                 className={`w-7 h-7 flex items-center justify-center border transition-all
-                  ${isAutoPilotOn ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-black/30 dark:border-white/30'}`}>
+                  ${isAutoPilotOn ? 'bg-[#826BF0] border-[#826BF0] text-white' : 'border-black/30 dark:border-white/30'}`}>
                 <span className={`material-symbols-outlined text-sm ${isAutoPilotOn ? 'animate-spin-slow' : ''}`}>
                   {isAutoPilotOn ? 'auto_awesome' : 'power_settings_new'}
                 </span>
@@ -882,7 +882,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
             {/* Resume preview */}
             {canViewResume && (
               <button onClick={openResumeViewer}
-                className="flex items-center gap-1.5 px-3 py-1.5 border border-emerald-500/50 text-emerald-600 dark:text-emerald-400 text-[8px] font-black  tracking-widest shrink-0 hover:bg-emerald-500 hover:text-white transition-all">
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-[#826BF0]/50 text-[#826BF0] text-[8px] font-black  tracking-widest shrink-0 hover:bg-[#826BF0] hover:text-white transition-all">
                 <span className="material-symbols-outlined text-xs">description</span>
                 Resume
               </button>
@@ -903,7 +903,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
           {/* Vectorizing progress bar */}
           {isVectorizing && (
             <div className="w-full h-1 bg-black/5 dark:bg-white/5 relative overflow-hidden">
-              <div className="absolute inset-0 bg-emerald-500 animate-marquee" style={{ width: '20%' }} />
+              <div className="absolute inset-0 bg-[#826BF0] animate-marquee" style={{ width: '20%' }} />
             </div>
           )}
 
@@ -974,7 +974,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                         onClick={() => navigate(`/job/${job.id}`, { state: { job } })}
                         className={`relative border dark:border-white/10 transition-all duration-300 overflow-hidden cursor-pointer hover:border-black dark:hover:border-white group/card
                           bg-white dark:bg-background-dark
-                          ${isApplied ? 'border-emerald-500/60 border-l-4 border-l-emerald-500' : 'border-black/15'}`}
+                          ${isApplied ? 'border-[#826BF0]/60 border-l-4 border-l-[#826BF0]' : 'border-black/15'}`}
                       >
                         {/* Analyzing overlay */}
                         {job.analyzing && (
@@ -1004,7 +1004,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
                           {/* Score badge */}
                           <div className="shrink-0 text-right">
-                            <div className={`text-2xl font-black leading-none tabular-nums ${score >= 70 ? 'text-emerald-500' : score >= 40 ? 'text-amber-500' : 'text-black/40 dark:text-white/30'
+                            <div className={`text-2xl font-black leading-none tabular-nums ${score >= 70 ? 'text-[#826BF0]' : score >= 40 ? 'text-amber-500' : 'text-black/40 dark:text-white/30'
                               }`}>{score}%</div>
                             <div className="text-[7px] font-black tracking-[0.3em] opacity-30 mt-0.5">Match</div>
                           </div>
@@ -1037,7 +1037,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                         {/* ── SCORE BAR ── */}
                         <div className="h-0.5 w-full bg-black/5 dark:bg-white/5">
                           <div
-                            className={`h-full transition-all duration-700 ${score >= 70 ? 'bg-emerald-500' : score >= 40 ? 'bg-amber-500' : 'bg-black/20'
+                            className={`h-full transition-all duration-700 ${score >= 70 ? 'bg-[#826BF0]' : score >= 40 ? 'bg-amber-500' : 'bg-black/20'
                               }`}
                             style={{ width: `${score}%` }}
                           />
@@ -1049,7 +1049,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                           <div className="flex items-center gap-2">
                             {score > 0 && (
                               <button onClick={(e) => { e.stopPropagation(); handleAceInterview(job); }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 text-[8px] font-black tracking-widest border border-emerald-500/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all font-mono"
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-[8px] font-black tracking-widest border border-[#826BF0]/50 text-[#826BF0] hover:bg-[#826BF0] hover:text-white hover:border-[#826BF0] transition-all font-mono"
                               >
                                 <span className="material-symbols-outlined text-xs">emoji_objects</span>
                                 Ace Interview
@@ -1067,7 +1067,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
 
                           {/* Apply / Applied */}
                           {isApplied ? (
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-[8px] font-black tracking-widest">
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#826BF0] text-white text-[8px] font-black tracking-widest">
                               <span className="material-symbols-outlined text-xs">check_circle</span>
                               Applied
                             </div>
@@ -1082,11 +1082,11 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                                   className={`relative flex items-center gap-1.5 px-4 py-1.5 text-[8px] font-black tracking-widest transition-all
                                     ${isEligible
                                       ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
-                                      : 'border border-black/20 dark:border-white/20 opacity-50 hover:border-emerald-500 hover:text-emerald-500 hover:opacity-100'}`}>
+                                      : 'border border-black/20 dark:border-white/20 opacity-50 hover:border-[#826BF0] hover:text-[#826BF0] hover:opacity-100'}`}>
                                   {!isEligible && <span className="material-symbols-outlined text-xs">{isPremiumButLowScore ? 'warning' : 'lock'}</span>}
                                   {isPremiumButLowScore ? 'Low Match' : 'Apply'}
                                   {!canManualApply && (
-                                    <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[6px] font-black px-1 py-0.5">PRO</span>
+                                    <span className="absolute -top-1.5 -right-1.5 bg-[#826BF0] text-white text-[6px] font-black px-1 py-0.5">PRO</span>
                                   )}
                                 </button>
                               );
@@ -1109,23 +1109,23 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
               <div className="border border-black dark:border-white/20 p-6 md:p-8 space-y-6 bg-black/5 dark:bg-white/5">
                 <div className="flex justify-between items-start">
                   <h4 className="text-[10px] font-black tracking-[0.3em] opacity-40">Auto-Pilot Status</h4>
-                  <span className={`material-symbols-outlined text-sm ${isAutoPilotOn ? 'text-emerald-500 animate-pulse' : 'opacity-20'}`}>
+                  <span className={`material-symbols-outlined text-sm ${isAutoPilotOn ? 'text-[#826BF0] animate-pulse' : 'opacity-20'}`}>
                     offline_bolt
                   </span>
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <p className="text-[8px] font-black tracking-widest opacity-40">Application Rules</p>
-                    <p className="text-xs font-black text-emerald-500">Recruiter-defined threshold</p>
+                    <p className="text-xs font-black text-[#826BF0]">Recruiter-defined threshold</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[8px] font-black tracking-widest opacity-40">Sync Interval</p>
                     <p className="text-xs font-black">Every 15 Minutes</p>
                   </div>
-                  <div className="p-3 border border-emerald-500/30 bg-emerald-500/5 space-y-1">
+                  <div className="p-3 border border-[#826BF0]/30 bg-[#826BF0]/5 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-xs text-emerald-500">info</span>
-                      <span className="text-[8px] font-black tracking-widest text-emerald-500">Available on all plans</span>
+                      <span className="material-symbols-outlined text-xs text-[#826BF0]">info</span>
+                      <span className="text-[8px] font-black tracking-widest text-[#826BF0]">Available on all plans</span>
                     </div>
                     <p className="text-[8px] font-black tracking-widest opacity-40 leading-relaxed">
                       Auto-Pilot applies for you automatically using recruiter thresholds. Manual Initialize requires Student Plan.
@@ -1140,18 +1140,18 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                   onClick={() => !canManualApply && setShowUpgradeModal(true)}
                   className={`border-2 p-6 space-y-4 transition-all
                     ${canManualApply
-                      ? 'border-emerald-500/30 bg-emerald-500/5'
-                      : 'border-black/10 dark:border-white/10 cursor-pointer hover:border-emerald-500 group'}`}
+                      ? 'border-[#826BF0]/30 bg-[#826BF0]/5'
+                      : 'border-black/10 dark:border-white/10 cursor-pointer hover:border-[#826BF0] group'}`}
                 >
                   <div className="flex justify-between items-start">
                     <h4 className="text-[9px] font-black tracking-[0.3em] opacity-40">Access Tier</h4>
                     <span className={`material-symbols-outlined text-sm transition-all
-                      ${canManualApply ? 'text-emerald-500' : 'opacity-20 group-hover:text-emerald-500 group-hover:opacity-100'}`}>
+                      ${canManualApply ? 'text-[#826BF0]' : 'opacity-20 group-hover:text-[#826BF0] group-hover:opacity-100'}`}>
                       {canManualApply ? 'verified' : 'lock'}
                     </span>
                   </div>
                   <div>
-                    <p className={`text-xl font-black tracking-tight ${canManualApply ? 'text-emerald-500' : ''}`}>
+                    <p className={`text-xl font-black tracking-tight ${canManualApply ? 'text-[#826BF0]' : ''}`}>
                       {planLabel}
                     </p>
                     <p className="text-[8px] font-black tracking-widest opacity-40 mt-1 leading-relaxed">
@@ -1162,7 +1162,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                   </div>
                   {!canManualApply && (
                     <div className="pt-2 border-t border-black/5 dark:border-white/5">
-                      <span className="text-[8px] font-black tracking-widest text-emerald-500 group-hover:underline">
+                      <span className="text-[8px] font-black tracking-widest text-[#826BF0] group-hover:underline">
                         Upgrade to Student Plan →
                       </span>
                     </div>
@@ -1176,7 +1176,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                 <div className="space-y-2">
                   <p className="text-[8px] font-black tracking-widest opacity-40">Active File</p>
                   <p className="text-xs font-black truncate">{resumeName}</p>
-                  <span className="text-[7px] font-black tracking-widest px-2 py-0.5 border inline-block border-emerald-500 text-emerald-500">
+                  <span className="text-[7px] font-black tracking-widest px-2 py-0.5 border inline-block border-[#826BF0] text-[#826BF0]">
                     SAVED
                   </span>
                   <span className="text-[7px] font-black tracking-widest px-2 py-0.5 border inline-block border-white/20 text-white/40 dark:border-black/20 dark:text-black/40 ml-2">

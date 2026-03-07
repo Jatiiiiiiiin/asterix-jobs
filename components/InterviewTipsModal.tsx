@@ -15,7 +15,7 @@ const SECTIONS = [
         label: 'Strengths',
         sublabel: 'Lead with these',
         icon: 'verified',
-        color: '#10b981',
+        color: '#826BF0',
         tag: '01',
     },
     {
@@ -62,12 +62,12 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                     <div className="flex items-center gap-4">
                         <div
                             className="w-9 h-9 flex items-center justify-center shrink-0"
-                            style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)' }}
+                            style={{ background: 'rgba(130,107,240,0.12)', border: '1px solid rgba(130,107,240,0.3)' }}
                         >
-                            <span className="material-symbols-outlined text-lg" style={{ color: '#10b981' }}>emoji_objects</span>
+                            <span className="material-symbols-outlined text-lg" style={{ color: '#826BF0' }}>emoji_objects</span>
                         </div>
                         <div>
-                            <p className="text-[6px] md:text-[7px] font-black tracking-[0.4em] md:tracking-[0.5em] mb-0.5 opacity-80" style={{ color: '#10b981' }}>
+                            <p className="text-[6px] md:text-[7px] font-black tracking-[0.4em] md:tracking-[0.5em] mb-0.5 opacity-80" style={{ color: '#826BF0' }}>
                                 Interview Ace Protocol
                             </p>
                             <h2 className="text-sm md:text-base font-black tracking-tight text-white leading-none truncate max-w-[150px] sm:max-w-xs lg:max-w-md">
@@ -79,10 +79,10 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                     <div className="flex items-center gap-3 shrink-0">
                         <div
                             className="hidden sm:flex items-center gap-1.5 px-2.5 py-1"
-                            style={{ border: '1px solid rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.05)' }}
+                            style={{ border: '1px solid rgba(130,107,240,0.25)', background: 'rgba(130,107,240,0.05)' }}
                         >
-                            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#10b981' }} />
-                            <span className="text-[7px] font-black tracking-widest" style={{ color: '#10b981' }}>
+                            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#826BF0' }} />
+                            <span className="text-[7px] font-black tracking-widest" style={{ color: '#826BF0' }}>
                                 Llama 3.3 (Groq)
                             </span>
                         </div>
@@ -104,7 +104,7 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                         <div className="flex flex-col items-center justify-center gap-6 py-24">
                             <span
                                 className="material-symbols-outlined text-6xl"
-                                style={{ color: '#10b981', animation: 'ace-spin 1.2s linear infinite' }}
+                                style={{ color: '#826BF0', animation: 'ace-spin 1.2s linear infinite' }}
                             >
                                 neurology
                             </span>
@@ -120,7 +120,7 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                                 className="w-48 overflow-hidden"
                                 style={{ height: 2, background: 'rgba(255,255,255,0.05)' }}
                             >
-                                <div style={{ width: '35%', height: '100%', background: '#10b981', animation: 'ace-slide 1.4s linear infinite' }} />
+                                <div style={{ width: '35%', height: '100%', background: '#826BF0', animation: 'ace-slide 1.4s linear infinite' }} />
                             </div>
                         </div>
 
@@ -194,7 +194,7 @@ export default function InterviewTipsModal({ isOpen, jobTitle, tips, isLoading, 
                         <button
                             onClick={onClose}
                             className="w-full sm:w-auto px-10 py-3 md:py-2 text-[9px] font-black tracking-widest text-black transition-all hover:opacity-80 active:scale-95"
-                            style={{ background: '#10b981' }}
+                            style={{ background: '#826BF0' }}
                         >
                             Got it ✓
                         </button>

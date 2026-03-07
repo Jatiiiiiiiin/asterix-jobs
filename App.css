@@ -19,13 +19,21 @@
 
 /* ── Blink Highlight Effect ── */
 @keyframes blink-highlight {
-  0% { background-color: transparent; }
-  50% { background-color: rgba(16, 185, 129, 0.2); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: transparent;
+  }
+
+  50% {
+    background-color: rgba(130, 107, 240, 0.2);
+  }
+
+  100% {
+    background-color: transparent;
+  }
 }
 
 .blink-highlight {
   animation: blink-highlight 1.5s ease-in-out 3;
-  border-color: #10b981 !important;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+  border-color: #826BF0 !important;
+  box-shadow: 0 0 20px rgba(130, 107, 240, 0.2);
 }

@@ -1,5 +1,6 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import BrandLogo from './BrandLogo';
+
 
 interface AuthPromptModalProps {
     isOpen: boolean;
@@ -19,7 +20,7 @@ const AuthPromptModal: React.FC<AuthPromptModalProps> = ({ isOpen, onClose }) =>
                 <div className="space-y-8 relative z-10">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 text-emerald-500">
-                            <span className="material-symbols-outlined text-3xl animate-pulse">auto_awesome</span>
+                            <BrandLogo className="size-8" />
                             <span className="text-[10px] font-black tracking-[0.4em] uppercase">Security Protocol</span>
                         </div>
                         <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-[0.85]">

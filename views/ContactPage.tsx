@@ -76,8 +76,8 @@ const ContactPage: React.FC = () => {
 
                     <div>
                         {submitted ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center gap-6 border border-emerald-500/30 bg-emerald-500/5 p-12">
-                                <span className="material-symbols-outlined text-5xl text-emerald-500">check_circle</span>
+                            <div className="h-full flex flex-col items-center justify-center text-center gap-6 border border-[#826BF0]/30 bg-[#826BF0]/5 p-12">
+                                <span className="material-symbols-outlined text-5xl text-[#826BF0]">check_circle</span>
                                 <div>
                                     <h2 className="text-2xl font-black tracking-tight mb-2">Message Sent</h2>
                                     <p className="text-sm opacity-60">We'll get back to you within 24 hours.</p>

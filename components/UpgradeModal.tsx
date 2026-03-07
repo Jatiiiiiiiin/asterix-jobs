@@ -32,7 +32,7 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
       <div className="relative w-full max-w-lg bg-white dark:bg-background-dark border-4 border-black dark:border-white shadow-[16px_16px_0px_rgba(0,0,0,0.15)] dark:shadow-[16px_16px_0px_rgba(255,255,255,0.05)] overflow-hidden">
 
         {/* Top accent bar */}
-        <div className="h-1.5 w-full bg-emerald-500" />
+        <div className="h-1.5 w-full bg-[#826BF0]" />
 
         <div className="p-8 md:p-12 space-y-8">
 
@@ -51,7 +51,7 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
           {/* Headline */}
           <div className="space-y-3">
-            <p className="text-[9px] font-black tracking-[0.4em] text-emerald-500">
+            <p className="text-[9px] font-black tracking-[0.4em] text-[#826BF0]">
               Access Restricted
             </p>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-[0.9]">
@@ -75,10 +75,10 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
               <div key={label} className="flex items-center justify-between py-2 border-b border-black/5 dark:border-white/5">
                 <span className="text-[10px] font-black tracking-widest opacity-60">{label}</span>
                 <div className="flex gap-6">
-                  <span className={`text-[10px] font-black ${free ? 'text-emerald-500' : 'opacity-20'}`}>
+                  <span className={`text-[10px] font-black ${free ? 'text-[#826BF0]' : 'opacity-20'}`}>
                     {free ? '✓' : '✗'}
                   </span>
-                  <span className={`text-[10px] font-black ${premium ? 'text-emerald-500' : 'opacity-20'}`}>
+                  <span className={`text-[10px] font-black ${premium ? 'text-[#826BF0]' : 'opacity-20'}`}>
                     {premium ? '✓' : '✗'}
                   </span>
                 </div>
@@ -89,7 +89,7 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
               <span className="text-[8px] font-black tracking-widest opacity-30">Feature</span>
               <div className="flex gap-4">
                 <span className="text-[8px] font-black tracking-widest opacity-30 w-6 text-center">Free</span>
-                <span className="text-[8px] font-black tracking-widest text-emerald-500 w-10 text-center">Student</span>
+                <span className="text-[8px] font-black tracking-widest text-[#826BF0] w-10 text-center">Student</span>
               </div>
             </div>
           </div>

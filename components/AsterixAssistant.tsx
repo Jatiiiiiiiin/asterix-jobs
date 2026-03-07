@@ -188,7 +188,7 @@ const AsterixAssistant: React.FC = () => {
                             <div>
                                 <h3 className="text-[11px] font-black tracking-[0.2em] leading-none">ASTERIX SCOUT</h3>
                                 <div className="flex items-center gap-1.5 mt-1">
-                                    <span className="size-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                                    <span className="size-1.5 bg-[#826BF0] rounded-full animate-pulse shadow-[0_0_8px_rgba(130,107,240,0.5)]" />
                                     <span className="text-[8px] font-bold tracking-widest opacity-40">ONLINE</span>
                                 </div>
                             </div>
