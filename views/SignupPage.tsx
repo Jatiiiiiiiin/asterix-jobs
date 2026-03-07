@@ -141,7 +141,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
         LEFT SIDE: FORM 
         =================
       */}
-      <div className="w-full md:w-1/2 h-full bg-white dark:bg-[#1A1A1A] flex flex-col z-20 relative pb-10 md:pb-2">
+      <div className="w-full md:w-1/2 min-h-[100dvh] md:h-full bg-white dark:bg-[#1A1A1A] flex flex-col z-20 relative">
 
         {/* Header - Logo Only */}
         <div className="px-6 md:px-10 lg:px-16 py-4 md:py-6 flex justify-between items-center w-full z-30 shrink-0">
@@ -152,7 +152,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess }) => {
         </div>
 
         {/* Form Container */}
-        <div className="flex-1 flex flex-col justify-start md:justify-center items-center px-6 md:px-10 lg:px-16 xl:px-24 w-full h-full max-w-[600px] shrink-0 mx-auto animate-fade-in-up">
+        <div className="flex-1 flex flex-col justify-center items-center px-6 md:px-10 lg:px-16 xl:px-24 w-full h-full max-w-[600px] mx-auto animate-fade-in-up py-6 md:py-0">
 
           <div className="mb-4 xl:mb-6 shrink-0 mt-2 md:mt-0">
             <h1 className="text-[28px] md:text-[32px] lg:text-[40px] font-black tracking-tighter leading-[1] mb-1.5 uppercase shrink-0">
