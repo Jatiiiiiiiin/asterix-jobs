@@ -470,7 +470,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onToggleTheme, isDarkMode }) 
               </div>
               <div className="flex flex-col items-center justify-center text-center space-y-2 border-l border-black/5 dark:border-white/5">
                 <p className="text-4xl sm:text-5xl md:text-6xl font-black leading-none text-[#826BF0]">
-                  {liveJobsMatched !== null ? `${liveJobsMatched.toLocaleString()}` : '98%'}
+                  98.2%
                 </p>
                 <p className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-gray-500">Accuracy</p>
               </div>
