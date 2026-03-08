@@ -40,7 +40,7 @@ const CampusConnectPage: React.FC<CampusConnectPageProps> = ({ onToggleTheme, is
 
         setSuccess(true);
         setTimeout(() => {
-            navigate('/candidate/test');
+            navigate('/candidate/test', { state: { college: selectedCollege } });
         }, 1500);
     };
 

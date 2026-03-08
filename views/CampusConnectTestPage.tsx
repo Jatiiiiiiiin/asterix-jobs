@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../authService';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { generateTestQuestions } from '../geminiService';
 import { Video, Mic, AlertTriangle, CheckCircle, ShieldAlert, Monitor, LogOut } from 'lucide-react';
@@ -21,11 +21,16 @@ interface Question {
 
 const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMode }) => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const college = (location.state as any)?.college || 'Unknown College';
 
     // Auth & DB State
     const [userId, setUserId] = useState<string | null>(null);
     const [userSkills, setUserSkills] = useState<string[]>([]);
     const [isBlocked, setIsBlocked] = useState(false);
+    const [candidateName, setCandidateName] = useState('');
+    const [candidateEmail, setCandidateEmail] = useState('');
+    const [resumeUrl, setResumeUrl] = useState('');
 
     // Media & Permissions
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -66,8 +71,14 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                     const skillsObj = data.skills || [];
                     const skillsList = skillsObj.map((s: any) => s.s || s.skill || s);
                     setUserSkills(skillsList.length > 0 ? skillsList : ['General Aptitude']);
+
+                    // Load candidate identity for result saving
+                    setCandidateName(data.name || data.fullName || '');
+                    setCandidateEmail(data.email || user.email || '');
+                    setResumeUrl(data.resumeUrl || data.resume || '');
                 } else {
-                    setUserSkills(['General Aptitude']); // Fallback
+                    setUserSkills(['General Aptitude']);
+                    setCandidateEmail(user.email || '');
                 }
             } catch (err) {
                 console.error("Failed to load profile:", err);
@@ -210,7 +221,30 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
         });
         setScore(totalScore);
 
-        // In a real app we would save the score to Firestore here
+        // Save result to Firestore
+        if (userId) {
+            try {
+                const scorePercent = questions.length > 0
+                    ? Math.round((totalScore / questions.length) * 100)
+                    : 0;
+
+                await addDoc(collection(db, 'test_results'), {
+                    userId,
+                    name: candidateName,
+                    email: candidateEmail,
+                    college,
+                    score: totalScore,
+                    totalQuestions: questions.length,
+                    scorePercent,
+                    skills: userSkills,
+                    resumeUrl,
+                    submittedAt: serverTimestamp(),
+                });
+                console.log('[Test] Result saved to Firestore.');
+            } catch (err) {
+                console.error('[Test] Failed to save result:', err);
+            }
+        }
     };
 
     const handleAnswer = (option: string) => {
@@ -344,12 +378,13 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                 <h1 className="text-4xl font-black tracking-tighter mb-4 uppercase text-[#826BF0]">Test Submitted</h1>
 
                 <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 my-8 w-full max-w-sm">
-                    <p className="text-sm font-black tracking-widest opacity-50 mb-2 uppercase">Your Final Score</p>
-                    <p className="text-6xl font-black text-[#826BF0]">{score} <span className="text-2xl opacity-50">/ {questions.length}</span></p>
+                    <p className="text-sm font-black tracking-widest opacity-50 mb-3 uppercase">Status</p>
+                    <p className="text-2xl font-black text-[#826BF0]">Successfully Recorded</p>
+                    <p className="text-xs font-medium text-slate-500 mt-3">Your results have been securely submitted and are under review.</p>
                 </div>
 
                 <p className="text-sm font-medium tracking-widest opacity-80 mb-8 max-w-md">
-                    Your assessment results have been securely recorded. The recruitment team will review your profile shortly.
+                    The recruitment team will review your assessment and reach out to you directly.
                 </p>
 
                 <button

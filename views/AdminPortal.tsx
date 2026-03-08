@@ -16,7 +16,9 @@ import {
     FileText,
     School,
     ShieldAlert,
-    Unlock
+    Unlock,
+    BarChart2,
+    Download
 } from "lucide-react";
 import { db, auth } from "../firebase";
 import {
@@ -29,7 +31,8 @@ import {
     doc,
     setDoc,
     serverTimestamp,
-    updateDoc
+    updateDoc,
+    orderBy
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../authService";
@@ -51,8 +54,10 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
     const [jobs, setJobs] = useState<LiveJob[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isPosting, setIsPosting] = useState(false);
-    const [activeTab, setActiveTab] = useState<'jobs' | 'codes' | 'blocked'>('jobs');
+    const [activeTab, setActiveTab] = useState<'jobs' | 'codes' | 'blocked' | 'results'>('jobs');
     const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+    const [testResults, setTestResults] = useState<any[]>([]);
+    const [selectedCollege, setSelectedCollege] = useState('All');
 
     // AI Parsing State
     const [rawJD, setRawJD] = useState("");
@@ -100,6 +105,67 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
         });
         return unsub;
     }, []);
+
+    // Subscribe to test results, sorted score desc
+    useEffect(() => {
+        const q = query(collection(db, "test_results"), orderBy("scorePercent", "desc"));
+        const unsub = onSnapshot(q, (snap) => {
+            const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            setTestResults(rows);
+        });
+        return unsub;
+    }, []);
+
+    // CSV Export — grouped by college, sorted high→low within each group
+    const downloadCSV = (results: any[]) => {
+        // Sort a copy high→low
+        const sorted = [...results].sort((a, b) => (b.scorePercent ?? 0) - (a.scorePercent ?? 0));
+
+        // Group by college
+        const grouped: Record<string, any[]> = {};
+        sorted.forEach(r => {
+            const key = r.college || 'Unknown';
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(r);
+        });
+
+        const escCSV = (v: any) => {
+            const s = String(v ?? '').replace(/"/g, '""');
+            return `"${s}"`;
+        };
+
+        const header = ['Rank', 'Name', 'Email', 'College', 'Score (%)', 'Correct / Total', 'Skills', 'Resume URL', 'Submitted'];
+        const lines: string[] = [header.map(escCSV).join(',')];
+
+        Object.entries(grouped).forEach(([college, rows]) => {
+            // College separator row
+            lines.push(`"--- ${college} ---",,,,,,,,`);
+            rows.forEach((r, idx) => {
+                const submittedAt = r.submittedAt?.toDate
+                    ? r.submittedAt.toDate().toLocaleString('en-IN')
+                    : '';
+                lines.push([
+                    escCSV(idx + 1),
+                    escCSV(r.name),
+                    escCSV(r.email),
+                    escCSV(r.college),
+                    escCSV(r.scorePercent ?? 0),
+                    escCSV(`${r.score ?? 0} / ${r.totalQuestions ?? 0}`),
+                    escCSV(Array.isArray(r.skills) ? r.skills.join(', ') : r.skills),
+                    escCSV(r.resumeUrl),
+                    escCSV(submittedAt)
+                ].join(','));
+            });
+        });
+
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `campus_connect_results_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
 
     const handleUnblock = async (id: string) => {
         if (window.confirm("Are you sure you want to unblock this user?")) {
@@ -560,7 +626,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                 {/* Right Column: Content Area */}
                 <div className="lg:col-span-7 space-y-6">
                     {/* Tabs */}
-                    <div className="flex items-center gap-4 border-b border-gray-200 dark:border-slate-700 pb-2">
+                    <div className="flex items-center gap-1 border-b border-gray-200 dark:border-slate-700 pb-2 flex-wrap">
                         <button
                             onClick={() => setActiveTab('jobs')}
                             className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'jobs' ? 'text-[#826BF0] border-[#826BF0]' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
@@ -581,6 +647,13 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                         >
                             <ShieldAlert className="w-5 h-5" />
                             Blocked Candidates
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('results')}
+                            className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors border-b-2 ${activeTab === 'results' ? 'text-[#826BF0] border-[#826BF0]' : 'text-gray-500 border-transparent hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                        >
+                            <BarChart2 className="w-5 h-5" />
+                            Test Results {testResults.length > 0 && <span className="ml-1 text-xs bg-[#826BF0] text-white rounded-full px-1.5 py-0.5">{testResults.length}</span>}
                         </button>
                     </div>
 
@@ -683,7 +756,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                 </table>
                             </div>
                         </div>
-                    ) : (
+                    ) : activeTab === 'blocked' ? (
                         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 overflow-hidden">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Blocked Test Candidates</h3>
                             {blockedUsers.length === 0 ? (
@@ -707,6 +780,108 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    ) : (
+                        /* ===== TEST RESULTS TAB ===== */
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+                            {/* Header Row */}
+                            <div className="p-6 border-b border-gray-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Campus Test Results</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Sorted by score (high → low) · {testResults.length} total submissions</p>
+                                </div>
+                                <div className="flex items-center gap-3 flex-wrap">
+                                    {/* College filter */}
+                                    <select
+                                        value={selectedCollege}
+                                        onChange={e => setSelectedCollege(e.target.value)}
+                                        className="text-sm px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#826BF0] outline-none"
+                                    >
+                                        <option value="All">All Colleges</option>
+                                        {COLLEGES.map(c => (
+                                            <option key={c.name} value={c.name}>{c.name}</option>
+                                        ))}
+                                    </select>
+                                    {/* CSV download */}
+                                    <button
+                                        onClick={() => {
+                                            const filtered = selectedCollege === 'All'
+                                                ? testResults
+                                                : testResults.filter(r => r.college === selectedCollege);
+                                            downloadCSV(filtered);
+                                        }}
+                                        className="flex items-center gap-2 px-4 py-2 bg-[#826BF0] hover:bg-[#826BF0]/90 text-white font-semibold rounded-lg transition-colors text-sm"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        Download CSV
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Table */}
+                            {(() => {
+                                const filtered = selectedCollege === 'All'
+                                    ? testResults
+                                    : testResults.filter(r => r.college === selectedCollege);
+
+                                if (filtered.length === 0) {
+                                    return (
+                                        <div className="text-center py-20">
+                                            <BarChart2 className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-4" />
+                                            <p className="text-gray-500 dark:text-gray-400">No test results yet.</p>
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div className="overflow-x-auto max-h-[560px] overflow-y-auto custom-scrollbar">
+                                        <table className="w-full text-left border-collapse text-sm">
+                                            <thead className="bg-gray-50 dark:bg-slate-900/50 sticky top-0 backdrop-blur-sm">
+                                                <tr>
+                                                    {['#', 'Name', 'Email', 'College', 'Score', 'Skills', 'Resume', 'Submitted'].map(h => (
+                                                        <th key={h} className="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                                                {filtered.map((r, idx) => {
+                                                    const submittedAt = r.submittedAt?.toDate
+                                                        ? r.submittedAt.toDate().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                                                        : '—';
+                                                    const pct = r.scorePercent ?? 0;
+                                                    const scoreColor = pct >= 75 ? 'text-emerald-600 dark:text-emerald-400' : pct >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-red-500 dark:text-red-400';
+                                                    return (
+                                                        <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/40 transition-colors">
+                                                            <td className="px-4 py-3 text-gray-400 font-mono text-xs">{idx + 1}</td>
+                                                            <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white whitespace-nowrap">{r.name || '—'}</td>
+                                                            <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{r.email || '—'}</td>
+                                                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">{r.college || '—'}</td>
+                                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                                <span className={`font-black text-base ${scoreColor}`}>{pct}%</span>
+                                                                <span className="text-xs text-gray-400 ml-1">({r.score}/{r.totalQuestions})</span>
+                                                            </td>
+                                                            <td className="px-4 py-3 max-w-[180px]">
+                                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                                    {Array.isArray(r.skills) ? r.skills.slice(0, 4).join(', ') : r.skills || '—'}
+                                                                    {Array.isArray(r.skills) && r.skills.length > 4 && ` +${r.skills.length - 4} more`}
+                                                                </p>
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                {r.resumeUrl ? (
+                                                                    <a href={r.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[#826BF0] hover:underline text-xs font-semibold">
+                                                                        <FileText className="w-3.5 h-3.5" /> View
+                                                                    </a>
+                                                                ) : <span className="text-gray-300 dark:text-slate-600 text-xs">—</span>}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{submittedAt}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
                 </div>
