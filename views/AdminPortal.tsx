@@ -144,6 +144,12 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                 const submittedAt = r.submittedAt?.toDate
                     ? r.submittedAt.toDate().toLocaleString('en-IN')
                     : '';
+
+                // Truncate Base64 to avoid bloating CSV
+                const cleanResumeUrl = r.resumeUrl?.startsWith('data:')
+                    ? 'Resume Included (Base64)'
+                    : r.resumeUrl;
+
                 lines.push([
                     escCSV(idx + 1),
                     escCSV(r.name),
@@ -152,7 +158,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                     escCSV(r.scorePercent ?? 0),
                     escCSV(`${r.score ?? 0} / ${r.totalQuestions ?? 0}`),
                     escCSV(Array.isArray(r.skills) ? r.skills.join(', ') : r.skills),
-                    escCSV(r.resumeUrl),
+                    escCSV(cleanResumeUrl),
                     escCSV(submittedAt)
                 ].join(','));
             });
@@ -834,46 +840,103 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onToggleTheme, isDarkMode }) 
                                 }
 
                                 return (
-                                    <div className="overflow-x-auto max-h-[560px] overflow-y-auto custom-scrollbar">
-                                        <table className="w-full text-left border-collapse text-sm">
-                                            <thead className="bg-gray-50 dark:bg-slate-900/50 sticky top-0 backdrop-blur-sm">
+                                    <div className="overflow-x-auto max-h-[650px] overflow-y-auto custom-scrollbar">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead className="bg-[#1A1A1A] dark:bg-black sticky top-0 z-10 border-b border-white/10">
                                                 <tr>
-                                                    {['#', 'Name', 'Email', 'College', 'Score', 'Skills', 'Resume', 'Submitted'].map(h => (
-                                                        <th key={h} className="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                                    {['Rank', 'Candidate Profile', 'College & Match', 'Skills Inventory', 'Resume', 'Timestamp'].map(h => (
+                                                        <th key={h} className="px-6 py-5 text-[9px] font-black text-white/40 uppercase tracking-[0.3em] whitespace-nowrap">{h}</th>
                                                     ))}
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                                            <tbody className="divide-y divide-gray-100 dark:divide-white/5 bg-white dark:bg-slate-800/20">
                                                 {filtered.map((r, idx) => {
                                                     const submittedAt = r.submittedAt?.toDate
-                                                        ? r.submittedAt.toDate().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                                                        ? r.submittedAt.toDate().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
                                                         : '—';
                                                     const pct = r.scorePercent ?? 0;
-                                                    const scoreColor = pct >= 75 ? 'text-emerald-600 dark:text-emerald-400' : pct >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-red-500 dark:text-red-400';
+
+                                                    // High-end score styling
+                                                    let scoreBg = 'bg-black dark:bg-white text-white dark:text-black';
+                                                    let scoreLabel = 'NEURAL MATCH';
+                                                    if (pct >= 80) { scoreBg = 'bg-[#826BF0] text-white'; scoreLabel = 'ELITE PERFORMER'; }
+                                                    else if (pct >= 60) { scoreBg = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'; scoreLabel = 'QUALIFIED'; }
+                                                    else if (pct < 40) { scoreBg = 'bg-red-500/10 text-red-500 border border-red-500/20'; scoreLabel = 'LOW SCORE'; }
+
                                                     return (
-                                                        <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/40 transition-colors">
-                                                            <td className="px-4 py-3 text-gray-400 font-mono text-xs">{idx + 1}</td>
-                                                            <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white whitespace-nowrap">{r.name || '—'}</td>
-                                                            <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{r.email || '—'}</td>
-                                                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">{r.college || '—'}</td>
-                                                            <td className="px-4 py-3 whitespace-nowrap">
-                                                                <span className={`font-black text-base ${scoreColor}`}>{pct}%</span>
-                                                                <span className="text-xs text-gray-400 ml-1">({r.score}/{r.totalQuestions})</span>
+                                                        <tr key={r.id} className="hover:bg-gray-50/80 dark:hover:bg-white/[0.02] transition-all group">
+                                                            {/* RANK */}
+                                                            <td className="px-6 py-6">
+                                                                <div className="text-[10px] font-black text-gray-300 dark:text-white/10 font-mono tracking-tighter">
+                                                                    {String(idx + 1).padStart(3, '0')}
+                                                                </div>
                                                             </td>
-                                                            <td className="px-4 py-3 max-w-[180px]">
-                                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                                                    {Array.isArray(r.skills) ? r.skills.slice(0, 4).join(', ') : r.skills || '—'}
-                                                                    {Array.isArray(r.skills) && r.skills.length > 4 && ` +${r.skills.length - 4} more`}
-                                                                </p>
+
+                                                            {/* CANDIDATE PROFILE */}
+                                                            <td className="px-6 py-6">
+                                                                <div className="flex flex-col gap-1">
+                                                                    <div className="text-sm font-black tracking-tight text-gray-900 dark:text-white group-hover:text-[#826BF0] transition-colors">
+                                                                        {r.name || 'Anonymous User'}
+                                                                    </div>
+                                                                    <div className="text-[10px] font-medium text-gray-400 dark:text-white/30 tracking-tight lowercase">
+                                                                        {r.email || 'no-email@asterix.io'}
+                                                                    </div>
+                                                                </div>
                                                             </td>
-                                                            <td className="px-4 py-3">
+
+                                                            {/* COLLEGE & MATCH */}
+                                                            <td className="px-6 py-6">
+                                                                <div className="flex flex-col gap-2">
+                                                                    <div className="text-[10px] font-black tracking-widest text-gray-400 dark:text-white/20 uppercase truncate max-w-[200px]">
+                                                                        {r.college || 'Direct Entry'}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className={`px-2.5 py-1 text-[8px] font-black tracking-[0.2em] rounded-sm shadow-sm ${scoreBg}`}>
+                                                                            {pct}% • {scoreLabel}
+                                                                        </div>
+                                                                        <div className="text-[9px] font-bold text-gray-300 dark:text-white/20 whitespace-nowrap">
+                                                                            {r.score}/{r.totalQuestions} POINTS
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            {/* SKILLS */}
+                                                            <td className="px-6 py-6 max-w-[240px]">
+                                                                <div className="flex flex-wrap gap-1.5">
+                                                                    {(Array.isArray(r.skills) ? r.skills : (r.skills || '').split(',')).slice(0, 3).map((s: string, i: number) => (
+                                                                        <span key={i} className="px-2 py-0.5 border border-black/5 dark:border-white/5 text-[8px] font-black tracking-widest text-gray-500 uppercase">
+                                                                            {s.trim()}
+                                                                        </span>
+                                                                    ))}
+                                                                    <span className="text-[8px] font-black text-[#826BF0] opacity-40">+ MORE</span>
+                                                                </div>
+                                                            </td>
+
+                                                            {/* RESUME */}
+                                                            <td className="px-6 py-6 text-center">
                                                                 {r.resumeUrl ? (
-                                                                    <a href={r.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[#826BF0] hover:underline text-xs font-semibold">
-                                                                        <FileText className="w-3.5 h-3.5" /> View
+                                                                    <a
+                                                                        href={r.resumeUrl}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="size-10 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl group/btn"
+                                                                    >
+                                                                        <FileText className="w-4 h-4 group-hover/btn:animate-pulse" />
                                                                     </a>
-                                                                ) : <span className="text-gray-300 dark:text-slate-600 text-xs">—</span>}
+                                                                ) : (
+                                                                    <div className="size-10 rounded-full border border-dashed border-gray-200 dark:border-white/10 flex items-center justify-center opacity-30">
+                                                                        <ShieldAlert className="w-4 h-4" />
+                                                                    </div>
+                                                                )}
                                                             </td>
-                                                            <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{submittedAt}</td>
+
+                                                            {/* TIMESTAMP */}
+                                                            <td className="px-6 py-6">
+                                                                <div className="text-[10px] font-black text-gray-400 dark:text-white/20 tracking-widest uppercase">
+                                                                    {submittedAt}
+                                                                </div>
+                                                            </td>
                                                         </tr>
                                                     );
                                                 })}

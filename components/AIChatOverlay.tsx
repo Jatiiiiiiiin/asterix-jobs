@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-export default function AIChatOverlay() {
+export default function AIChatOverlay({ job }: { job: any }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
   const [input, setInput] = useState("");
@@ -14,7 +14,7 @@ export default function AIChatOverlay() {
   }, [messages, isOpen]);
 
   const handleSend = async () => {
-    if (!input.trim() || isTyping) return;
+    if (!input.trim() || isTyping || !job) return;
 
     const userMessage = input;
     setInput("");
@@ -28,8 +28,8 @@ export default function AIChatOverlay() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          jobTitle: job.title,
-          jobDescription: job.jobSummary + "\n" + job.responsibilities.join("\n"),
+          jobTitle: job?.title || "Unknown Job",
+          jobDescription: (job?.jobSummary || "") + "\n" + (job?.responsibilities?.join("\n") || ""),
           question: userMessage,
           history: []
         })
