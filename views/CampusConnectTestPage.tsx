@@ -4,7 +4,7 @@ import { authService } from '../authService';
 import { doc, getDoc, setDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { generateTestQuestions } from '../geminiService';
-import { Video, Mic, AlertTriangle, CheckCircle, ShieldAlert, Monitor, LogOut } from 'lucide-react';
+import { Video, Mic, AlertTriangle, CheckCircle, ShieldAlert, Monitor, LogOut, Timer } from 'lucide-react';
 
 interface CampusConnectTestPageProps {
     onToggleTheme: () => void;
@@ -19,6 +19,14 @@ interface Question {
     difficulty: string;
 }
 
+const TEST_DURATION_SECONDS = 60 * 60; // 60 minutes
+
+function formatTime(seconds: number): string {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
 const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMode }) => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -26,11 +34,11 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
 
     // Auth & DB State
     const [userId, setUserId] = useState<string | null>(null);
-    const [userSkills, setUserSkills] = useState<string[]>([]);
     const [isBlocked, setIsBlocked] = useState(false);
     const [candidateName, setCandidateName] = useState('');
     const [candidateEmail, setCandidateEmail] = useState('');
     const [resumeUrl, setResumeUrl] = useState('');
+    const [userSkills, setUserSkills] = useState<string[]>([]);
 
     // Media & Permissions
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -39,7 +47,6 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
 
     // Proctoring State
     const [warningCount, setWarningCount] = useState(0);
-    const [isFullScreen, setIsFullScreen] = useState(false);
 
     // Test State
     const [testPhase, setTestPhase] = useState<'setup' | 'loading' | 'active' | 'completed' | 'terminated'>('setup');
@@ -47,6 +54,11 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
     const [currentIndex, setCurrentIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<number, string>>({});
     const [score, setScore] = useState(0);
+
+    // Timer
+    const [timeLeft, setTimeLeft] = useState(TEST_DURATION_SECONDS);
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const hasAutoSubmitted = useRef(false);
 
     // Initial Load & Auth Check
     useEffect(() => {
@@ -67,27 +79,21 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                         setIsBlocked(true);
                         return;
                     }
-
                     const skillsObj = data.skills || [];
                     const skillsList = skillsObj.map((s: any) => s.s || s.skill || s);
-                    setUserSkills(skillsList.length > 0 ? skillsList : ['General Aptitude']);
-
-                    // Load candidate identity for result saving
+                    setUserSkills(skillsList);
                     setCandidateName(data.name || data.fullName || '');
                     setCandidateEmail(data.email || user.email || '');
                     setResumeUrl(data.resumeUrl || data.resume || '');
                 } else {
-                    setUserSkills(['General Aptitude']);
                     setCandidateEmail(user.email || '');
                 }
             } catch (err) {
                 console.error("Failed to load profile:", err);
-                setUserSkills(['General Aptitude']);
             }
         };
         init();
 
-        // Cleanup media on unmount
         return () => {
             if (mediaStream) {
                 mediaStream.getTracks().forEach(t => t.stop());
@@ -95,10 +101,34 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
             if (document.fullscreenElement) {
                 document.exitFullscreen().catch(err => console.error(err));
             }
+            if (timerRef.current) clearInterval(timerRef.current);
         };
     }, []);
 
-    // Proctoring: Visibility Change (Tab Switching)
+    // Timer countdown
+    useEffect(() => {
+        if (testPhase !== 'active') return;
+
+        timerRef.current = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    clearInterval(timerRef.current!);
+                    if (!hasAutoSubmitted.current) {
+                        hasAutoSubmitted.current = true;
+                        submitTest();
+                    }
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, [testPhase]);
+
+    // Proctoring: Visibility Change & Fullscreen
     useEffect(() => {
         if (testPhase !== 'active') return;
 
@@ -106,7 +136,6 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
             if (document.visibilityState === 'hidden') {
                 const newCount = warningCount + 1;
                 setWarningCount(newCount);
-
                 if (newCount > 2) {
                     await terminateTest();
                 } else {
@@ -117,17 +146,13 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
 
         const handleFullScreenChange = async () => {
             if (!document.fullscreenElement) {
-                setIsFullScreen(false);
                 const newCount = warningCount + 1;
                 setWarningCount(newCount);
-
                 if (newCount > 2) {
                     await terminateTest();
                 } else {
                     alert(`WARNING: You have exited full-screen mode. Warning ${newCount}/2. Please return to full-screen immediately.`);
                 }
-            } else {
-                setIsFullScreen(true);
             }
         };
 
@@ -162,7 +187,6 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
 
         try {
             await document.documentElement.requestFullscreen();
-            setIsFullScreen(true);
         } catch (err) {
             console.error("Failed to enter fullscreen", err);
             alert("Full screen mode is required. Please allow full-screen access.");
@@ -171,18 +195,54 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
 
         setTestPhase('loading');
 
-        // Fetch AI generated test
-        const generatedQuestions = await generateTestQuestions(userSkills);
-        if (generatedQuestions && generatedQuestions.length > 0) {
-            setQuestions(generatedQuestions);
-            setTestPhase('active');
-        } else {
-            alert("Failed to generate test questions. Please try again later.");
+        try {
+            // 1. Check Firestore for a cached college test
+            const collegeDocRef = doc(db, 'college_tests', college);
+            const collegeSnap = await getDoc(collegeDocRef);
+
+            let loadedQuestions: Question[] = [];
+
+            if (collegeSnap.exists() && collegeSnap.data().questions?.length > 0) {
+                // Serve the same test for all students of this college
+                console.log(`[Test] Loaded cached test for college: ${college}`);
+                loadedQuestions = collegeSnap.data().questions;
+            } else {
+                // Generate a fresh test and cache it in Firestore
+                console.log(`[Test] No cached test found for college: ${college}. Generating...`);
+                const generated = await generateTestQuestions(college);
+
+                if (generated && generated.length > 0) {
+                    loadedQuestions = generated;
+                    // Save to Firestore so all future candidates from this college get the same test
+                    await setDoc(collegeDocRef, {
+                        questions: loadedQuestions,
+                        generatedAt: serverTimestamp(),
+                        college,
+                    });
+                    console.log(`[Test] Saved new test to Firestore for college: ${college}`);
+                }
+            }
+
+            if (loadedQuestions.length > 0) {
+                setQuestions(loadedQuestions);
+                setTimeLeft(TEST_DURATION_SECONDS);
+                hasAutoSubmitted.current = false;
+                setTestPhase('active');
+            } else {
+                alert("Failed to load test questions. Please try again later.");
+                if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+                setTestPhase('setup');
+            }
+        } catch (err) {
+            console.error("[Test] Error loading test:", err);
+            alert("Failed to load test questions. Please try again later.");
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
             setTestPhase('setup');
         }
     };
 
     const terminateTest = async () => {
+        if (timerRef.current) clearInterval(timerRef.current);
         setTestPhase('terminated');
         if (document.fullscreenElement) {
             await document.exitFullscreen().catch(e => console.error(e));
@@ -203,6 +263,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
     };
 
     const submitTest = async () => {
+        if (timerRef.current) clearInterval(timerRef.current);
         setTestPhase('completed');
         if (document.fullscreenElement) {
             await document.exitFullscreen().catch(e => console.error(e));
@@ -259,7 +320,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
         }
     };
 
-    // Render Sub-Components
+    // ─── Render Sub-Components ────────────────────────────────────────────────
 
     if (testPhase === 'terminated' || isBlocked) {
         return (
@@ -302,6 +363,10 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                                     <li className="flex gap-3">
                                         <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
                                         <span className="text-sm font-medium">Do not switch tabs or windows. More than 2 tab switches will result in immediate termination.</span>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <Timer className="w-5 h-5 text-[#826BF0] shrink-0" />
+                                        <span className="text-sm font-medium">You have exactly <strong>60 minutes</strong>. The test auto-submits when the timer expires.</span>
                                     </li>
                                     <li className="flex gap-3">
                                         <Video className="w-5 h-5 text-[#826BF0] shrink-0" />
@@ -365,8 +430,8 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
         return (
             <div className="flex h-screen w-screen bg-slate-900 text-white flex-col items-center justify-center p-6 text-center z-50 fixed inset-0">
                 <div className="animate-spin w-16 h-16 border-4 border-[#826BF0] border-t-transparent rounded-full mb-8" />
-                <h2 className="text-2xl font-black tracking-widest uppercase">Initializing Neural Sequence</h2>
-                <p className="border-[#826BF0] mt-4 font-medium tracking-wide">Compiling custom questions based on your profile skills...</p>
+                <h2 className="text-2xl font-black tracking-widest uppercase">Initializing Assessment</h2>
+                <p className="border-[#826BF0] mt-4 font-medium tracking-wide">Loading your college's test paper...</p>
             </div>
         );
     }
@@ -399,6 +464,7 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
 
     // Active Test Phase
     const currentQ = questions[currentIndex];
+    const isLowTime = timeLeft <= 300; // 5 minutes warning
 
     return (
         <div className="flex flex-col h-screen w-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-white overflow-hidden select-none">
@@ -409,14 +475,23 @@ const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMod
                     <span className="text-sm font-black tracking-widest uppercase">Proctored Assessment</span>
                 </div>
 
-                {/* PIP Video Feed */}
                 <div className="flex items-center gap-4">
+                    {/* Countdown Timer */}
+                    <div className={`flex items-center gap-2 px-4 py-2 border font-black tracking-widest text-sm tabular-nums ${isLowTime
+                            ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-600 dark:text-red-400'
+                            : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                        }`}>
+                        <Timer className={`w-4 h-4 ${isLowTime ? 'animate-pulse' : ''}`} />
+                        {formatTime(timeLeft)}
+                    </div>
+
                     {warningCount > 0 && (
                         <div className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1 border border-red-200 dark:border-red-800">
                             <AlertTriangle className="w-4 h-4" />
                             <span className="text-xs font-bold tracking-wider">WARNINGS: {warningCount}/2</span>
                         </div>
                     )}
+                    {/* PIP Video Feed */}
                     <div className="w-32 h-24 bg-black border-2 border-slate-200 dark:border-slate-700 overflow-hidden relative shadow-lg">
                         <video
                             ref={(el) => {

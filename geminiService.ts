@@ -534,12 +534,12 @@ export async function parseJobDescription(rawText: string) {
 
 /* ================= CAMPUS CONNECT TEST ================= */
 
-export async function generateTestQuestions(skills: string[]) {
+export async function generateTestQuestions(college: string) {
   try {
     const res = await fetch(`${API_BASE}/generate-test`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ skills })
+      body: JSON.stringify({ college })
     });
 
     if (!res.ok) {
