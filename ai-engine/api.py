@@ -1244,7 +1244,7 @@ async def contact(req: ContactRequest):
         # Send to jatinthakurr2003@gmail.com
         params = {
             "from": RESEND_FROM_EMAIL,
-            "to": ["jatinthakurr2003@gmail.com"],
+            "to": ["info@asterix-jobs.in"],
             "subject": f"Contact: {req.subject} (from {req.name})",
             "html": html_content,
         }

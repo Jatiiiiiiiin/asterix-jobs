@@ -44,7 +44,7 @@ const EMPTY: FormState = {
   companyName: '',
   salaryMin: '',
   salaryMax: '',
-  currency: 'USD',
+  currency: 'INR',
   experienceRequired: '',
   openings: '1',
   jobSummary: '',
