@@ -52,9 +52,9 @@ export interface Job {
   matchHighlights?: string[];
   breakdown?: any;
 
-  // Admin-specific fields
   isAdminPosted?: boolean;
   externalUrl?: string;
+  sources?: Record<string, { url: string; postedDate?: string }>;
 }
 
 

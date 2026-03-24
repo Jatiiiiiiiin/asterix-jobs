@@ -21,6 +21,15 @@ const db = getFirestore();
  * @typedef {import('./Jobservice').LiveJob} LiveJob
  */
 
+function slugify(text) {
+    if (!text) return 'generic';
+    return text.toString().toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // remove invalid chars
+        .replace(/\s+/g, '_')         // collapse whitespace and replace with _
+        .replace(/-+/g, '_')          // replace - with _
+        .replace(/^_+|_+$/g, '');     // trim _
+}
+
 /* ── Providers Strategy ──────────────────────────────────────────────────── */
 
 const MockProvider = {
@@ -53,6 +62,7 @@ const MockProvider = {
         ];
     },
     mapToLiveJob(extJob) {
+        const sourceName = 'Internal'; 
         return {
             title: extJob.title,
             status: 'active',
@@ -66,7 +76,13 @@ const MockProvider = {
             salaryRange: { min: extJob.salaryMin, max: extJob.salaryMax, currency: extJob.currency },
             jobSummary: extJob.summary,
             externalUrl: extJob.url,
-            isAdminPosted: true
+            isAdminPosted: true,
+            sources: {
+                [sourceName]: {
+                    url: extJob.url,
+                    postedDate: new Date().toISOString()
+                }
+            }
         };
     }
 };
@@ -103,7 +119,7 @@ const RapidAPIProvider = {
         }
     },
     mapToLiveJob(extJob) {
-        // JSearch mapped to Asterix LiveJob schema
+        const sourceName = extJob.job_publisher || 'External';
         return {
             title: extJob.job_title || 'Untitled',
             status: 'active',
@@ -121,7 +137,13 @@ const RapidAPIProvider = {
             },
             jobSummary: extJob.job_description || '',
             externalUrl: extJob.job_apply_link || '',
-            isAdminPosted: true
+            isAdminPosted: true,
+            sources: {
+                [sourceName]: {
+                    url: extJob.job_apply_link,
+                    postedDate: extJob.job_posted_at_datetime_utc || new Date().toISOString()
+                }
+            }
         };
     }
 };
@@ -166,22 +188,41 @@ async function importJobs() {
 
         const jobsRef = db.collection('jobs');
         const batch = db.batch();
+        const groupedJobs = {};
         let merged = 0;
 
         for (const extJob of externalJobs) {
             const liveJob = provider.mapToLiveJob(extJob);
-            // Generate deterministic ID so we don't duplicate on multiple runs
-            const idKey = extJob.id || extJob.job_id || Math.random().toString(36).substring(7);
-            const docId = `aggregated_${providerArg}_${idKey}`;
-            const docRef = jobsRef.doc(docId);
+            const compName = typeof liveJob.company === 'string' ? liveJob.company : liveJob.company?.name;
+            const key = `${slugify(compName)}_${slugify(liveJob.title)}`;
+            const docId = `aggregated_${key}`;
 
-            batch.set(docRef, liveJob, { merge: true });
+            if (!groupedJobs[docId]) {
+                groupedJobs[docId] = {
+                    ...liveJob,
+                    sources: { ...liveJob.sources }
+                };
+            } else {
+                // Merge sources
+                groupedJobs[docId].sources = {
+                    ...groupedJobs[docId].sources,
+                    ...liveJob.sources
+                };
+                
+                // Update externalUrl to point to a primary one if needed, or keep original
+                // We keep the old descriptions/titles for now, or could pick best.
+            }
+        }
+
+        for (const [docId, job] of Object.entries(groupedJobs)) {
+            const docRef = jobsRef.doc(docId);
+            batch.set(docRef, job, { merge: true });
             merged++;
         }
 
         if (merged > 0) {
             await batch.commit();
-            console.log(`Successfully merged/upserted ${merged} jobs to Firestore.`);
+            console.log(`Successfully merged/upserted ${merged} unique jobs to Firestore.`);
         } else {
             console.log('No records required updating.');
         }

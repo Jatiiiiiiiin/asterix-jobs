@@ -1,0 +1,4 @@
+views/CandidateDashboard.tsx(784,14): error TS2304: Cannot find name 'canViewResume'.
+views/CandidateDashboard.tsx(891,19): error TS2304: Cannot find name 'sortedJobs'.
+views/CandidateDashboard.tsx(898,20): error TS2304: Cannot find name 'sortedJobs'.
+views/CandidateDashboard.tsx(951,92): error TS2304: Cannot find name 'handleAceInterview'.

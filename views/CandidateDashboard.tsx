@@ -139,7 +139,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         unsubJobs = subscribeToActiveJobs(
           (liveJobs) => {
             const merged: Job[] = liveJobs
-              .filter(liveJob => !liveJob.isAdminPosted)
+              .filter(liveJob => !liveJob.isAdminPosted || (liveJob.sources && Object.keys(liveJob.sources).length > 0))
               .map(liveJob => {
                 const savedData = Array.isArray(jobDataMap)
                   ? jobDataMap.find((j: any) => j.id === liveJob.id)
@@ -1070,6 +1070,36 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
                             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#826BF0] text-white text-[8px] font-black tracking-widest">
                               <span className="material-symbols-outlined text-xs">check_circle</span>
                               Applied
+                            </div>
+                          ) : ((job.sources && Object.keys(job.sources).length > 0) || job.externalUrl) ? (
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {Object.entries((job.sources && Object.keys(job.sources).length > 0) ? job.sources : { [job.externalUrl!.includes('linkedin') ? 'LinkedIn' : job.externalUrl!.includes('indeed') ? 'Indeed' : 'External']: { url: job.externalUrl! } }).map(([source, details]: any) => {
+                                const isLinkedIn = source.toLowerCase().includes('linkedin');
+                                const isIndeed = source.toLowerCase().includes('indeed');
+                                const bgColor = isLinkedIn ? 'bg-[#0077b5]' : isIndeed ? 'bg-[#003a9b]' : 'bg-[#1a1a1a]';
+                                return (
+                                  <a
+                                    key={source}
+                                    href={details.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (gateInteraction()) e.preventDefault();
+                                    }}
+                                    className={`flex items-center gap-1.5 justify-center px-3 py-1.5 text-[8px] font-black tracking-widest ${bgColor} text-white hover:opacity-90 transition-all uppercase shadow-md`}
+                                  >
+                                    <span className="material-symbols-outlined text-[10px]">open_in_new</span>
+                                    {source}
+                                  </a>
+                                );
+                              })}
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleInitialize(job); }}
+                                className="px-2 py-1.5 text-[8px] font-black tracking-widest border border-black/20 dark:border-white/20 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all uppercase shadow-sm"
+                              >
+                                Details
+                              </button>
                             </div>
                           ) : (
                             (() => {

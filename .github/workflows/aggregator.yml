@@ -1,0 +1,32 @@
+name: Job Aggregator Sync
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Every 15 minutes
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  sync-jobs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Inject Service Account Credentials
+        run: |
+          mkdir -p ai-engine
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > ai-engine/service-account.json
+
+      - name: Run Aggregator
+        run: node import-jobs.mjs --provider=rapidapi
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}

@@ -1,0 +1,1 @@
+views/CandidateDashboard.tsx(796,14): error TS2304: Cannot find name 'hasResume'.

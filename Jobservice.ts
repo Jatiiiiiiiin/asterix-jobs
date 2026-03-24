@@ -55,6 +55,7 @@ export interface LiveJob {
 
   isAdminPosted?: boolean;
   externalUrl?: string;
+  sources?: Record<string, { url: string; postedDate?: string }>;
 }
 
 /* ── Resolvers (safe JSX rendering) ─────────────────────────────────────── */

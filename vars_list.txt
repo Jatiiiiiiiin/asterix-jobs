@@ -1,0 +1,13 @@
+Variable/Function: resumeFileRef
+Variable/Function: jobsRef
+Variable/Function: savedResumeName
+Variable/Function: savedJobs
+Variable/Function: jobDataMap
+Variable/Function: recoverResume
+Variable/Function: openResumeViewer
+Variable/Function: closeResumeViewer
+Variable/Function: jobsToScore
+Variable/Function: processJob
+Variable/Function: jobIndex
+Variable/Function: jobIndex
+Variable/Function: hasResume

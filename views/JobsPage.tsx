@@ -717,6 +717,36 @@ const JobCard: React.FC<{
               <span className="material-symbols-outlined text-lg">check_circle</span>
               Applied
             </div>
+          ) : ((job.sources && Object.keys(job.sources).length > 0) || job.externalUrl) ? (
+            <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+              {Object.entries((job.sources && Object.keys(job.sources).length > 0) ? job.sources : { [job.externalUrl!.includes('linkedin') ? 'LinkedIn' : job.externalUrl!.includes('indeed') ? 'Indeed' : 'External']: { url: job.externalUrl! } }).map(([source, details]: any) => {
+                const isLinkedIn = source.toLowerCase().includes('linkedin');
+                const isIndeed = source.toLowerCase().includes('indeed');
+                const bgColor = isLinkedIn ? 'bg-[#0077b5]' : isIndeed ? 'bg-[#003a9b]' : 'bg-[#1a1a1a]';
+                return (
+                  <a
+                    key={source}
+                    href={details.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (gateInteraction()) e.preventDefault();
+                    }}
+                    className={`flex items-center gap-1.5 justify-center px-3 sm:px-4 py-2 text-[8px] sm:text-[9px] font-black tracking-widest ${bgColor} text-white hover:opacity-90 transition-all uppercase shadow-md`}
+                  >
+                    <span className="material-symbols-outlined text-[10px] sm:text-[12px]">open_in_new</span>
+                    {source}
+                  </a>
+                );
+              })}
+              <button
+                onClick={(e) => { e.stopPropagation(); canManualApply ? navigate(`/job/${job.id}`, { state: { job } }) : onLockedClick(); }}
+                className="px-3 sm:px-4 py-2 text-[8px] sm:text-[9px] font-black tracking-widest border border-black/20 dark:border-white/20 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all uppercase shadow-sm"
+              >
+                Details
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => {
