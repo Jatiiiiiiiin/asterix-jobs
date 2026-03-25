@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { subscribeToActiveJobs } from '../Jobservice';
 import Sidebar from '../components/Sidebar';
-import { getAIInsights, getDetailedSkillAudit } from '../geminiService';
+import { getAIInsights, getDetailedSkillAudit, getMatchingSummary } from '../geminiService';
 import { useLocation } from 'react-router-dom';
 import { authService, readSessionUid } from '../authService';
 import { saveApplication, buildApplicationPayload, hasApplied as checkAlreadyApplied } from '../applicationService';
@@ -111,8 +111,20 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
       if (job) {
         setIsLoadingPrep(true);
         try {
-          const skillsToAudit = (job.techStack ?? job.requiredSkills ?? []) || [];
+          let skillsToAudit = Array.from(new Set([...(job.techStack || []), ...(job.requiredSkills || [])]));
           const jobDesc = `${job.title}\n\n${job.jobSummary || job.description || ''}`;
+          
+          if (skillsToAudit.length === 0 && jobDesc.trim().length > 10) {
+            try {
+              const summaryData = await getMatchingSummary(jobDesc);
+              if (summaryData && Array.isArray(summaryData.requirements)) {
+                skillsToAudit = summaryData.requirements;
+              }
+            } catch (err) {
+              console.error("Fallback skill audit failed", err);
+            }
+          }
+
           // Pass forceRefresh parameter to getAIInsights
           const [insights, detailedAudit] = await Promise.all([
             getAIInsights(resumeName, job.title ?? 'Position', jobDesc, resumeContent, force),
