@@ -129,13 +129,37 @@ const RapidAPIProvider = {
     mapToLiveJob(extJob) {
         const sourceName = extJob.job_publisher || 'External';
         
-        // JSearch sometimes gives 1-line descriptions. Pick the longest text available.
         const descOptions = [
             extJob.job_description,
             extJob.job_summary,
             Object.values(extJob.job_highlights || {}).flat().join('\n')
         ].filter(Boolean);
         const bestDescription = descOptions.sort((a, b) => b.length - a.length)[0] || '';
+
+        // --- NATIVE JD PARSER IMPL ---
+        // Since we are running in GitHub Actions without the Python Backend, extract techStack using regex/keyword matching
+        const techKeywords = [
+            "python", "javascript", "typescript", "java", "c++", "c#", "react", "angular", "vue",
+            "node", "express", "django", "flask", "spring", "sql", "mongodb", "postgresql", "mysql",
+            "aws", "azure", "gcp", "docker", "kubernetes", "git", "ci/cd", "graphql", "rest api", "redis",
+            "kafka", "elastic", "linux", "html", "css", "tailwind", "next.js"
+        ];
+        const descLower = bestDescription.toLowerCase();
+        
+        // Use Set to avoid duplicates safely
+        const techStackSet = new Set();
+        techKeywords.forEach(kw => {
+            // Check for exact word boundaries to avoid false positives (e.g. matching 'java' in 'javascript')
+            const regex = new RegExp(`\\b${kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
+            if (regex.test(descLower)) {
+                techStackSet.add(kw.charAt(0).toUpperCase() + kw.slice(1));
+            }
+        });
+
+        // Ensure these match the Job Schema array format strictly
+        const resList = extJob.job_highlights?.Responsibilities || [];
+        const reqSkillsList = extJob.job_required_skills || extJob.job_highlights?.Qualifications || [];
+        const benefitsList = extJob.job_benefits_strings || extJob.job_highlights?.Benefits || [];
 
         return {
             title: extJob.job_title || 'Untitled',
@@ -153,9 +177,10 @@ const RapidAPIProvider = {
                 currency: extJob.job_salary_currency || 'USD'
             },
             jobSummary: bestDescription,
-            requiredSkills: extJob.job_required_skills || (extJob.job_highlights?.Qualifications || []),
-            benefits: extJob.job_benefits_strings || (extJob.job_highlights?.Benefits || []),
-            responsibilities: extJob.job_highlights?.Responsibilities || [],
+            requiredSkills: reqSkillsList,
+            responsibilities: resList,
+            benefits: benefitsList,
+            techStack: Array.from(techStackSet),
             employmentType: extJob.job_employment_type || null,
             experienceRequired: extJob.job_required_experience?.required_experience_in_months ? `${Math.round(extJob.job_required_experience.required_experience_in_months / 12)}+ years` : null,
             externalUrl: extJob.job_apply_link || '',
