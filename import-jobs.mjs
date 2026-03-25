@@ -98,8 +98,9 @@ const RapidAPIProvider = {
         }
 
         console.log('Fetching from RapidAPI JSearch setup...');
-        // Standard endpoint: e.g., 'jsearch.p.rapidapi.com/search'
-        const url = 'https://jsearch.p.rapidapi.com/search?query=Software%20Engineer&num_pages=1';
+        const queries = ['Software Engineer', 'Frontend Developer', 'React Developer', 'Full Stack Developer', 'Backend Engineer', 'Data Engineer'];
+        const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+        const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(randomQuery)}&num_pages=1&date_posted=today`;
         const options = {
             method: 'GET',
             headers: {
@@ -120,6 +121,15 @@ const RapidAPIProvider = {
     },
     mapToLiveJob(extJob) {
         const sourceName = extJob.job_publisher || 'External';
+        
+        // JSearch sometimes gives 1-line descriptions. Pick the longest text available.
+        const descOptions = [
+            extJob.job_description,
+            extJob.job_summary,
+            Object.values(extJob.job_highlights || {}).flat().join('\n')
+        ].filter(Boolean);
+        const bestDescription = descOptions.sort((a, b) => b.length - a.length)[0] || '';
+
         return {
             title: extJob.job_title || 'Untitled',
             status: 'active',
@@ -135,7 +145,7 @@ const RapidAPIProvider = {
                 max: extJob.job_max_salary || null,
                 currency: extJob.job_salary_currency || 'USD'
             },
-            jobSummary: extJob.job_description || extJob.job_summary || Object.values(extJob.job_highlights || {}).flat().join('\n') || '',
+            jobSummary: bestDescription,
             requiredSkills: extJob.job_required_skills || (extJob.job_highlights?.Qualifications || []),
             benefits: extJob.job_benefits_strings || (extJob.job_highlights?.Benefits || []),
             responsibilities: extJob.job_highlights?.Responsibilities || [],
