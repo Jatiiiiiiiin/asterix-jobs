@@ -522,7 +522,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
           const updated = [...prev];
           const jobIndex = updated.findIndex(j => j.id === job.id);
           if (jobIndex !== -1) {
-            updated[jobIndex] = { ...updated[jobIndex], analyzing: false, matchScore: undefined };
+            updated[jobIndex] = { ...updated[jobIndex], analyzing: false, matchScore: 0 };
           }
           return updated;
         });
