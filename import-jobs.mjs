@@ -135,7 +135,12 @@ const RapidAPIProvider = {
                 max: extJob.job_max_salary || null,
                 currency: extJob.job_salary_currency || 'USD'
             },
-            jobSummary: extJob.job_description || '',
+            jobSummary: extJob.job_description || extJob.job_summary || Object.values(extJob.job_highlights || {}).flat().join('\n') || '',
+            requiredSkills: extJob.job_required_skills || (extJob.job_highlights?.Qualifications || []),
+            benefits: extJob.job_benefits_strings || (extJob.job_highlights?.Benefits || []),
+            responsibilities: extJob.job_highlights?.Responsibilities || [],
+            employmentType: extJob.job_employment_type || null,
+            experienceRequired: extJob.job_required_experience?.required_experience_in_months ? `${Math.round(extJob.job_required_experience.required_experience_in_months / 12)}+ years` : null,
             externalUrl: extJob.job_apply_link || '',
             isAdminPosted: true,
             sources: {
