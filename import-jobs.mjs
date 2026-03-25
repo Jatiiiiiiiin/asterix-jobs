@@ -98,7 +98,14 @@ const RapidAPIProvider = {
         }
 
         console.log('Fetching from RapidAPI JSearch setup...');
-        const queries = ['Software Engineer', 'Frontend Developer', 'React Developer', 'Full Stack Developer', 'Backend Engineer', 'Data Engineer'];
+        const queries = [
+            'Software Engineer Fresher in India',
+            'Junior Frontend Developer in India',
+            'Entry Level React Developer in India',
+            'Junior Full Stack Developer in India',
+            'Junior Backend Engineer in India',
+            'Entry Level Data Engineer in India'
+        ];
         const randomQuery = queries[Math.floor(Math.random() * queries.length)];
         const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(randomQuery)}&num_pages=1&date_posted=today`;
         const options = {
