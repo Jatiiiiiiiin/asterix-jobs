@@ -288,8 +288,8 @@ const JobDetailsPage: React.FC<{ onToggleTheme: () => void, isDarkMode: boolean 
                 <div className="border-b border-black dark:border-white pb-3">
                   <h3 className="text-[9px] md:text-[10px] font-black tracking-[0.3em]">01 / Job Summary</h3>
                 </div>
-                <p className="text-base md:text-lg font-medium tracking-tight leading-snug text-black/90 dark:text-white/95">
-                  {job?.jobSummary ?? job?.description ?? 'No description available'}
+                <p className="text-base md:text-lg font-medium tracking-tight leading-snug text-black/90 dark:text-white/95 whitespace-pre-wrap">
+                  {job?.jobSummary || job?.description || 'No description available. Please click Apply to view the original posting.'}
                 </p>
               </section>
 

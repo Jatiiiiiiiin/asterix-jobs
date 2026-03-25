@@ -208,6 +208,7 @@ async function importJobs() {
 
         for (const extJob of externalJobs) {
             const liveJob = provider.mapToLiveJob(extJob);
+            
             const compName = typeof liveJob.company === 'string' ? liveJob.company : liveJob.company?.name;
             const key = `${slugify(compName)}_${slugify(liveJob.title)}`;
             const docId = `aggregated_${key}`;
