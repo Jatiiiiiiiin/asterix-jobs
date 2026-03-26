@@ -139,7 +139,7 @@ export default function CandidateDashboard({ onToggleTheme, isDarkMode }: any) {
         unsubJobs = subscribeToActiveJobs(
           (liveJobs) => {
             const merged: Job[] = liveJobs
-              .filter(liveJob => !liveJob.isAdminPosted || (liveJob.sources && Object.keys(liveJob.sources).length > 0))
+              .filter(liveJob => !liveJob.isAdminPosted)
               .map(liveJob => {
                 const savedData = Array.isArray(jobDataMap)
                   ? jobDataMap.find((j: any) => j.id === liveJob.id)
