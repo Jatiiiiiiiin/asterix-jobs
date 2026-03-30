@@ -9,7 +9,7 @@ initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
 async function purgeJSearchJobs() {
-    console.log('--- Purging All Aggregated Jobs (JSearch) ---');
+    console.log('--- 🧹 Purging All Aggregated Jobs (JSearch) ---');
 
     try {
         const jobsRef = db.collection('jobs');
@@ -22,30 +22,37 @@ async function purgeJSearchJobs() {
 
         let deletedCount = 0;
         let batch = db.batch();
+        let batchOpCount = 0;
 
-        snapshot.forEach(doc => {
+        for (const doc of snapshot.docs) {
             // Delete all jobs imported by our aggregator
             if (doc.id.startsWith('aggregated_')) {
-                console.log(`Deleting previously fetched job: ${doc.id}`);
+                console.log(`- Deleting: ${doc.id}`);
                 batch.delete(doc.ref);
                 deletedCount++;
-                
-                // Firestore batch limit is 500. For safety we just do it if it's less than 500, but let's implement a simple chunk approach if needed.
+                batchOpCount++;
+
+                // Firestore batch limit is 500
+                if (batchOpCount === 500) {
+                    await batch.commit();
+                    batch = db.batch(); // Start a new batch
+                    batchOpCount = 0;
+                }
             }
-        });
+        }
+
+        // Commit any remaining deletions
+        if (batchOpCount > 0) {
+            await batch.commit();
+        }
 
         if (deletedCount > 0) {
-            if (deletedCount <= 500) {
-                await batch.commit();
-                console.log(`Successfully purged ${deletedCount} old aggregated jobs.`);
-            } else {
-                console.log(`Found ${deletedCount} jobs, which exceeds the 500 batch limit. Please implement chunking.`);
-            }
+            console.log(`✅ Successfully purged ${deletedCount} old aggregated jobs.`);
         } else {
             console.log('No aggregated JSearch jobs found to delete!');
         }
     } catch (error) {
-        console.error('Error cleaning up jobs:', error);
+        console.error('❌ Error cleaning up jobs:', error);
     }
 }
 
