@@ -108,7 +108,7 @@ const RapidAPIProvider = {
         ];
         const randomQuery = queries[Math.floor(Math.random() * queries.length)];
         const encodeQ = encodeURIComponent(randomQuery);
-        const url = `https://jsearch.p.rapidapi.com/search?query=${encodeQ}&num_pages=1&date_posted=3days`;
+        const url = `https://jsearch.p.rapidapi.com/search?query=${encodeQ}&num_pages=3&date_posted=3days`;
         const options = {
             method: 'GET',
             headers: {
