@@ -21,8 +21,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutPhase, setLogoutPhase] = useState(0);
   const [glitchText, setGlitchText] = useState('SIGN OUT');
-  const [isPurging, setIsPurging] = useState(false);
-  const [purgeStatus, setPurgeStatus] = useState<string | null>(null);
 
   /* ── Auth user (includes isPremium / isStudent) ── */
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -190,54 +188,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
     await new Promise(r => setTimeout(r, 1600));
     await authService.logout();
     onLogout();
-  };
-
-  /* ── Purge Tool (Temporary) ── */
-  const handlePurge = async () => {
-    if (!window.confirm("⚠️ SYSTEM OVERRIDE: This will permanently delete all 65+ aggregated jobs. Local records will be wiped. Proceed?")) return;
-    
-    setIsPurging(true);
-    setPurgeStatus('INITIALIZING...');
-
-    try {
-      const { collection, query, where, getDocs, deleteDoc, writeBatch } = await import('firebase/firestore');
-      const { db } = await import('../firebase');
-      
-      const q = query(collection(db, 'jobs'), where('isAdminPosted', '==', true));
-      const snap = await getDocs(q);
-      
-      let count = 0;
-      let batch = writeBatch(db);
-      let opCount = 0;
-
-      for (const d of snap.docs) {
-        if (d.id.startsWith('aggregated_')) {
-          batch.delete(d.ref);
-          count++;
-          opCount++;
-          if (opCount === 500) {
-            await batch.commit();
-            batch = writeBatch(db);
-            opCount = 0;
-          }
-        }
-      }
-
-      if (opCount > 0) await batch.commit();
-      
-      setPurgeStatus(`SUCCESS: ${count} NODES WIPED`);
-      if (typeof (window as any).addNotification === 'function') {
-        (window as any).addNotification('Neural Purge', `${count} stale nodes decommissioned.`, 'success');
-      }
-    } catch (err: any) {
-      console.error("Purge failure:", err);
-      setPurgeStatus(`ERROR: ${err.message}`);
-    } finally {
-      setTimeout(() => {
-        setIsPurging(false);
-        setPurgeStatus(null);
-      }, 3000);
-    }
   };
 
   const tabs = role === 'candidate'
@@ -692,32 +642,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onToggleTheme, isDarkMode, 
                       ? <><span className="material-symbols-outlined text-sm">check_circle</span> Done</>
                       : 'Execute Sync'}
                 </button>
-              </div>
-
-              {/* ── Developer Zone (Temporary) ── */}
-              <div className="mt-12 pt-10 border-t-2 border-red-500/20 space-y-6">
-                <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-red-500 text-sm">terminal</span>
-                    <h4 className="text-[10px] font-black tracking-[0.4em] text-red-500 uppercase">Developer Override</h4>
-                </div>
-                <div className="p-6 bg-red-500/5 border border-red-500/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-black tracking-widest text-red-500">Node Purge Protocol</p>
-                    <p className="text-[8px] font-bold tracking-widest opacity-40 leading-relaxed max-w-sm">
-                      Wipe all stale aggregated jobs from the database. Use this to reset the sync with the new API key.
-                    </p>
-                  </div>
-                  <button 
-                    onClick={handlePurge}
-                    disabled={isPurging}
-                    className={`w-full md:w-auto px-8 py-4 text-[9px] font-black tracking-widest transition-all border-2
-                      ${isPurging 
-                        ? 'bg-red-500/20 border-red-500 text-red-500 cursor-wait' 
-                        : 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white'}`}
-                  >
-                    {isPurging ? purgeStatus : 'EXECUTE PURGE'}
-                  </button>
-                </div>
               </div>
 
               {/* Danger zone */}
