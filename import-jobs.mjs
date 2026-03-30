@@ -93,11 +93,10 @@ const RapidAPIProvider = {
         const apiKey = process.env.RAPIDAPI_KEY;
         if (!apiKey) {
             console.error('❌ Missing RAPIDAPI_KEY inside `.env.local` file.');
-            console.log('Falling back to empty fetch for RapidAPI.');
             return [];
         }
 
-        console.log('Fetching from RapidAPI JSearch setup...');
+        console.log('Fetching for all fresher categories...');
         const queries = [
             'Software Engineer Fresher in India',
             'Junior Frontend Developer in India',
@@ -106,26 +105,34 @@ const RapidAPIProvider = {
             'Junior Backend Engineer in India',
             'Entry Level Data Engineer in India'
         ];
-        const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-        const encodeQ = encodeURIComponent(randomQuery);
-        const url = `https://jsearch.p.rapidapi.com/search?query=${encodeQ}&num_pages=3&date_posted=3days`;
-        const options = {
-            method: 'GET',
-            headers: {
-                'X-RapidAPI-Key': apiKey,
-                'X-RapidAPI-Host': 'jsearch.p.rapidapi.com'
-            }
-        };
 
-        try {
-            const response = await fetch(url, options);
-            if (!response.ok) throw new Error(`Fetch failed with status ${response.status}`);
-            const result = await response.json();
-            return result.data || []; // JSearch wraps in .data
-        } catch (error) {
-            console.error('RapidAPI Fetch Error:', error);
-            return [];
+        let allJobs = [];
+        for (const query of queries) {
+            console.log(`- Fetching "${query}"...`);
+            const encodeQ = encodeURIComponent(query);
+            const url = `https://jsearch.p.rapidapi.com/search?query=${encodeQ}&num_pages=3&date_posted=3days`;
+            const options = {
+                method: 'GET',
+                headers: {
+                    'X-RapidAPI-Key': apiKey,
+                    'X-RapidAPI-Host': 'jsearch.p.rapidapi.com'
+                }
+            };
+
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) throw new Error(`Fetch failed for "${query}" status ${response.status}`);
+                const result = await response.json();
+                if (result.data) {
+                    console.log(`  Found ${result.data.length} results.`);
+                    allJobs.push(...result.data);
+                }
+            } catch (error) {
+                console.error(`  Error fetching "${query}":`, error.message);
+                // Continue to next query even if one fails
+            }
         }
+        return allJobs;
     },
     mapToLiveJob(extJob) {
         const sourceName = extJob.job_publisher || 'External';
