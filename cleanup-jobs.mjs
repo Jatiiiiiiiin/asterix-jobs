@@ -37,8 +37,8 @@ async function cleanupExpiredJobs() {
             const deadline = data.applicationDeadline;
 
             if (deadline && deadline < todayStr) {
-                console.log(`Deleting expired job: ${doc.id} (${data.title}) - Deadline: ${deadline}`);
-                batch.delete(doc.ref);
+                console.log(`Closing expired job: ${doc.id} (${data.title}) - Deadline: ${deadline}`);
+                batch.update(doc.ref, { status: 'closed' });
                 deletedCount++;
             }
         });

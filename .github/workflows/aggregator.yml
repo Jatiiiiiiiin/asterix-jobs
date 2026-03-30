@@ -32,3 +32,6 @@ jobs:
         run: node import-jobs.mjs --provider=rapidapi
         env:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+
+      - name: Run Job Expiration Cleanup
+        run: node cleanup-jobs.mjs

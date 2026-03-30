@@ -107,7 +107,8 @@ const RapidAPIProvider = {
             'Entry Level Data Engineer in India'
         ];
         const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-        const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(randomQuery)}&num_pages=1&date_posted=today`;
+        const encodeQ = encodeURIComponent(randomQuery);
+        const url = `https://jsearch.p.rapidapi.com/search?query=${encodeQ}&num_pages=1&date_posted=3days`;
         const options = {
             method: 'GET',
             headers: {
@@ -161,6 +162,12 @@ const RapidAPIProvider = {
         const reqSkillsList = extJob.job_required_skills || extJob.job_highlights?.Qualifications || [];
         const benefitsList = extJob.job_benefits_strings || extJob.job_highlights?.Benefits || [];
 
+        // Formatting deadline to YYYY-MM-DD for simpler comparison
+        let applicationDeadline = null;
+        if (extJob.job_offer_expiration_datetime_utc) {
+            applicationDeadline = extJob.job_offer_expiration_datetime_utc.split('T')[0];
+        }
+
         return {
             title: extJob.job_title || 'Untitled',
             status: 'active',
@@ -184,6 +191,7 @@ const RapidAPIProvider = {
             employmentType: extJob.job_employment_type || null,
             experienceRequired: extJob.job_required_experience?.required_experience_in_months ? `${Math.round(extJob.job_required_experience.required_experience_in_months / 12)}+ years` : null,
             externalUrl: extJob.job_apply_link || '',
+            applicationDeadline: applicationDeadline, // NEW
             isAdminPosted: true,
             sources: {
                 [sourceName]: {
@@ -228,8 +236,10 @@ async function importJobs() {
 
     try {
         const externalJobs = await provider.fetchJobs();
+        console.log(`Fetched ${externalJobs.length} raw records from ${provider.name}.`);
+
         if (externalJobs.length === 0) {
-            console.log('No jobs found or fetched. Exiting.');
+            console.log('No new jobs found for the selected query. Exiting.');
             return;
         }
 
