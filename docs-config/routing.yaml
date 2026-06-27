@@ -2,20 +2,27 @@
 # Maps source files to their permanent MDX/Markdown documentation files
 
 routes:
-  - pattern: "src/components/**/*.tsx"
-    dest: "content/docs/components/{name}.mdx"
-  
-  - pattern: "src/hooks/**/*.ts"
-    dest: "content/docs/hooks/{name}.mdx"
+  - id: 'ai-engine'
+    name: 'AI Processing Engine'
+    pattern: 'ai-engine/**/*.ts'
+    template: 'api-reference'
 
-  - pattern: "src/app/api/**/*.ts"
-    dest: "content/docs/api/{name}.mdx"
+  - id: 'components'
+    name: 'React Components'
+    pattern: '{components/**/*.tsx,src/components/**/*.tsx}'
+    template: 'component'
 
-  - pattern: "src/services/**/*.ts"
-    dest: "content/docs/services/{name}.mdx"
+  - id: 'services'
+    name: 'Core Services'
+    pattern: '{*Service.ts,firebase.ts}'
+    template: 'api-reference'
+    
+  - id: 'scripts'
+    name: 'Maintenance Scripts'
+    pattern: '*.mjs'
+    template: 'script'
 
-  - pattern: "src/utils/**/*.ts"
-    dest: "content/docs/utils/{name}.mdx"
-
-  - pattern: "src/lib/**/*.ts"
-    dest: "content/docs/utils/{name}.mdx"
+  - id: 'views'
+    name: 'UI Views'
+    pattern: 'views/**/*.tsx'
+    template: 'component'
