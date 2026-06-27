@@ -1,0 +1,21 @@
+# Documentation Automation Routing Configuration
+# Maps source files to their permanent MDX/Markdown documentation files
+
+routes:
+  - pattern: "src/components/**/*.tsx"
+    dest: "content/docs/components/{name}.mdx"
+  
+  - pattern: "src/hooks/**/*.ts"
+    dest: "content/docs/hooks/{name}.mdx"
+
+  - pattern: "src/app/api/**/*.ts"
+    dest: "content/docs/api/{name}.mdx"
+
+  - pattern: "src/services/**/*.ts"
+    dest: "content/docs/services/{name}.mdx"
+
+  - pattern: "src/utils/**/*.ts"
+    dest: "content/docs/utils/{name}.mdx"
+
+  - pattern: "src/lib/**/*.ts"
+    dest: "content/docs/utils/{name}.mdx"
