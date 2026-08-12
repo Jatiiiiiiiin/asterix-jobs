@@ -3,3 +3,5 @@
 node_modules
 .venv_new
 .venv
+public/docs
+docs/.vitepress/cache
