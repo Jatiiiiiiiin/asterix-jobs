@@ -11,3 +11,5 @@ huggingface_hub
 requests
 groq
 google-generativeai
+firebase-admin>=6.0.0
+slowapi>=0.1.9

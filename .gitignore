@@ -5,3 +5,7 @@ node_modules
 .venv
 public/docs
 docs/.vitepress/cache
+
+# Security: never commit Firebase Admin service account or AI engine secrets
+ai-engine/service-account.json
+ai-engine/.env

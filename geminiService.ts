@@ -1,5 +1,6 @@
 import { Job } from "./types";
 import * as pdfjs from 'pdfjs-dist';
+import { auth } from "./firebase";
 
 // Configure PDF.js worker
 if (typeof window !== 'undefined' && 'Worker' in window) {
@@ -58,7 +59,20 @@ function setInCache(key: string, data: any) {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-// In-browser ML pipeline removed — all scoring routes to backend
+/**
+ * Returns an Authorization header with the current user's Firebase ID token.
+ * All backend API calls must include this so the server can verify identity.
+ */
+async function getAuthHeader(): Promise<Record<string, string>> {
+  try {
+    const user = auth.currentUser;
+    if (!user) return {};
+    const token = await user.getIdToken();
+    return { Authorization: `Bearer ${token}` };
+  } catch {
+    return {};
+  }
+}
 
 /* ================= PDF EXTRACTION (CLIENT) ================= */
 
@@ -164,8 +178,10 @@ export async function extractResumeText(resumeSource: File | string): Promise<st
   }
 
   try {
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/extract`, {
       method: "POST",
+      headers: authHeader,
       body: formData
     });
 
@@ -185,8 +201,10 @@ export async function embedResumeBackend(resumeText: string) {
   formData.append("resumeText", resumeText);
 
   try {
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/embed-resume`, {
       method: "POST",
+      headers: authHeader,
       body: formData
     });
 
@@ -251,8 +269,10 @@ export async function calculateSemanticFidelityBackend(
   const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   try {
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/match`, {
       method: "POST",
+      headers: authHeader,
       body: formData,
       signal: controller.signal
     });
@@ -282,9 +302,10 @@ export async function sendAutoApplyEmail(payload: {
   location: string;
 }) {
   try {
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/send-auto-apply-email`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeader },
       body: JSON.stringify(payload),
     });
 
@@ -318,8 +339,10 @@ export const getAIInsights = async (
   form.append("resumeText", resumeText);
 
   try {
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/insights`, {
       method: "POST",
+      headers: authHeader,
       body: form,
     });
 
@@ -347,8 +370,10 @@ export const getMatchingSummary = async (jobDescription: string) => {
   form.append("jobDescription", jobDescription);
 
   try {
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/summary`, {
       method: "POST",
+      headers: authHeader,
       body: form,
     });
 
@@ -383,9 +408,10 @@ export async function queryJobContext(
   };
 
   try {
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeader },
       body: JSON.stringify(payload)
     });
 
@@ -492,8 +518,10 @@ export async function getInterviewTips(
     form.append("jobDescription", jobDescription);
     form.append("resumeText", resumeText);
 
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/tips`, {
       method: "POST",
+      headers: authHeader,
       body: form,
     });
 
@@ -515,9 +543,10 @@ export async function getInterviewTips(
 
 export async function parseJobDescription(rawText: string) {
   try {
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/parse-jd`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeader },
       body: JSON.stringify({ text: rawText })
     });
 
@@ -536,9 +565,10 @@ export async function parseJobDescription(rawText: string) {
 
 export async function generateTestQuestions(college: string) {
   try {
+    const authHeader = await getAuthHeader();
     const res = await fetch(`${API_BASE}/generate-test`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeader },
       body: JSON.stringify({ college })
     });
 

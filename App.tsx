@@ -138,24 +138,20 @@ const App: React.FC = () => {
   const handleGlobalPaymentVerification = useCallback(async (orderId: string) => {
     try {
       console.log("[GlobalPayment] Verifying order:", orderId);
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/status/${orderId}`);
+      const { auth } = await import("./firebase");
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/status/${orderId}`, {
+        headers: idToken ? { Authorization: `Bearer ${idToken}` } : {},
+      });
       const data = await response.json();
 
       if (data.status === "success" && (data.payment_status === "SUCCESS" || data.payment_status === "PAID")) {
         console.log("[GlobalPayment] Verification logic success. Activating premium_student...");
         const selectedPlanId = localStorage.getItem("selected_plan") || "student";
+        const plan = (selectedPlanId === "recruiter" ? "premium" : "premium_student") as "premium" | "student" | "premium_student";
 
-        const planData = {
-          plan: (selectedPlanId === "recruiter" ? "premium" : "premium_student") as any,
-          status: "active" as const,
-          isPremium: true,
-          isStudent: selectedPlanId === "student",
-          startDate: new Date(),
-          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          paymentId: orderId,
-        };
-
-        await authService.updateSubscription(planData);
+        // Subscription is now activated server-side: backend verifies payment then writes to Firestore
+        await authService.updateSubscription(orderId, plan);
 
         // Clean up URL parameters to avoid re-triggering
         const newUrl = window.location.pathname + window.location.hash;

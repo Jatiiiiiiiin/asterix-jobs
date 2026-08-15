@@ -80,7 +80,11 @@ const ConfirmPaymentPage: React.FC<ConfirmPaymentPageProps> = ({ onPaymentSucces
     const verifyPayment = async (orderId: string) => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/status/${orderId}`);
+            const { auth } = await import("../firebase");
+            const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/status/${orderId}`, {
+                headers: idToken ? { Authorization: `Bearer ${idToken}` } : {},
+            });
             const data = await response.json();
 
             if (data.status === "success" && (data.payment_status === "SUCCESS" || data.payment_status === "PAID")) {
@@ -97,16 +101,9 @@ const ConfirmPaymentPage: React.FC<ConfirmPaymentPageProps> = ({ onPaymentSucces
 
     const activateSubscription = async (paymentId: string) => {
         try {
-            const planData = {
-                plan: (selectedPlanId === "recruiter" ? "premium" : "premium_student") as "free" | "premium" | "student" | "premium_student",
-                status: "active" as const,
-                isPremium: true,
-                isStudent: selectedPlanId === "student",
-                startDate: new Date(),
-                endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                paymentId,
-            };
-            await authService.updateSubscription(planData);
+            const plan = (selectedPlanId === "recruiter" ? "premium" : "premium_student") as "premium" | "student" | "premium_student";
+            // Subscription activation is server-side: backend verifies payment then writes to Firestore
+            await authService.updateSubscription(paymentId, plan);
             localStorage.removeItem("auth_intent");
             localStorage.removeItem("selected_plan");
             onPaymentSuccess();
@@ -139,9 +136,14 @@ const ConfirmPaymentPage: React.FC<ConfirmPaymentPageProps> = ({ onPaymentSucces
                 console.warn("[Payment] Could not fetch phone from profile, using fallback.");
             }
 
+            const { auth: firebaseAuth } = await import("../firebase");
+            const idToken = firebaseAuth.currentUser ? await firebaseAuth.currentUser.getIdToken() : null;
             const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/payments/create-order`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+                },
                 body: JSON.stringify({
                     amount: plan.amount,
                     customer_id: user.uid,

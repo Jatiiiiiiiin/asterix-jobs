@@ -29,16 +29,17 @@ If you're picking this up cold, in order:
 1. **[How it all fits together](/platform/overview)** — the shape of the whole system in one pass. Ten minutes, and the rest stops being confusing.
 2. **[Deploy matrix](/platform/deploy-matrix)** — what ships where, on what trigger. Getting this wrong is the most common wasted afternoon.
 3. **[Data model](/platform/data-model)** — the Firestore collections everything reads and writes, since there's no schema to grep for.
-4. Then the [Reference](/reference/frontend) page for whichever part you actually have to touch.
-5. **[Gotchas that cost days](/platform/gotchas)** — read it before you need it, not after.
+4. **[Auth & access control](/platform/auth)** — the security model: what's enforced where and why.
+5. Then the [Reference](/reference/frontend) page for whichever part you actually have to touch.
+6. **[Gotchas that cost days](/platform/gotchas)** — read it before you need it, not after.
 
 ## Three things that are true across everything
 
-**There is no server-side authorization boundary.** Every role check (`candidate` / `recruiter` / `admin`) is a client-side route guard in `App.tsx`. Firestore access control is whatever `firestore.rules` says, independent of what the UI shows. Never assume a hidden route is actually inaccessible — see [Auth & access control](/platform/auth).
+**Client-side route guards are UI, not security.** Every role check (`candidate` / `recruiter` / `admin`) in `App.tsx` is a navigation convenience — it redirects the browser, it doesn't lock data. The real enforcement layer is two-part: **Firestore rules** (for direct DB reads/writes) and **Firebase JWT verification on the AI engine** (for all LLM, payment, and email endpoints). See [Auth & access control](/platform/auth) for why this split was chosen.
 
-**Firebase config is hardcoded, not env-driven.** Unlike the AI engine and the job aggregator, `firebase.ts` has the Firebase project config written directly into the file — there are no `VITE_FIREBASE_*` variables to set. If you're spinning up a second environment, this is the file you edit, not `.env.local`.
+**Firebase config is now env-driven.** `firebase.ts` reads from `VITE_FIREBASE_*` environment variables — set in `.env.local` for local dev and in the Vercel dashboard for production. This replaces the previous hardcoded config and means you can rotate keys or point at a different project without touching source code.
 
-**One committed file is a live credential.** `ai-engine/service-account.json` is a Firebase Admin service account — checked into git, not gitignored. This is the single highest-priority item in this handbook. See the callout in [Gotchas](/platform/gotchas#committed-service-account-credential).
+**The service account is no longer in git.** `ai-engine/service-account.json` is now gitignored and untracked. The AI engine loads its Firebase Admin credentials from a `FIREBASE_SERVICE_ACCOUNT_JSON` environment variable (the full JSON as a single-line string) set as a secret on Render. See [Gotchas](/platform/gotchas#service-account-credential) for the full history and what you still need to do about git history.
 
 ::: danger This handbook is not customer-facing
 It documents internal deploy mechanics, collection names, and where secrets live (not secret *values*). It's served at `/docs` with `noindex`, but that's obscurity, not access control — anyone with the URL can read it. Don't put actual key/token values on any page here.

@@ -131,16 +131,12 @@ export const authService = {
     }
 
     const data = (await getDoc(userRef)).data();
-    let role = data?.role || "candidate";
+    const role = data?.role || "candidate";
 
-    // HARDCODED ADMIN CHECK
-    if (email === "asterixadmin@gmail.com") {
-      role = "admin";
-      // Update firestore if not already admin
-      if (data?.role !== "admin") {
-        await setDoc(userRef, { role: "admin" }, { merge: true });
-      }
-    }
+    // NOTE: Admin role is set server-side only via Firebase Admin SDK.
+    // Do NOT grant admin by email check — that can be forged.
+    // To make a user admin: firebase_auth.set_custom_user_claims(uid, {"role": "admin"})
+    // and set role: "admin" in their Firestore /users/{uid} document.
 
     writeSession(res.user.uid, res.user.email, role);
 
@@ -236,7 +232,8 @@ export const authService = {
     return {
       uid,
       email: data.email ?? firebaseUser?.email ?? null,
-      role: (data.role === 'admin' || data.email === 'asterixadmin@gmail.com' || firebaseUser?.email === 'asterixadmin@gmail.com') ? 'admin' : data.role,
+      // Role comes from Firestore only — set server-side via Admin SDK
+      role: data.role as "candidate" | "recruiter" | "admin",
       isOnboarded: data.isOnboarded || false,
       isPremium: data.subscription?.isPremium || data.isPremium || false,
       isStudent: data.subscription?.isStudent || data.isStudent || false,
@@ -272,40 +269,34 @@ export const authService = {
     await setDoc(doc(db, "users", uid), data, { merge: true });
   },
 
-  /* ========= UPDATE SUBSCRIPTION ========= */
-  async updateSubscription(subscriptionData: {
-    plan: "free" | "premium" | "student" | "premium_student" | "student_premium";
-    status?: "active" | "canceled" | "expired";
-    isPremium?: boolean;
-    isStudent?: boolean;
-    startDate?: Date;
-    endDate?: Date | null;
-    paymentId?: string;
-    autoRenew?: boolean;
-  }) {
-    const uid = readSessionUid() || auth.currentUser?.uid;
-    if (!uid) throw new Error("No user session");
+  /* ========= UPDATE SUBSCRIPTION (SERVER-SIDE) ========= */
+  // Subscription upgrades are handled server-side to prevent privilege escalation.
+  // Call this AFTER Cashfree redirects back with a successful order_id.
+  // The backend verifies payment with Cashfree before writing to Firestore.
+  async updateSubscription(orderId: string, plan: "premium" | "student" | "premium_student") {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No authenticated user");
 
-    const isPremium = subscriptionData.isPremium ?? true;
-    const isStudent = subscriptionData.isStudent ?? (subscriptionData.plan.includes('student'));
+    const API_BASE = import.meta.env.VITE_API_BASE_URL;
+    const idToken = await user.getIdToken();
 
-    console.log(`[AuthService] Hardened Sync for ${uid}: isPremium=${isPremium}, plan=${subscriptionData.plan}`);
-
-    await setDoc(
-      doc(db, "users", uid),
-      {
-        isPremium,
-        isStudent,
-        subscription: {
-          ...subscriptionData,
-          isPremium,
-          isStudent,
-          updatedAt: new Date(),
-        },
+    const res = await fetch(`${API_BASE}/payments/activate-subscription`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`,
       },
-      { merge: true }
-    );
-    console.log("[AuthService] Subscription sync complete.");
+      body: JSON.stringify({ order_id: orderId, plan }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.detail || "Subscription activation failed");
+    }
+
+    const result = await res.json();
+    console.log("[AuthService] Subscription activated server-side:", result);
+    return result;
   },
 
   /* ========= LOGOUT ========= */

@@ -56,6 +56,7 @@ export default defineConfig({
           { text: 'Deploy matrix', link: '/platform/deploy-matrix' },
           { text: 'Data model (Firestore)', link: '/platform/data-model' },
           { text: 'Auth & access control', link: '/platform/auth' },
+          { text: 'Security model', link: '/platform/security' },
           { text: 'Gotchas that cost days', link: '/platform/gotchas' },
         ],
       },

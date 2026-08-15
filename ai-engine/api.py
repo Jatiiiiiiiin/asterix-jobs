@@ -6,10 +6,10 @@ import pydantic
 if not hasattr(builtins, "StrictBytes"):
     builtins.StrictBytes = getattr(pydantic, "StrictBytes", str) # Fallback to str if missing
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Set
+from typing import List, Set, Optional
 import pdfplumber
 import numpy as np
 import json
@@ -36,6 +36,15 @@ import os
 from groq import Groq
 import google.generativeai as genai
 
+# Firebase Admin SDK — loaded from env var, NOT from a committed file
+import firebase_admin
+from firebase_admin import credentials, auth as firebase_auth
+
+# Rate limiting
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path=env_path)
 
@@ -54,9 +63,52 @@ print(f"[Startup] Groq Initialized: {bool(GROQ_API_KEY)}")
 print(f"[Startup] Gemini Initialized: {bool(GOOGLE_API_KEY)}")
 print(f"[Startup] Loading .env from: {env_path}")
 
+# ================= FIREBASE ADMIN INIT =================
+# Load service account from FIREBASE_SERVICE_ACCOUNT_JSON env var (JSON string).
+# Never commit the service account file — set this as a secret on Render.
+
+_firebase_initialized = False
+
+def _init_firebase():
+    global _firebase_initialized
+    if _firebase_initialized or firebase_admin._apps:
+        _firebase_initialized = True
+        return
+    sa_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+    if sa_json:
+        try:
+            sa_dict = json.loads(sa_json)
+            cred = credentials.Certificate(sa_dict)
+            firebase_admin.initialize_app(cred)
+            _firebase_initialized = True
+            print("[Firebase Admin] Initialized from FIREBASE_SERVICE_ACCOUNT_JSON env var")
+        except Exception as e:
+            print(f"[Firebase Admin ERROR] Failed to initialize from env var: {e}")
+    else:
+        # Fallback: try local file path (only for local dev — NEVER commit this file)
+        sa_path = os.path.join(os.path.dirname(__file__), 'service-account.json')
+        if os.path.exists(sa_path):
+            try:
+                cred = credentials.Certificate(sa_path)
+                firebase_admin.initialize_app(cred)
+                _firebase_initialized = True
+                print("[Firebase Admin] Initialized from local service-account.json (DEV ONLY)")
+            except Exception as e:
+                print(f"[Firebase Admin ERROR] Failed to initialize from file: {e}")
+        else:
+            print("[Firebase Admin WARNING] No service account configured — JWT auth will REJECT all requests")
+
+_init_firebase()
+
 # ================= APP =================
 
 app = FastAPI()
+
+# ================= RATE LIMITER =================
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ================= AI RESPONSE CACHE =================
 # Simple in-memory cache to prevent redundant LLM calls for the same payload
@@ -98,6 +150,47 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ================= AUTH DEPENDENCY =================
+
+class TokenData(BaseModel):
+    uid: str
+    email: Optional[str] = None
+    role: Optional[str] = None
+
+
+async def get_current_user(authorization: Optional[str] = Header(None)) -> TokenData:
+    """Verify Firebase ID token from Authorization: Bearer <token> header."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or malformed Authorization header")
+    token = authorization[len("Bearer "):].strip()
+    if not token:
+        raise HTTPException(status_code=401, detail="Empty token")
+    try:
+        decoded = firebase_auth.verify_id_token(token)
+        return TokenData(
+            uid=decoded["uid"],
+            email=decoded.get("email"),
+            role=decoded.get("role"),
+        )
+    except firebase_auth.ExpiredIdTokenError:
+        raise HTTPException(status_code=401, detail="Token expired — please re-authenticate")
+    except firebase_auth.InvalidIdTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        print(f"[Auth ERROR] Token verification failed: {e}")
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+
+async def require_admin(user: TokenData = Depends(get_current_user)) -> TokenData:
+    """Only allow users whose Firestore role is 'admin' (set via Admin SDK, not client)."""
+    # The Firebase custom claims or Firestore role is checked — we rely on
+    # Firestore rules for data access; here we verify the claim in the token.
+    # Admins should have a custom claim set: firebase_auth.set_custom_user_claims(uid, {"role": "admin"})
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
 
 
 # ================= LIGHTWEIGHT EMBEDDER =================
@@ -579,7 +672,8 @@ def health():
 # ================= EXTRACTION ENDPOINT =================
 
 @app.post("/extract")
-async def extract_resume(resume: UploadFile = File(...)):
+@limiter.limit("30/minute")
+async def extract_resume(request: Request, resume: UploadFile = File(...), user: TokenData = Depends(get_current_user)):
     """Extract text from a resume once to avoid repeated uploads"""
     print(f"\n[EXTRACT] Received: {resume.filename}")
     
@@ -594,7 +688,8 @@ async def extract_resume(resume: UploadFile = File(...)):
 
 
 @app.post("/embed-resume")
-async def embed_resume(resumeText: str = Form(...)):
+@limiter.limit("30/minute")
+async def embed_resume(request: Request, resumeText: str = Form(...), user: TokenData = Depends(get_current_user)):
     """Extract structured identity and skills from resume text using Groq/Gemini"""
     print(f"\n[EMBED] Processing identity extraction for text len: {len(resumeText)}")
     
@@ -665,7 +760,10 @@ async def embed_resume(resumeText: str = Form(...)):
 # ================= MATCH ENDPOINT =================
 
 @app.post("/match")
+@limiter.limit("10/minute")
 async def match_resume(
+    request: Request,
+    user: TokenData = Depends(get_current_user),
     resume: UploadFile = File(None),
     resumeText: str = Form(None),
     jobTitle: str = Form(...),
@@ -828,7 +926,8 @@ async def match_resume(
 # ================= INSIGHTS =================
 
 @app.post("/insights")
-async def insights(candidateName: str = Form(...), jobTitle: str = Form(...), jobDescription: str = Form(""), resumeText: str = Form("")):
+@limiter.limit("30/minute")
+async def insights(request: Request, candidateName: str = Form(...), jobTitle: str = Form(...), jobDescription: str = Form(""), resumeText: str = Form(""), user: TokenData = Depends(get_current_user)):
     """Generate role-specific insights using Groq"""
     
     # Check Cache
@@ -874,7 +973,8 @@ async def insights(candidateName: str = Form(...), jobTitle: str = Form(...), jo
 
 
 @app.post("/tips")
-async def tips(jobTitle: str = Form(...), jobDescription: str = Form(...), resumeText: str = Form(...)):
+@limiter.limit("30/minute")
+async def tips(request: Request, jobTitle: str = Form(...), jobDescription: str = Form(...), resumeText: str = Form(...), user: TokenData = Depends(get_current_user)):
     """Generate personalized interview tips using Groq"""
     
     # Check Cache
@@ -917,7 +1017,8 @@ async def tips(jobTitle: str = Form(...), jobDescription: str = Form(...), resum
 # ================= SUMMARY =================
 
 @app.post("/summary")
-async def summary(jobDescription: str = Form(...)):
+@limiter.limit("30/minute")
+async def summary(request: Request, jobDescription: str = Form(...), user: TokenData = Depends(get_current_user)):
     """Extract key requirements and generate a professional summary using Gemini/Groq"""
     
     # Check Cache
@@ -975,7 +1076,8 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/chat")
-async def chat(req: ChatRequest):
+@limiter.limit("20/minute")
+async def chat(request: Request, req: ChatRequest, user: TokenData = Depends(get_current_user)):
     """Dynamic AI Chat using Groq"""
     
     if groq_client:
@@ -1054,7 +1156,8 @@ RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "onboarding@resend.dev")
 print(f"[Startup] RESEND_FROM_EMAIL: {RESEND_FROM_EMAIL}")
 
 @app.post("/send-auto-apply-email")
-async def send_auto_apply_email(req: EmailRequest):
+@limiter.limit("5/minute")
+async def send_auto_apply_email(request: Request, req: EmailRequest, user: TokenData = Depends(get_current_user)):
     """Notify candidate about automatic application"""
     print(f"\n[EMAIL REQUEST] To: {req.to_email}, Job: {req.job_title}")
     
@@ -1108,8 +1211,12 @@ class OrderRequest(BaseModel):
     customer_name: str = "Customer"
 
 @app.post("/payments/create-order")
-async def create_payment_order(req: OrderRequest):
+@limiter.limit("5/minute")
+async def create_payment_order(request: Request, req: OrderRequest, user: TokenData = Depends(get_current_user)):
     """Create a Cashfree order and return session ID"""
+    # Verify the customer_id matches the authenticated user
+    if req.customer_id != user.uid:
+        raise HTTPException(status_code=403, detail="customer_id must match authenticated user")
     print(f"\n[PAYMENT] Creating order for {req.customer_email}, amount: {req.amount}")
     
     if not CASHFREE_APP_ID or not CASHFREE_SECRET_KEY:
@@ -1184,7 +1291,8 @@ async def create_payment_order(req: OrderRequest):
         return {"status": "error", "message": str(e)}
 
 @app.get("/payments/status/{order_id}")
-async def get_payment_status(order_id: str):
+@limiter.limit("20/minute")
+async def get_payment_status(request: Request, order_id: str, user: TokenData = Depends(get_current_user)):
     """Verify payment status with Cashfree"""
     print(f"\n[PAYMENT] Checking status for order: {order_id}")
     
@@ -1263,7 +1371,8 @@ class ParseJDRequest(BaseModel):
     text: str
 
 @app.post("/parse-jd")
-async def parse_jd(req: ParseJDRequest):
+@limiter.limit("10/minute")
+async def parse_jd(request: Request, req: ParseJDRequest, user: TokenData = Depends(require_admin)):
     """Parse raw Job Description text into structured JSON for Admin Auto-Fill"""
     if not req.text or len(req.text) < 10:
         return {"status": "error", "message": "Please paste at least one full sentence of the job description."}
@@ -1356,7 +1465,8 @@ class GenerateTestRequest(BaseModel):
     college: str = ""
 
 @app.post("/generate-test")
-async def generate_test(req: GenerateTestRequest):
+@limiter.limit("3/minute")
+async def generate_test(request: Request, req: GenerateTestRequest, user: TokenData = Depends(require_admin)):
     """Generate a college-level shared test at moderate difficulty."""
     college = req.college.strip() or "General"
     cache_key = f"gen_test_college:{hashlib.md5(college.lower().encode()).hexdigest()}"
@@ -1432,6 +1542,91 @@ async def generate_test(req: GenerateTestRequest):
             print(f"[Generate Test Error] LLM fallback: {e}")
 
     return default_result
+
+# ================= SUBSCRIPTION ACTIVATION (SERVER-SIDE) =================
+# This endpoint replaces the client-side updateSubscription() call.
+# The client MUST call this after Cashfree redirects back — it verifies
+# the payment with Cashfree and ONLY THEN upgrades the user in Firestore
+# via the Admin SDK. This prevents privilege escalation from the client.
+
+from firebase_admin import firestore as admin_firestore
+
+class ActivateSubscriptionRequest(BaseModel):
+    order_id: str
+    plan: str  # "premium" | "student" | "premium_student"
+
+@app.post("/payments/activate-subscription")
+@limiter.limit("5/minute")
+async def activate_subscription(
+    request: Request,
+    req: ActivateSubscriptionRequest,
+    user: TokenData = Depends(get_current_user)
+):
+    """
+    Verify Cashfree payment and write isPremium/isStudent to Firestore via Admin SDK.
+    Client can no longer write these fields directly.
+    """
+    print(f"\n[SUBSCRIPTION] Activating for uid={user.uid}, order={req.order_id}, plan={req.plan}")
+
+    # Step 1: Verify payment status with Cashfree
+    try:
+        response = Cashfree().PGOrderFetchPayments("2023-08-01", req.order_id)
+        if not response or not response.data or len(response.data) == 0:
+            raise HTTPException(status_code=402, detail="Payment not found")
+
+        payment = response.data[0]
+        payment_status = getattr(payment, "payment_status", None)
+        if isinstance(payment, dict):
+            payment_status = payment.get("payment_status")
+
+        print(f"[SUBSCRIPTION] Payment status for {req.order_id}: {payment_status}")
+
+        if payment_status != "SUCCESS":
+            raise HTTPException(
+                status_code=402,
+                detail=f"Payment not completed. Status: {payment_status}"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[SUBSCRIPTION ERROR] Cashfree verification failed: {e}")
+        raise HTTPException(status_code=502, detail="Payment gateway error")
+
+    # Step 2: Determine subscription fields from plan
+    plan = req.plan.lower()
+    is_premium = "premium" in plan
+    is_student = "student" in plan
+
+    now = __import__("datetime").datetime.utcnow()
+    from datetime import datetime, timedelta
+    end_date = now + timedelta(days=365) if is_premium else None
+
+    subscription_data = {
+        "plan": plan,
+        "status": "active",
+        "isPremium": is_premium,
+        "isStudent": is_student,
+        "startDate": now,
+        "endDate": end_date,
+        "paymentId": req.order_id,
+        "updatedAt": now,
+    }
+
+    # Step 3: Write to Firestore via Admin SDK (server-side, cannot be forged by client)
+    try:
+        db_admin = admin_firestore.client()
+        user_ref = db_admin.collection("users").document(user.uid)
+        user_ref.set({
+            "isPremium": is_premium,
+            "isStudent": is_student,
+            "subscription": subscription_data,
+        }, merge=True)
+        print(f"[SUBSCRIPTION] Successfully activated {plan} for uid={user.uid}")
+        return {"status": "success", "plan": plan, "isPremium": is_premium, "isStudent": is_student}
+    except Exception as e:
+        print(f"[SUBSCRIPTION ERROR] Firestore write failed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to activate subscription")
+
 
 # ================= RUN =================
 
