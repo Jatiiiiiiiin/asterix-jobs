@@ -1,0 +1,94 @@
+name: AI Documentation Automation
+# Test A: skip path — CI yaml change should not update the investor doc
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  build-and-trigger:
+    # Run only if the pull request was merged successfully or direct push
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Fetch history to run git diff against parent commit
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Project Dependencies
+        run: npm ci || npm install --no-audit --no-fund
+
+      - name: Check commit type
+        id: check_commit
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if echo "$COMMIT_MSG" | grep -q "setup: connect to AI documentation pipeline"; then
+            echo "mode=init" >> $GITHUB_OUTPUT
+            echo "Setup commit detected — running full initialization."
+          else
+            echo "mode=update" >> $GITHUB_OUTPUT
+          fi
+
+      # ── INIT MODE: first-time connection ─────────────────────────────────────
+      - name: Initialize Documentation (first-time setup)
+        if: steps.check_commit.outputs.mode == 'init'
+        env:
+          AIDOC_WEBHOOK_URL: ${{ secrets.AIDOC_WEBHOOK_URL }}
+          AIDOC_WEBHOOK_SECRET: ${{ secrets.AIDOC_WEBHOOK_SECRET }}
+        run: |
+          echo "Scanning all source files in this repo and sending to n8n for initial doc generation..."
+          npx tsx scripts/initializeDocs.ts
+
+      # ── UPDATE MODE: regular commits ──────────────────────────────────────────
+      - name: Detect Changed Source Files
+        if: steps.check_commit.outputs.mode == 'update'
+        run: npx tsx scripts/detectChanges.ts --output changed-files.json
+
+      - name: Prepare n8n Webhook Payload
+        if: steps.check_commit.outputs.mode == 'update'
+        run: npx tsx scripts/prepareWebhookPayload.ts --input changed-files.json --output n8n-payload.json
+
+      - name: Route Files to Doc Mappings
+        if: steps.check_commit.outputs.mode == 'update'
+        run: npx tsx scripts/routeDocs.ts --input changed-files.json --output docs-mapping.json
+
+      - name: Send Payload to n8n Webhook
+        if: steps.check_commit.outputs.mode == 'update'
+        env:
+          AIDOC_WEBHOOK_URL: ${{ secrets.AIDOC_WEBHOOK_URL }}
+          AIDOC_WEBHOOK_SECRET: ${{ secrets.AIDOC_WEBHOOK_SECRET }}
+        run: |
+          FILE_COUNT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('changed-files.json')).length)")
+          if [ "$FILE_COUNT" -gt 0 ]; then
+            if [ -z "$AIDOC_WEBHOOK_URL" ]; then
+              echo "Error: AIDOC_WEBHOOK_URL secret is not set. Skipping webhook."
+              exit 0
+            fi
+            echo "Sending webhook trigger to AIDOC Next.js API..."
+            curl -sS -X POST "$AIDOC_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $AIDOC_WEBHOOK_SECRET" \
+              -H "x-github-event: push" \
+              -d @n8n-payload.json \
+              -o n8n-response.json
+
+            echo "--- Webhook Response ---"
+            cat n8n-response.json
+            echo ""
+            echo "------------------------"
+
+            echo "Validating response node output..."
+            npx tsx scripts/validateWebhookResponse.ts --response n8n-response.json
+          else
+            echo "No matching source file changes detected. Webhook skipped."
+          fi

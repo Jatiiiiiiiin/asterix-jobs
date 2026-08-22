@@ -1,0 +1,659 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { authService } from '../authService';
+import { doc, getDoc, setDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
+import { generateTestQuestions } from '../geminiService';
+import { Video, Mic, AlertTriangle, CheckCircle, ShieldAlert, Monitor, LogOut, Timer } from 'lucide-react';
+
+interface CampusConnectTestPageProps {
+    onToggleTheme: () => void;
+    isDarkMode: boolean;
+}
+
+interface Question {
+    question: string;
+    options: string[];
+    answer: string;
+    type: string;
+    difficulty: string;
+}
+
+const TEST_DURATION_SECONDS = 60 * 60; // 60 minutes
+
+function formatTime(seconds: number): string {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+const CampusConnectTestPage: React.FC<CampusConnectTestPageProps> = ({ isDarkMode }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const college = (location.state as any)?.college || 'Unknown College';
+
+    // Auth & DB State
+    const [userId, setUserId] = useState<string | null>(null);
+    const [isBlocked, setIsBlocked] = useState(false);
+    const [candidateName, setCandidateName] = useState('');
+    const [candidateEmail, setCandidateEmail] = useState('');
+    const [resumeUrl, setResumeUrl] = useState('');
+    const [userSkills, setUserSkills] = useState<string[]>([]);
+
+    // Media & Permissions
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+    const [hasPermissions, setHasPermissions] = useState(false);
+
+    // Proctoring State
+    const [warningCount, setWarningCount] = useState(0);
+
+    // Test State
+    const [testPhase, setTestPhase] = useState<'setup' | 'loading' | 'active' | 'completed' | 'terminated'>('setup');
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [answers, setAnswers] = useState<Record<number, string>>({});
+    const [score, setScore] = useState(0);
+
+    // Timer
+    const [timeLeft, setTimeLeft] = useState(TEST_DURATION_SECONDS);
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const hasAutoSubmitted = useRef(false);
+
+    // Initial Load & Auth Check
+    useEffect(() => {
+        const init = async () => {
+            const user = await authService.getCurrentUser();
+            if (!user) {
+                navigate('/');
+                return;
+            }
+            setUserId(user.uid);
+
+            try {
+                const snap = await getDoc(doc(db, 'profiles', user.uid));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.isBlocked) {
+                        setTestPhase('terminated');
+                        setIsBlocked(true);
+                        return;
+                    }
+                    const skillsObj = data.skills || [];
+                    const skillsList = skillsObj.map((s: any) => s.s || s.skill || s);
+                    setUserSkills(skillsList);
+                    setCandidateName(data.name || data.fullName || '');
+                    setCandidateEmail(data.email || user.email || '');
+                    setResumeUrl(data.resumeUrl || data.resume || '');
+                } else {
+                    setCandidateEmail(user.email || '');
+                }
+            } catch (err) {
+                console.error("Failed to load profile:", err);
+            }
+        };
+        init();
+
+        return () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(t => t.stop());
+            }
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(err => console.error(err));
+            }
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, []);
+
+    // Timer countdown
+    useEffect(() => {
+        if (testPhase !== 'active') return;
+
+        timerRef.current = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    clearInterval(timerRef.current!);
+                    if (!hasAutoSubmitted.current) {
+                        hasAutoSubmitted.current = true;
+                        submitTest();
+                    }
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, [testPhase]);
+
+    // Proctoring: Visibility Change & Fullscreen
+    useEffect(() => {
+        if (testPhase !== 'active') return;
+
+        const handleVisibilityChange = async () => {
+            if (document.visibilityState === 'hidden') {
+                const newCount = warningCount + 1;
+                setWarningCount(newCount);
+                if (newCount > 2) {
+                    await terminateTest();
+                } else {
+                    alert(`WARNING: Tab switching detected. Warning ${newCount}/2. Further violations will terminate your test.`);
+                }
+            }
+        };
+
+        const handleFullScreenChange = async () => {
+            if (!document.fullscreenElement) {
+                const newCount = warningCount + 1;
+                setWarningCount(newCount);
+                if (newCount > 2) {
+                    await terminateTest();
+                } else {
+                    alert(`WARNING: You have exited full-screen mode. Warning ${newCount}/2. Please return to full-screen immediately.`);
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        document.addEventListener('fullscreenchange', handleFullScreenChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            document.removeEventListener('fullscreenchange', handleFullScreenChange);
+        };
+    }, [testPhase, warningCount]);
+
+    const requestPermissions = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            setMediaStream(stream);
+            setHasPermissions(true);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (err) {
+            console.error("Media permission denied", err);
+            alert("Camera and Microphone access are mandatory for this proctored test.");
+        }
+    };
+
+    const startTest = async () => {
+        if (!hasPermissions) {
+            alert("Please grant camera and microphone permissions first.");
+            return;
+        }
+
+        try {
+            await document.documentElement.requestFullscreen();
+        } catch (err) {
+            console.error("Failed to enter fullscreen", err);
+            alert("Full screen mode is required. Please allow full-screen access.");
+            return;
+        }
+
+        setTestPhase('loading');
+
+        try {
+            // 1. Check Firestore for a cached college test
+            const collegeDocRef = doc(db, 'college_tests', college);
+            const collegeSnap = await getDoc(collegeDocRef);
+
+            let loadedQuestions: Question[] = [];
+
+            if (collegeSnap.exists() && collegeSnap.data().questions?.length > 0) {
+                // Serve the same test for all students of this college
+                console.log(`[Test] Loaded cached test for college: ${college}`);
+                loadedQuestions = collegeSnap.data().questions;
+            } else {
+                // Generate a fresh test and cache it in Firestore
+                console.log(`[Test] No cached test found for college: ${college}. Generating...`);
+                const generated = await generateTestQuestions(college);
+
+                if (generated && generated.length > 0) {
+                    loadedQuestions = generated;
+                    // Save to Firestore so all future candidates from this college get the same test
+                    await setDoc(collegeDocRef, {
+                        questions: loadedQuestions,
+                        generatedAt: serverTimestamp(),
+                        college,
+                    });
+                    console.log(`[Test] Saved new test to Firestore for college: ${college}`);
+                }
+            }
+
+            if (loadedQuestions.length > 0) {
+                setQuestions(loadedQuestions);
+                setTimeLeft(TEST_DURATION_SECONDS);
+                hasAutoSubmitted.current = false;
+                setTestPhase('active');
+            } else {
+                alert("Failed to load test questions. Please try again later.");
+                if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+                setTestPhase('setup');
+            }
+        } catch (err) {
+            console.error("[Test] Error loading test:", err);
+            alert("Failed to load test questions. Please try again later.");
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+            setTestPhase('setup');
+        }
+    };
+
+    const terminateTest = async () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setTestPhase('terminated');
+        if (document.fullscreenElement) {
+            await document.exitFullscreen().catch(e => console.error(e));
+        }
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(t => t.stop());
+            setMediaStream(null);
+        }
+
+        if (userId) {
+            try {
+                await setDoc(doc(db, 'profiles', userId), { isBlocked: true }, { merge: true });
+                setIsBlocked(true);
+            } catch (err) {
+                console.error("Error updating blocked status", err);
+            }
+        }
+    };
+
+    const submitTest = async () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setTestPhase('completed');
+        if (document.fullscreenElement) {
+            await document.exitFullscreen().catch(e => console.error(e));
+        }
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(t => t.stop());
+            setMediaStream(null);
+        }
+
+        // Calculate score
+        let totalScore = 0;
+        questions.forEach((q, idx) => {
+            if (answers[idx] === q.answer) {
+                totalScore++;
+            }
+        });
+        setScore(totalScore);
+
+        // Save result to Firestore
+        if (userId) {
+            try {
+                const scorePercent = questions.length > 0
+                    ? Math.round((totalScore / questions.length) * 100)
+                    : 0;
+
+                await addDoc(collection(db, 'test_results'), {
+                    userId,
+                    name: candidateName,
+                    email: candidateEmail,
+                    college,
+                    score: totalScore,
+                    totalQuestions: questions.length,
+                    scorePercent,
+                    skills: userSkills,
+                    resumeUrl,
+                    submittedAt: serverTimestamp(),
+                });
+                console.log('[Test] Result saved to Firestore.');
+            } catch (err) {
+                console.error('[Test] Failed to save result:', err);
+            }
+        }
+    };
+
+    const handleAnswer = (option: string) => {
+        setAnswers(prev => ({ ...prev, [currentIndex]: option }));
+    };
+
+    const handleNext = () => {
+        if (currentIndex < questions.length - 1) {
+            setCurrentIndex(prev => prev + 1);
+        } else {
+            submitTest();
+        }
+    };
+
+    // ─── Render Sub-Components ────────────────────────────────────────────────
+
+    if (testPhase === 'terminated' || isBlocked) {
+        return (
+            <div className="flex h-screen w-screen bg-red-50 dark:bg-red-950/20 text-red-900 dark:text-red-100 flex-col items-center justify-center p-6 text-center">
+                <ShieldAlert className="w-24 h-24 text-red-600 mb-6" />
+                <h1 className="text-4xl font-black tracking-tighter mb-4 uppercase">Test Terminated</h1>
+                <p className="text-lg font-bold tracking-widest opacity-80 max-w-2xl mb-8 leading-relaxed">
+                    We detected multiple severe violations of the proctoring rules (e.g. tab switching, exiting full screen).
+                    Your account has been blocked from further testing.
+                </p>
+                <button
+                    onClick={() => navigate('/')}
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 font-black tracking-widest uppercase transition-colors"
+                >
+                    <LogOut className="w-5 h-5" /> Return to Home
+                </button>
+            </div>
+        );
+    }
+
+    if (testPhase === 'setup') {
+        return (
+            <div className={`flex min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-colors duration-500`}>
+                <div className="max-w-4xl mx-auto w-full p-8 md:p-12 flex flex-col justify-center">
+
+                    <div className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-8 md:p-12 shadow-2xl">
+                        <div className="flex items-center gap-4 mb-8 border-b border-slate-200 dark:border-slate-700 pb-6">
+                            <Monitor className="w-10 h-10 text-[#826BF0]" />
+                            <h1 className="text-3xl font-black tracking-tighter">Proctored Assessment Setup</h1>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-12">
+                            <div className="space-y-6">
+                                <h2 className="text-sm font-black tracking-widest text-slate-500 uppercase">Testing Rules</h2>
+                                <ul className="space-y-4">
+                                    <li className="flex gap-3">
+                                        <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                                        <span className="text-sm font-medium">Full screen mode is strictly enforced. Exiting full screen counts as a violation.</span>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                                        <span className="text-sm font-medium">Do not switch tabs or windows. More than 2 tab switches will result in immediate termination.</span>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <Timer className="w-5 h-5 text-[#826BF0] shrink-0" />
+                                        <span className="text-sm font-medium">You have exactly <strong>60 minutes</strong>. The test auto-submits when the timer expires.</span>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <Video className="w-5 h-5 text-[#826BF0] shrink-0" />
+                                        <span className="text-sm font-medium">Your camera and microphone must remain on and unobstructed.</span>
+                                    </li>
+                                </ul>
+
+                                <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
+                                    {hasPermissions ? (
+                                        <div className="flex items-center gap-3 text-[#826BF0] p-4 bg-[#826BF0]/5 border border-[#826BF0]/20">
+                                            <CheckCircle className="w-5 h-5" />
+                                            <span className="text-sm font-bold">Hardware verified. You are ready.</span>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={requestPermissions}
+                                            className="w-full flex items-center justify-center gap-3 bg-[#826BF0] text-white hover:invert transition-colors p-4 font-black tracking-widest uppercase text-sm"
+                                        >
+                                            <Mic className="w-4 h-4" /> <Video className="w-4 h-4" />
+                                            Grant Camera & Mic Access
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col items-center justify-center bg-black aspect-video relative overflow-hidden border border-slate-300 dark:border-slate-700 shadow-inner">
+                                {hasPermissions ? (
+                                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror" />
+                                ) : (
+                                    <div className="text-center text-slate-500 space-y-2">
+                                        <Video className="w-12 h-12 mx-auto opacity-50" />
+                                        <p className="text-xs font-black tracking-widest">CAMERA PREVIEW OFFLINE</p>
+                                    </div>
+                                )}
+
+                                {hasPermissions && (
+                                    <div className="absolute bottom-4 right-4 flex gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                        <span className="text-[10px] text-white font-black tracking-widest uppercase shadow-black drop-shadow-md">Recording</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="mt-12 flex justify-end">
+                            <button
+                                onClick={startTest}
+                                disabled={!hasPermissions}
+                                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 text-white px-10 py-4 font-black tracking-widest uppercase transition-colors disabled:cursor-not-allowed"
+                            >
+                                Enter Full Screen & Start Test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (testPhase === 'loading') {
+        return (
+            <div className="flex h-screen w-screen bg-slate-900 text-white flex-col items-center justify-center p-6 text-center z-50 fixed inset-0">
+                <div className="animate-spin w-16 h-16 border-4 border-[#826BF0] border-t-transparent rounded-full mb-8" />
+                <h2 className="text-2xl font-black tracking-widest uppercase">Initializing Assessment</h2>
+                <p className="border-[#826BF0] mt-4 font-medium tracking-wide">Loading your college's test paper...</p>
+            </div>
+        );
+    }
+
+    if (testPhase === 'completed') {
+        return (
+            <div className="flex h-screen w-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white flex-col items-center justify-center p-6 text-center">
+                <CheckCircle className="w-24 h-24 text-[#826BF0] mb-6" />
+                <h1 className="text-4xl font-black tracking-tighter mb-4 uppercase text-[#826BF0]">Test Submitted</h1>
+
+                <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 my-8 w-full max-w-sm">
+                    <p className="text-sm font-black tracking-widest opacity-50 mb-3 uppercase">Status</p>
+                    <p className="text-2xl font-black text-[#826BF0]">Successfully Recorded</p>
+                    <p className="text-xs font-medium text-slate-500 mt-3">Your results have been securely submitted and are under review.</p>
+                </div>
+
+                <p className="text-sm font-medium tracking-widest opacity-80 mb-8 max-w-md">
+                    The recruitment team will review your assessment and reach out to you directly.
+                </p>
+
+                <button
+                    onClick={() => navigate('/candidate')}
+                    className="border border-slate-900 dark:border-white px-8 py-4 font-black tracking-widest uppercase hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-colors"
+                >
+                    Return to Dashboard
+                </button>
+            </div>
+        );
+    }
+
+    // Active Test Phase
+    const currentQ = questions[currentIndex];
+    const isLowTime = timeLeft <= 300; // 5 minutes warning
+
+    return (
+        <div className="flex flex-col h-screen w-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-white overflow-hidden select-none">
+            {/* Header Toolbar */}
+            <header className="flex justify-between items-center px-6 py-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-4">
+                    <Monitor className="w-6 h-6 text-[#826BF0]" />
+                    <span className="text-sm font-black tracking-widest uppercase">Proctored Assessment</span>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    {/* Countdown Timer */}
+                    <div className={`flex items-center gap-2 px-4 py-2 border font-black tracking-widest text-sm tabular-nums ${isLowTime
+                            ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-600 dark:text-red-400'
+                            : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                        }`}>
+                        <Timer className={`w-4 h-4 ${isLowTime ? 'animate-pulse' : ''}`} />
+                        {formatTime(timeLeft)}
+                    </div>
+
+                    {warningCount > 0 && (
+                        <div className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1 border border-red-200 dark:border-red-800">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span className="text-xs font-bold tracking-wider">WARNINGS: {warningCount}/2</span>
+                        </div>
+                    )}
+                    {/* PIP Video Feed */}
+                    <div className="w-32 h-24 bg-black border-2 border-slate-200 dark:border-slate-700 overflow-hidden relative shadow-lg">
+                        <video
+                            ref={(el) => {
+                                if (el && mediaStream && !el.srcObject) {
+                                    el.srcObject = mediaStream;
+                                }
+                            }}
+                            autoPlay
+                            playsInline
+                            muted
+                            className="w-full h-full object-cover mirror"
+                        />
+                        <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse border border-white" />
+                    </div>
+                </div>
+            </header>
+
+            {/* Test Content Core */}
+            <main className="flex-1 flex w-full overflow-hidden relative">
+
+                {/* Left Main Question Area */}
+                <div className="flex-1 flex flex-col p-6 md:p-12 overflow-y-auto custom-scrollbar border-r border-slate-200 dark:border-slate-800">
+                    {/* Progress Indicators */}
+                    <div className="flex justify-between items-end mb-8 border-b border-slate-200 dark:border-slate-800 pb-4">
+                        <div>
+                            <span className="text-[10px] font-black tracking-[0.2em] text-[#826BF0] uppercase">
+                                Question {currentIndex + 1} of {questions.length}
+                            </span>
+                            <div className="flex gap-2 mt-2">
+                                <span className="text-[10px] font-bold tracking-widest opacity-50 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 uppercase">{currentQ?.type}</span>
+                                <span className="text-[10px] font-bold tracking-widest opacity-50 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 uppercase">{currentQ?.difficulty}</span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-xs font-bold opacity-40 uppercase tracking-widest">Total Progress</span>
+                            <div className="w-32 h-1.5 bg-slate-200 dark:bg-slate-800 mt-2 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-[#826BF0] transition-all duration-300"
+                                    style={{ width: `${((currentIndex) / questions.length) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Question Area */}
+                    <div className="flex-1 max-w-3xl">
+                        <h2 className="text-lg md:text-xl font-bold tracking-tight leading-relaxed mb-6">
+                            {currentQ?.question}
+                        </h2>
+
+                        {currentQ?.type === 'coding' ? (
+                            <div className="h-64">
+                                <textarea
+                                    value={answers[currentIndex] || ''}
+                                    onChange={(e) => setAnswers(prev => ({ ...prev, [currentIndex]: e.target.value }))}
+                                    className="w-full h-full p-4 border-2 border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-200 font-mono text-sm focus:ring-2 focus:ring-[#826BF0] focus:border-[#826BF0] outline-none resize-none custom-scrollbar"
+                                    placeholder="Write your code solution here in any language..."
+                                />
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {currentQ?.options?.map((opt, i) => {
+                                    const isSelected = answers[currentIndex] === opt;
+                                    return (
+                                        <button
+                                            key={i}
+                                            onClick={() => handleAnswer(opt)}
+                                            className={`w-full text-left p-4 border-2 transition-all group relative overflow-hidden ${isSelected
+                                                ? 'border-[#826BF0] bg-[#826BF0]/5 shadow-md'
+                                                : 'border-slate-200 dark:border-slate-800 hover:border-[#826BF0]/40 dark:hover:border-[#826BF0]/60 hover:bg-slate-50 dark:hover:bg-slate-900'
+                                                }`}
+                                        >
+                                            <div className="flex gap-4">
+                                                <div className={`w-5 h-5 mt-0.5 shrink-0 border-2 rounded-full flex items-center justify-center transition-colors ${isSelected ? 'border-[#826BF0] bg-[#826BF0]' : 'border-slate-400 dark:border-slate-600 group-hover:border-[#826BF0]/40'
+                                                    }`}>
+                                                    {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                                                </div>
+                                                <span className="text-base font-medium leading-tight">{opt}</span>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Navigation Footer */}
+                    <div className="mt-12 flex justify-between max-w-4xl items-center">
+                        <button
+                            onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
+                            disabled={currentIndex === 0}
+                            className="bg-transparent border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 px-8 py-4 font-black tracking-widest uppercase hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors disabled:opacity-30"
+                        >
+                            Previous
+                        </button>
+                        <button
+                            onClick={handleNext}
+                            disabled={!answers[currentIndex]}
+                            className="bg-[#826BF0] text-white px-12 py-4 font-black tracking-widest uppercase hover:invert transition-colors disabled:opacity-30 disabled:hover:invert-0"
+                        >
+                            {currentIndex < questions.length - 1 ? 'Save & Next' : 'Submit Final Test'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Right Sidebar */}
+                <aside className="w-80 flex-shrink-0 bg-slate-50 dark:bg-slate-900/40 p-6 flex flex-col overflow-y-auto">
+                    <h3 className="text-xs font-black tracking-[0.1em] uppercase mb-6 opacity-60">Question Navigator</h3>
+
+                    <div className="grid grid-cols-4 gap-3 mb-8">
+                        {questions.map((q, idx) => {
+                            const isAnswered = !!answers[idx];
+                            const isCurrent = currentIndex === idx;
+                            return (
+                                <button
+                                    key={idx}
+                                    onClick={() => setCurrentIndex(idx)}
+                                    className={`w-12 h-12 flex items-center justify-center text-sm font-black rounded-lg transition-all ${isCurrent
+                                        ? 'bg-[#826BF0] text-white ring-4 ring-[#826BF0]/30 border-none'
+                                        : isAnswered
+                                            ? 'bg-[#826BF0]/60 text-white border-none'
+                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-[#826BF0]/40'
+                                        }`}
+                                >
+                                    {idx + 1}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="mt-auto space-y-4 pt-6 pb-4 border-t border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                            <div className="w-4 h-4 bg-[#826BF0]/60 rounded" />
+                            <span className="text-xs font-semi-bold opacity-70 tracking-wide">Answered</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-4 h-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded" />
+                            <span className="text-xs font-semi-bold opacity-70 tracking-wide">Unanswered</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-4 h-4 bg-[#826BF0] rounded" />
+                            <span className="text-xs font-semi-bold opacity-70 tracking-wide">Current Question</span>
+                        </div>
+
+                        <div className="pt-6 mt-4 border-t border-slate-200 dark:border-slate-800">
+                            <button
+                                onClick={() => {
+                                    if (window.confirm("Are you sure you want to finally submit the test? You cannot change your answers after this.")) {
+                                        submitTest();
+                                    }
+                                }}
+                                className="w-full bg-[#826BF0] text-white py-4 font-black tracking-widest uppercase hover:invert transition-colors"
+                            >
+                                Submit Test
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+
+            </main>
+        </div>
+    );
+};
+
+export default CampusConnectTestPage;

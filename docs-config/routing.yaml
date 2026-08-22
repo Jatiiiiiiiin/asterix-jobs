@@ -1,0 +1,28 @@
+# Documentation Automation Routing Configuration
+# Maps source files to their permanent MDX/Markdown documentation files
+
+routes:
+  - id: 'ai-engine'
+    name: 'AI Processing Engine'
+    pattern: 'ai-engine/**/*.ts'
+    template: 'api-reference'
+
+  - id: 'components'
+    name: 'React Components'
+    pattern: '{components/**/*.tsx,src/components/**/*.tsx}'
+    template: 'component'
+
+  - id: 'services'
+    name: 'Core Services'
+    pattern: '{*Service.ts,firebase.ts}'
+    template: 'api-reference'
+    
+  - id: 'scripts'
+    name: 'Maintenance Scripts'
+    pattern: '*.mjs'
+    template: 'script'
+
+  - id: 'views'
+    name: 'UI Views'
+    pattern: 'views/**/*.tsx'
+    template: 'component'

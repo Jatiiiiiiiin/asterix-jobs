@@ -1,0 +1,13 @@
+views/CandidateDashboard.tsx(709,5): error TS2657: JSX expressions must have one parent element.
+views/CandidateDashboard.tsx(1005,14): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+views/CandidateDashboard.tsx(1022,19): error TS1005: ')' expected.
+views/CandidateDashboard.tsx(1029,17): error TS1128: Declaration or statement expected.
+views/CandidateDashboard.tsx(1030,15): error TS1109: Expression expected.
+views/CandidateDashboard.tsx(1046,13): error TS1128: Declaration or statement expected.
+views/CandidateDashboard.tsx(1047,11): error TS1109: Expression expected.
+views/CandidateDashboard.tsx(1048,9): error TS1109: Expression expected.
+views/CandidateDashboard.tsx(1049,7): error TS1109: Expression expected.
+views/CandidateDashboard.tsx(1087,7): error TS2657: JSX expressions must have one parent element.
+views/CandidateDashboard.tsx(1148,5): error TS1128: Declaration or statement expected.
+views/CandidateDashboard.tsx(1149,3): error TS1109: Expression expected.
+views/CandidateDashboard.tsx(1150,1): error TS1128: Declaration or statement expected.
