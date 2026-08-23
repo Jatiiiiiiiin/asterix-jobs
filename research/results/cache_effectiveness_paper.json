@@ -1,0 +1,7 @@
+{
+  "cold_mean_ms": 56.43,
+  "cold_p95_ms": 81.79,
+  "warm_mean_ms": 0.000886,
+  "warm_p95_ms": 0.001188,
+  "speedup_factor": 63663.0
+}

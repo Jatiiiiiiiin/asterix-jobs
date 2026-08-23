@@ -1,0 +1,12 @@
+{
+  "mean_score": 72.0,
+  "std_score": 0.1642,
+  "min_score": 71.78,
+  "max_score": 72.28,
+  "score_range": 0.504,
+  "male_mean": 72.067,
+  "female_mean": 72.003,
+  "gender_ttest_p": 0.72,
+  "anova_p": 0.91,
+  "interpretation": "No significant bias detected (p > 0.05)"
+}

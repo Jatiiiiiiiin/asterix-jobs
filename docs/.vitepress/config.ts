@@ -24,6 +24,7 @@ export default defineConfig({
       { text: 'Features', link: '/features/' },
       { text: 'Platform', link: '/platform/overview' },
       { text: 'Reference', link: '/reference/frontend' },
+      { text: '🔬 Research', link: '/research/' },
     ],
 
     sidebar: [
@@ -69,6 +70,21 @@ export default defineConfig({
           { text: 'Job aggregation pipeline', link: '/reference/job-aggregation' },
           { text: 'Payments (Cashfree)', link: '/reference/payments' },
           { text: 'Scripts & maintenance tools', link: '/reference/scripts' },
+        ],
+      },
+      {
+        text: '🔬 Research Corner',
+        collapsed: false,
+        items: [
+          { text: 'Overview & methodology', link: '/research/' },
+          { text: 'EXP 1 — Matching accuracy', link: '/research/exp1-matching-accuracy' },
+          { text: 'EXP 2 — AI vs TF-IDF baseline', link: '/research/exp2-model-comparison' },
+          { text: 'EXP 3 — Scalability & throughput', link: '/research/exp3-scalability' },
+          { text: 'EXP 4 — Component latency', link: '/research/exp4-latency' },
+          { text: 'EXP 5 — Bias & fairness audit', link: '/research/exp5-bias' },
+          { text: 'EXP 6 — Score distribution', link: '/research/exp6-score-distribution' },
+          { text: 'EXP 7 — User capacity (M/M/c)', link: '/research/exp7-capacity' },
+          { text: 'EXP 8 — Embedding cache', link: '/research/exp8-cache' },
         ],
       },
     ],

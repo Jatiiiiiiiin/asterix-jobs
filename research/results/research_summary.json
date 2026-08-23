@@ -1,0 +1,70 @@
+{
+  "paper_title": "Asterix Jobs: An AI-Powered Recruitment Matching Platform",
+  "generated_at": "2026-08-23 22:15:31",
+  "system": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2 (384-dim)",
+    "scoring_formula": "0.30*semantic + 0.50*skill + 0.20*(profile*0.7 + quality*0.3)",
+    "soft_skill_boost": "+12% raw for soft-skill-heavy JDs"
+  },
+  "exp1": {
+    "n": 300,
+    "MAE": 41.103,
+    "RMSE": 47.705,
+    "Pearson_r": -0.0216,
+    "Pearson_p": 0.71,
+    "Spearman_rho": -0.0428,
+    "Spearman_p": 0.46,
+    "mean_latency_ms": 47.61,
+    "median_latency_ms": 1.02,
+    "p95_latency_ms": 175.19,
+    "p99_latency_ms": 228.0,
+    "pairs_scored_zero": 202
+  },
+  "exp2": {
+    "model": [
+      "Asterix AI Engine (MiniLM + Skill)",
+      "TF-IDF Baseline"
+    ],
+    "Pearson_r": [
+      -0.0216,
+      0.2468
+    ],
+    "MAE": [
+      41.103,
+      42.498
+    ],
+    "RMSE": [
+      47.705,
+      48.557
+    ]
+  },
+  "exp3": {
+    "local_peak_rps": 5532.7,
+    "with_cache_rps": 19364.5,
+    "estimated_concurrent": 193644
+  },
+  "exp5_bias": {
+    "mean_score": 25.0,
+    "std_score": 0.0,
+    "min_score": 25.0,
+    "max_score": 25.0,
+    "score_range": 0.0,
+    "male_mean": 25.0,
+    "female_mean": 25.0,
+    "gender_t_stat": NaN,
+    "gender_t_p": NaN,
+    "anova_f_stat": NaN,
+    "anova_p": NaN,
+    "interpretation": "Significant variation detected"
+  },
+  "exp7_capacity": {
+    "max_stable_concurrent_users": 10000
+  },
+  "exp8_cache": {
+    "cold_mean_ms": 56.25,
+    "cold_p95_ms": 94.36,
+    "warm_mean_ms": 0.0009,
+    "warm_p95_ms": 0.0013,
+    "speedup_factor": 63350.2
+  }
+}

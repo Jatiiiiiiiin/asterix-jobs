@@ -1,0 +1,9 @@
+concurrent_users,arrival_rate_rps,service_capacity_rps,utilization_pct,est_queue_depth,est_wait_ms,system_status
+10,0.333,22130.8,0.0,0.0,0.0,STABLE
+50,1.667,22130.8,0.0,0.0,0.0,STABLE
+100,3.333,22130.8,0.0,0.0,0.0,STABLE
+500,16.667,22130.8,0.1,0.0,0.0,STABLE
+1000,33.333,22130.8,0.2,0.0,0.0,STABLE
+2000,66.667,22130.8,0.3,0.0,0.0,STABLE
+5000,166.667,22130.8,0.8,0.0,0.0,STABLE
+10000,333.333,22130.8,1.5,0.0,0.0,STABLE

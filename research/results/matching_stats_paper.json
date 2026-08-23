@@ -1,0 +1,11 @@
+{
+  "n": 300,
+  "MAE": 6.499,
+  "RMSE": 8.214,
+  "Pearson_r": 0.9508,
+  "slope": 0.8979,
+  "mean_latency_ms": 47.61,
+  "median_latency_ms": 1.02,
+  "p95_latency_ms": 175.19,
+  "p99_latency_ms": 228.0
+}

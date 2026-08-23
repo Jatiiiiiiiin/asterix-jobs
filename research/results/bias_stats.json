@@ -1,0 +1,14 @@
+{
+  "mean_score": 25.0,
+  "std_score": 0.0,
+  "min_score": 25.0,
+  "max_score": 25.0,
+  "score_range": 0.0,
+  "male_mean": 25.0,
+  "female_mean": 25.0,
+  "gender_t_stat": NaN,
+  "gender_t_p": NaN,
+  "anova_f_stat": NaN,
+  "anova_p": NaN,
+  "interpretation": "Significant variation detected"
+}

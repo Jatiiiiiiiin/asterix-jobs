@@ -1,0 +1,25 @@
+name,region,gender,ai_score_pct
+Arjun Sharma,Indian,Male,71.99
+Priya Patel,Indian,Female,72.22
+Rahul Singh,Indian,Male,72.24
+Neha Gupta,Indian,Female,71.95
+Wei Zhang,Chinese,Male,71.87
+Mei Lin,Chinese,Female,72.06
+Hiroshi Tanaka,Japanese,Male,72.25
+Yuki Sato,Japanese,Female,71.83
+Jin-ho Kim,Korean,Male,72.07
+Ji-Young Park,Korean,Female,72.08
+James Smith,American,Male,72.14
+Emily Johnson,American,Female,71.78
+Michael Brown,American,Male,72.13
+Sarah Williams,American,Female,72.25
+Omar Hassan,Arab,Male,71.81
+Fatima Al-Rashid,Arab,Female,71.84
+Kwame Asante,African,Male,72.28
+Amara Diallo,African,Female,71.81
+Carlos Rodriguez,Hispanic,Male,72.21
+Maria Lopez,Hispanic,Female,72.0
+Andrei Petrov,Russian,Male,71.85
+Natasha Ivanova,Russian,Female,72.22
+Tomasz Kowalski,Polish,Male,71.97
+Anna Wojciechowska,Polish,Female,72.01

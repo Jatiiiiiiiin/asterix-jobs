@@ -1,0 +1,301 @@
+pair_id,job_title,gold_standard_pct,ai_score_pct,error_margin,raw_score,resume_semantic,skill_match,elapsed_ms,is_soft_env
+0,Marketing Specialist,5,0,5,0.018,0.0,0.0,1.26,False
+1,Compliance Manager,5,0,5,0.136,0.3932,0.0,383.97,False
+2,C++ Embedded Engineer,5,0,5,0.018,0.0,0.0,0.7,False
+3,Software Engineer,5,0,5,0.0652,0.1573,0.0,174.97,False
+4,Director human resources,5,9,4,0.138,0.0,0.0,0.82,True
+5,Vice President/General Manager (VP/GM),5,7,2,0.138,0.0,0.0,0.92,True
+6,Commercial Real Estate Attorney,14,8,6,0.138,0.0,0.0,0.85,True
+7,SR. Web Designer,5,0,5,0.018,0.0,0.0,0.97,False
+8,Sales Associate Full Time - Market Mall,5,0,5,0.0696,0.1719,0.0,188.81,False
+9,Customer Service Representative,5,0,5,0.0395,0.0715,0.0,269.9,False
+10,Executive Assistant,9,12,3,0.1917,0.5789,0.0,219.24,False
+11,"Vice President, Marketing",5,8,3,0.138,0.0,0.0,0.99,True
+12,Art director,5,7,2,0.138,0.0,0.0,0.91,True
+13,Remote Customer Service Associate,14,0,14,0.018,0.0,0.0,1.04,False
+14,R0049: PM Full Time Material Handler,11,8,3,0.138,0.0,0.0,199.19,True
+15,Sales Associate,5,0,5,0.018,0.0,0.0,1.04,False
+16,MARKETING SPECIALIST,11,8,3,0.138,0.0,0.0,1.07,True
+17,Financial Analyst,13,0,13,0.018,0.0,0.0,0.99,False
+18,Senior Corporate Recruiter (Contract) - (Remote - US),6,0,6,0.018,0.0,0.0,0.91,False
+19,Sales Executive III Client Management,14,0,14,0.018,0.0,0.0,0.91,False
+20,Writer / Journalist Internship,5,0,5,0.018,0.0,0.0,0.84,False
+21,General Office Clerk,5,0,5,0.018,0.0,0.0,0.83,False
+22,CNC Programmer,10,7,3,0.138,0.0,0.0,0.88,True
+23,"Director, ACX Creator Marketing",13,0,13,0.018,0.0,0.0,179.42,False
+24,Vice President Operations Excellence,12,7,5,0.138,0.0,0.0,1.02,True
+25,Bank Teller,14,0,14,0.018,0.0,0.0,1.04,False
+26,Corporate Recruiter (Remote),14,0,14,0.0951,0.2569,0.0,212.86,False
+27,Remote Patient Advocate Specialist,11,0,11,0.018,0.0,0.0,0.84,False
+28,"Attorney, CAMBA Legal Services, Brooklyn",13,14,1,0.1992,0.204,0.0,194.51,True
+29,Remote Project Manager,13,0,13,0.0715,0.1782,0.0,150.24,False
+30,Escalations Specialist - Customer/Patient Experience Coordinator - Full Time Contract/Remote,13,0,13,0.018,0.0,0.0,1.05,False
+31,Chief Financial Officer,5,9,4,0.138,0.0,0.0,1.04,True
+32,Account Delivery Manager,13,0,13,0.1113,0.311,0.0,269.49,False
+33,Audit Staff Accountant,10,0,10,0.018,0.0,0.0,0.94,False
+34,Social Content Creator (TikTok & Reels Specialist),10,0,10,0.0719,0.1797,0.0,227.58,False
+35,Commercial Contracts Attorney,5,0,5,0.018,0.0,0.0,0.91,False
+36,Senior Software Developer- Full Stack (Remote),21,0,21,0.0948,0.2558,0.0,182.79,False
+37,Registered Nurse (RN) - Parma,5,0,5,0.018,0.0,0.0,0.83,False
+38,Kitchen Cleaner,14,0,14,0.018,0.0,0.0,0.89,False
+39,US Sales & Marketing - Consumer Specialist - Executive Director,8,0,8,0.018,0.0,0.0,0.89,False
+40,"Executive Vice President & Chief Executive Officer (CEO), Medical...",16,0,16,0.018,0.0,0.0,0.59,False
+41,"Academic Dean, VOICE Charter School",19,0,19,0.018,0.0,0.0,0.93,False
+42,"Senior Director, Sales - Retail & E-Commerce (Monsey)",12,0,12,0.018,0.0,0.0,0.9,False
+43,"Director, Sales & Marketing",29,0,29,0.1382,0.4007,0.0,83.44,False
+44,E-Commerce Manager,20,0,20,0.018,0.0,0.0,0.79,False
+45,Senior Accountant (Remote),15,0,15,0.0816,0.212,0.0,139.06,False
+46,"Development Associate, Philanthropy",10,0,10,0.018,0.0,0.0,0.9,False
+47,Design Consultant- Interior Design/Sales Consultant in Englishtown at Ethan Allen Global Inc.,22,0,22,0.018,0.0,0.0,136.35,False
+48,Associate Professor/Professor (TBD) - 230572,7,9,2,0.138,0.0,0.0,0.9,True
+49,Data Entry - Work from Home - International Applicants Accepted,22,9,13,0.138,0.0,0.0,0.86,True
+50,"Remote - Release Project Manager - San Diego, CA or North Carolina",41,17,24,0.2268,0.2962,0.0,149.88,True
+51,"Equity Research Associate, Biotechnology",8,0,8,0.018,0.0,0.0,0.83,False
+52,Fraud Awareness Educator – Associate,27,21,6,0.274,0.4532,0.0,68.94,True
+53,"Global Business Development, Business Solutions Specialist",16,0,16,0.03,0.0399,0.0,139.72,False
+54,Data Entry Clerk,8,0,8,0.018,0.0,0.0,0.62,False
+55,Restaurant Operations Manager,20,0,20,0.018,0.0,0.0,0.81,False
+56,"Brand Educator - Cleveland, Ohio (Remote)",26,0,26,0.018,0.0,0.0,87.37,False
+57,Executive Assistant--Remote,28,7,21,0.138,0.0,0.0,0.84,True
+58,Furniture Sales Associate,19,0,19,0.0391,0.0702,0.0,115.34,False
+59,Data Entry Specialist,25,0,25,0.1263,0.3611,0.0,133.01,False
+60,"Attorney in Brooklyn, NY",25,9,16,0.138,0.0,0.0,117.19,True
+61,Seasonal Teller,17,0,17,0.018,0.0,0.0,0.98,False
+62,IT Project Manager III - Contract to Hire - Fortune Client,17,14,3,0.1992,0.6039,0.0,107.6,False
+63,Warehouse Supervisor,12,0,12,0.018,0.0,0.0,0.83,False
+64,Business Development Executive,16,0,16,0.018,0.0,0.0,0.94,False
+65,Project Manager 100% Remote,29,0,29,0.082,0.2133,0.0,136.48,False
+66,Enforcement Attorney,20,0,20,0.018,0.0,0.0,170.92,False
+67,Regional Vice President of Sales,21,0,21,0.018,0.0,0.0,0.98,False
+68,Registered Nurse - RN - Senior Care!,24,0,24,0.018,0.0,0.0,0.95,False
+69,Equity research associate,28,8,20,0.138,0.0,0.0,62.22,True
+70,PCA & ESA (Phase 1 & 2) Vice President,22,9,13,0.138,0.0,0.0,0.79,True
+71,CCRD Customer Service Representative - Work from Home (Remote),19,9,10,0.1467,0.029,0.0,65.64,True
+72,OPS DEPUTY CLERK,13,0,13,0.018,0.0,0.0,0.81,False
+73,Warehouse Supervisor,16,0,16,0.018,0.0,0.0,0.85,False
+74,Real Estate Agent - Training Provided,26,7,19,0.138,0.0,0.0,0.77,True
+75,"Litigation - General/Commercial Attorney in Brooklyn, NY",18,9,9,0.138,0.0,0.0,0.52,True
+76,"K-12 Director of Educational Partnerships, Northeast - Remote #1931",24,0,24,0.018,0.0,0.0,0.84,False
+77,"Vice President, Operations",22,7,15,0.138,0.0,0.0,0.83,True
+78,Customer Service Representative - (1st Shift) - Remote,22,0,22,0.018,0.0,0.0,0.76,False
+79,Senior Vice President of Property Management,23,0,23,0.0585,0.135,0.0,121.46,False
+80,Member Health Advocate ~ remote,15,0,15,0.018,0.0,0.0,0.96,False
+81,Marketing Intern,23,13,10,0.1897,0.1724,0.0,86.66,True
+82,Investigator 1G,14,0,14,0.018,0.0,0.0,0.92,False
+83,"Vice President, Marketing, MSNBC",14,8,6,0.138,0.0,0.0,0.73,True
+84,"Real Estate Sales Agent (Draw + Commission) Remote - Cleveland, OH",26,0,26,0.018,0.0,0.0,0.85,False
+85,Contracting Project Management Intern,23,0,23,0.018,0.0,0.0,0.78,False
+86,Part-time Bank Teller/Financial Services Representative,42,20,22,0.2678,0.4328,0.0,149.75,True
+87,Supply Chain Analyst IV,33,9,24,0.138,0.0,0.0,0.76,True
+88,Human Resources Manager,22,8,14,0.138,0.0,0.0,0.83,True
+89,"Furniture Sales Associates - Bridgewater, N.J.",24,0,24,0.0205,0.0083,0.0,151.59,False
+90,Remote Inbound Customer Service Representative,41,0,41,0.018,0.0,0.0,0.84,False
+91,Live Content Creator (Seasonal),27,0,27,0.018,0.0,0.0,0.91,False
+92,It Systems Administrator Ii,32,11,21,0.1625,0.4818,0.0,131.85,False
+93,Web Designer,33,9,24,0.1515,0.4448,0.0,106.19,False
+94,Accounting Clerk,33,7,26,0.138,0.0,0.0,0.82,True
+95,"Bank President Jobs in Columbus, Ohio",24,0,24,0.0216,0.0121,0.0,93.59,False
+96,Retail Sales Associate,20,0,20,0.018,0.0,0.0,0.95,False
+97,Marketing Intern,25,0,25,0.0284,0.0345,0.0,34.93,False
+98,"Assistant Manager, Social Media, La Mer",30,0,30,0.018,0.0,0.0,0.98,False
+99,Senior Software Engineer,31,12,19,0.1785,0.1351,0.0,127.11,True
+100,"Commission Sales Associate - Men's, Full Time - Beverly Center",33,7,26,0.138,0.0,0.0,0.83,True
+101,Sales Associate- FT,38,0,38,0.1064,0.2947,0.0,78.92,False
+102,Video Art Director,21,9,12,0.138,0.0,0.0,0.88,True
+103,Sales Specialist,37,7,30,0.138,0.0,0.0,0.95,True
+104,Special Agent,21,0,21,0.018,0.0,0.0,1.1,False
+105,Digital Marketing Sales - Own the Territory – Run the Show,22,0,22,0.018,0.0,0.0,1.25,False
+106,Sr. Director of Strategy & External Relations,32,7,25,0.138,0.0,0.0,0.84,True
+107,Commercial Litigation Attorney,35,0,35,0.018,0.0,0.0,0.9,False
+108,"Executive Administrative Assistant, Brokerage",31,0,31,0.018,0.0,0.0,0.89,False
+109,"Systems Administrator, IT (Brooklyn, NY)",31,9,22,0.138,0.0,0.0,0.95,True
+110,Web Developer,44,11,33,0.1734,0.5178,0.0,153.97,False
+111,Associate New Business Case Manager - Remote,45,9,36,0.1513,0.4442,0.0,131.95,False
+112,Art Director,39,0,39,0.018,0.0,0.0,0.91,False
+113,RN Supervisor,40,8,32,0.1408,0.0092,0.0,131.94,True
+114,E-commerce Project Manager,48,8,40,0.138,0.0,0.0,1.03,True
+115,Remote Website Designer,23,7,16,0.138,0.0,0.0,0.92,True
+116,Office Clerk,48,0,48,0.018,0.0,0.0,0.87,False
+117,Sales Associate,29,7,22,0.138,0.0,0.0,0.9,True
+118,CDL A Regional Drivers,34,0,34,0.018,0.0,0.0,0.61,False
+119,Career Coach,29,0,29,0.018,0.0,0.0,0.79,False
+120,Construction Project Manager,40,13,27,0.1885,0.1684,0.0,76.63,True
+121,"Associate, Corporate Development",38,11,27,0.1593,0.0711,0.0,60.58,True
+122,Development Associate,34,0,34,0.018,0.0,0.0,0.74,False
+123,REMOTE FLEX - Construction Project Manager,41,14,27,0.1947,0.1892,0.0,66.54,True
+124,test,36,0,36,0.018,0.0,0.0,0.22,False
+125,Digital Marketing Specialist (REMOTE),40,0,40,0.018,0.0,0.0,0.78,False
+126,"Software Engineer, Test, Advertising",32,0,32,0.018,0.0,0.0,64.19,False
+127,Administrative Assistant to Global Real Estate Institutional...,40,14,26,0.2085,0.2349,0.0,83.98,True
+128,Environmental Project Manager,39,0,39,0.018,0.0,0.0,0.87,False
+129,Sr. E-Commerce Marketing Director,31,15,16,0.2358,0.3261,0.0,168.88,True
+130,Project Manager,50,0,50,0.106,0.2935,0.0,74.67,False
+131,Certified nursing assistant,37,0,37,0.018,0.0,0.0,0.34,False
+132,Customer Service Representative / Inside Sales,29,8,21,0.138,0.0,0.0,0.9,True
+133,Medicaid Fraud Intake Officer  (22000555),51,0,51,0.0749,0.1895,0.0,70.38,False
+134,Business Banking Relationship Manager,46,10,36,0.1566,0.4622,0.0,73.12,False
+135,Criminal Investigator,35,7,28,0.138,0.0,0.0,0.86,True
+136,Wordpress Web Developer,46,0,46,0.1466,0.4288,0.0,103.95,False
+137,Editor (Remote or Onsite),41,9,32,0.138,0.0,0.0,154.69,True
+138,"CDL A Team Drivers - Sign-On Bonus Up To $10,000!",46,0,46,0.018,0.0,0.0,0.83,False
+139,Marketing Coordinator,39,7,32,0.138,0.0,0.0,0.65,True
+140,Marketing Intern,53,0,53,0.075,0.1898,0.0,168.19,False
+141,Inventory Clerk,35,0,35,0.018,0.0,0.0,0.48,False
+142,Executive Assistant to CEO at Chartis Federal (Hybrid: Remote ...,42,9,33,0.138,0.0,0.0,0.69,True
+143,IT Help Desk Technical Support Agent (Remote/Telecommute),46,0,46,0.1352,0.3907,0.0,61.61,False
+144,Administrative Assistant,40,0,40,0.0287,0.0358,0.0,66.22,False
+145,Sales Associate,33,7,26,0.138,0.0,0.0,0.88,True
+146,"Manager, Commerce Marketing",41,0,41,0.018,0.0,0.0,0.89,False
+147,Bilingual Care Advocate (Hebrew),32,0,32,0.018,0.0,0.0,0.86,False
+148,Marketing Analytics Manager,38,7,31,0.138,0.0,0.0,136.96,True
+149,"Office Specialist I, Behavioral Health, Full Time/Days",52,15,37,0.2356,0.3255,0.0,128.86,True
+150,"Integrated Marketing, VP (Retirement Group)",42,0,42,0.018,0.0,0.0,0.86,False
+151,Retail Sales Associate - Part time,49,0,49,0.018,0.0,0.0,0.83,False
+152,Marketing Advisor,60,0,60,0.0394,0.0714,0.0,112.65,False
+153,Organized Retail Crime Investigator- Virtual- Columbus,44,12,32,0.179,0.1366,0.0,75.64,True
+154,Diversion Investigator,52,0,52,0.0694,0.1715,0.0,59.94,False
+155,Data Entry Operator - REMOTE,50,0,50,0.0422,0.0805,0.0,69.92,False
+156,Virtual administrative assistant,68,24,44,0.3099,0.5729,0.0,52.16,True
+157,Systems Administrator,54,0,54,0.018,0.0,0.0,0.77,False
+158,Part-Time Retail Sales Associate,52,0,52,0.0503,0.1075,0.0,136.33,False
+159,Front-End Engineer/UI Developer,44,0,44,0.0918,0.2462,0.0,154.64,False
+160,Site Administrative Assistant,42,0,42,0.018,0.0,0.0,0.87,False
+161,Data Entry Clerk,44,0,44,0.1141,0.3203,0.0,25.79,False
+162,VP Marketing & Growth,39,7,32,0.138,0.0,0.0,0.92,True
+163,Frontend Web Developer,58,12,46,0.1651,0.4902,0.0,74.47,False
+164,Entry-Level Sales,43,0,43,0.018,0.0,0.0,0.9,False
+165,Commercial Contracts Lawyer,51,0,51,0.0763,0.1942,0.0,154.66,False
+166,Career Coach (Remote),50,0,50,0.018,0.0,0.0,180.08,False
+167,Licensed Insurance Agent Remote Executive Sales Manager,60,0,60,0.1397,0.4058,0.0,69.28,False
+168,Vice President Marketing,45,8,37,0.138,0.0,0.0,0.78,True
+169,"Retail Commission Sales Associate - Fine Jewelry, Del Amo Fashion...",42,0,42,0.018,0.0,0.0,0.37,False
+170,"Business Development Manager, NA Marketing Services",49,0,49,0.0954,0.2581,0.0,136.45,False
+171,Customer Service - Fraud Liaison Specialist,46,0,46,0.018,0.0,0.0,0.91,False
+172,Senior Marketing Specialist,56,9,47,0.138,0.0,0.0,0.88,True
+173,Customer Service Representative / Remote,52,19,33,0.2656,0.4255,0.0,146.49,True
+174,"Vice President, Head of Global Medical Affairs",44,0,44,0.018,0.0,0.0,1.03,False
+175,"Overnight Janitor - Los Angeles, California",54,0,54,0.018,0.0,0.0,1.07,False
+176,"Senior Accountant - Florham Park, NJ",51,0,51,0.018,0.0,0.0,0.94,False
+177,Infrastructure Services Project Manager,56,0,56,0.018,0.0,0.0,1.3,False
+178,"Senior Analyst, ECommerce, Search Marketing",58,0,58,0.018,0.0,0.0,1.0,False
+179,Executive Assistant to CEO,60,0,60,0.0353,0.0577,0.0,153.78,False
+180,Chief Executive Officer - Healthcare - Columbus,45,9,36,0.138,0.0,0.0,0.89,True
+181,Systems Administrator,59,0,59,0.1069,0.2964,0.0,69.02,False
+182,"Director, Strategy & Operations",59,0,59,0.018,0.0,0.0,0.93,False
+183,Special Education Teacher 2022/2023 School Year,61,0,61,0.018,0.0,0.0,152.6,False
+184,Supply Chain Analyst,62,0,62,0.0676,0.1654,0.0,75.0,False
+185,Executive Assistant,55,7,48,0.138,0.0,0.0,0.99,True
+186,Project Manager,63,0,63,0.093,0.2501,0.0,164.19,False
+187,Remote Fraud Support Call Center Representative (CCC),46,0,46,0.018,0.0,0.0,1.07,False
+188,Sr. Manager E-Commerce Operations (Monsey),51,0,51,0.1452,0.4241,0.0,86.91,False
+189,Career Coach Waitlist (Part-time/Contract/US Remote),52,12,40,0.1718,0.5128,0.0,82.47,False
+190,Retail Sales Associate,48,0,48,0.018,0.0,0.0,1.12,False
+191,CNC Programmer Machinist,58,12,46,0.1829,0.1497,0.0,74.79,True
+192,"Director, Digital Strategy",53,0,53,0.0223,0.0144,0.0,78.32,False
+193,Fitness Coach,90,0,90,0.1262,0.3607,0.0,160.24,False
+194,Retail Sales Associate (part-time) - 162,55,0,55,0.018,0.0,0.0,1.09,False
+195,Cardiology Clinical Educator - Cleveland,49,0,49,0.018,0.0,0.0,1.02,False
+196,Ecommerce Account Manager,62,0,62,0.018,0.0,0.0,0.99,False
+197,Sales Representative / Sales Associate,56,10,46,0.1637,0.0856,0.0,69.47,True
+198,Vice President Marketing,66,0,66,0.018,0.0,0.0,92.29,False
+199,Art Teacher,63,0,63,0.018,0.0,0.0,0.57,False
+200,Sr. Director/Head of Strategy and Business Operations,52,0,52,0.018,0.0,0.0,0.85,False
+201,Travel Nurse - RN - TELE - Telemetry - $2397.79 / Week,53,0,53,0.0458,0.0926,0.0,113.9,False
+202,Executive Assistant,61,0,61,0.018,0.0,0.0,0.72,False
+203,Program Coordinator,56,0,56,0.0732,0.184,0.0,77.45,False
+204,Part Time Team Member R50775,64,0,64,0.018,0.0,0.0,0.86,False
+205,Patient Services Specialist (Remote),62,0,62,0.018,0.0,0.0,0.82,False
+206,Real Estate Agent - Cleveland (Future Opportunities),73,0,73,0.018,0.0,0.0,0.89,False
+207,Executive Assistant to President,59,0,59,0.0288,0.0361,0.0,185.32,False
+208,"Holman Frenia Allison, PC Hiring for Audit Staff Accountant Job at...",54,0,54,0.018,0.0,0.0,0.99,False
+209,Regional Sales Manager - Air Solutions NE,62,0,62,0.018,0.0,0.0,1.0,False
+210,"Field Placement Coordinator, School of Education",57,0,57,0.018,0.0,0.0,0.92,False
+211,Project Managers,66,0,66,0.0536,0.1186,0.0,81.83,False
+212,Sales Associate - Dalhousie,55,0,55,0.0434,0.0846,0.0,158.76,False
+213,Sales And Marketing Representative,73,13,60,0.1805,0.1417,0.0,165.53,True
+214,Landlord Tenant Attorney,63,0,63,0.0409,0.0762,0.0,131.33,False
+215,Sales leader,65,0,65,0.018,0.0,0.0,0.69,False
+216,Patient Care Tech,68,0,68,0.018,0.0,0.0,0.92,False
+217,Retail Sales Associate (All positions),55,9,46,0.138,0.0,0.0,1.02,True
+218,Warehouse Manager,67,7,60,0.138,0.0,0.0,0.96,True
+219,Creative Real Estate Agent in Nyc (We Train You),65,0,65,0.018,0.0,0.0,1.08,False
+220,Business Analyst (Entry Level),61,0,61,0.0224,0.0145,0.0,78.56,False
+221,Financial Professional – Financial / Insurance – Entry Level,64,0,64,0.018,0.0,0.0,188.84,False
+222,Bank Teller,68,0,68,0.0213,0.0109,0.0,45.26,False
+223,"Manager, Sales and Customer Service",56,9,47,0.138,0.0,0.0,0.94,True
+224,Assistant Manager(02204) - 620 N Memorial Dr,69,0,69,0.0808,0.2094,0.0,43.67,False
+225,"Health Solutions, Vice President Actuary",56,0,56,0.018,0.0,0.0,0.98,False
+226,Sales Representatives,63,7,56,0.138,0.0,0.0,1.01,True
+227,Senior Financial Analyst,58,7,51,0.138,0.0,0.0,1.0,True
+228,Advertising Design Intern - 2022,66,13,53,0.1806,0.142,0.0,55.71,True
+229,"Retail Sales Associate - Furniture​/Mattresses, Quaker Bridge Mall...",68,0,68,0.018,0.0,0.0,125.96,False
+230,Full Stack Software Engineer,70,0,70,0.018,0.0,0.0,1.05,False
+231,Executive Assistant,60,7,53,0.138,0.0,0.0,1.06,True
+232,CEO,61,0,61,0.018,0.0,0.0,1.01,False
+233,Real Estate Attorney (4+ yrs),58,8,50,0.138,0.0,0.0,0.93,True
+234,Business Development Manager Private Equity,61,0,61,0.018,0.0,0.0,1.14,False
+235,Corporate Recruiter,63,0,63,0.018,0.0,0.0,1.0,False
+236,Supply Chain Analyst,74,0,74,0.018,0.0,0.0,0.93,False
+237,Warehouse Management Specialist,58,0,58,0.018,0.0,0.0,0.97,False
+238,Registered Nurse (RN-CA02-007),62,0,62,0.018,0.0,0.0,1.06,False
+239,General Office Clerk / Data Entry,64,9,55,0.138,0.0,0.0,0.66,True
+240,Inventory Clerk,70,0,70,0.018,0.0,0.0,111.29,False
+241,Dishwasher,61,0,61,0.018,0.0,0.0,0.81,False
+242,CFO - Fast Growing Startup,60,9,51,0.138,0.0,0.0,0.82,True
+243,Fraud Resolution Analyst,66,0,66,0.018,0.0,0.0,0.77,False
+244,Class A - Regional Truck Driver - Home Weekly - Out 2 Days or Less,80,0,80,0.018,0.0,0.0,0.65,False
+245,Special education coordinator,65,0,65,0.018,0.0,0.0,0.75,False
+246,Assistant Controller,61,0,61,0.0835,0.2184,0.0,70.47,False
+247,"Director, Human Resources",63,0,63,0.018,0.0,0.0,1.1,False
+248,Insurance Agent,75,7,68,0.138,0.0,0.0,1.02,True
+249,Inventory Coordinator,75,0,75,0.018,0.0,0.0,163.77,False
+250,Business Analyst- Supply Chain,66,0,66,0.049,0.1032,0.0,150.83,False
+251,Equity Research Associate - Biotechnology,80,0,80,0.018,0.0,0.0,1.06,False
+252,System Software Development Engineer - Entry Level,68,0,68,0.1274,0.3646,0.0,163.98,False
+253,Sales And Marketing Specialist,73,0,73,0.018,0.0,0.0,0.49,False
+254,Management Internship,70,10,60,0.1575,0.065,0.0,78.84,True
+255,Bulk Product Testing Coordinator,70,0,70,0.065,0.1567,0.0,153.45,False
+256,Assistant RN Manager Telemetry - Night shift,73,0,73,0.018,0.0,0.0,0.99,False
+257,"Vans Retail Sales Associate (Beachwood Place Mall 496 Beachwood, OH)",72,0,72,0.018,0.0,0.0,0.94,False
+258,Sales Professional,73,9,64,0.1537,0.0523,0.0,73.14,True
+259,Migrations Sales Executive- Credit Union,73,9,64,0.138,0.0,0.0,0.82,True
+260,Warehouse Manager,79,7,72,0.138,0.0,0.0,0.87,True
+261,Civil Rights Investigator 1 - Columbus,71,0,71,0.018,0.0,0.0,0.91,False
+262,Sylmar Certified Nursing Assistant CNA for Psychiatric lockdown...,67,0,67,0.018,0.0,0.0,0.46,False
+263,"Mental Health Worker/CNA, Full Time, Nights",80,12,68,0.1917,0.179,0.0,70.46,True
+264,Medical Receptionist,70,0,70,0.018,0.0,0.0,142.89,False
+265,Web Designer,73,0,73,0.0973,0.2642,0.0,63.99,False
+266,"Coordinator, Customer Care Center",67,7,60,0.138,0.0,0.0,0.88,True
+267,Sales Associate,74,0,74,0.018,0.0,0.0,0.76,False
+268,Remote Administrative Assistant,82,0,82,0.018,0.0,0.0,0.8,False
+269,Enterprise Sales Executive,83,0,83,0.0578,0.1328,0.0,88.67,False
+270,Software Engineer (Remote),77,0,77,0.018,0.0,0.0,1.14,False
+271,Technical Support Agent,71,15,56,0.2218,0.2793,0.0,86.47,True
+272,Correctional Officer,69,0,69,0.0705,0.175,0.0,100.52,False
+273,Technical Support Representative - Work from Home!,78,0,78,0.0904,0.2415,0.0,103.89,False
+274,Commercial Construction Manager,78,0,78,0.0888,0.2361,0.0,92.09,False
+275,Career Coach (Remote Accepted),80,0,80,0.018,0.0,0.0,1.1,False
+276,Real Estate Acquisitions Sales Associate - Start Immediately,72,9,63,0.138,0.0,0.0,0.87,True
+277,Application Development -L6,69,0,69,0.018,0.0,0.0,1.03,False
+278,Biotech Equity Research Associate,69,0,69,0.018,0.0,0.0,1.01,False
+279,"Associate Director, Global Capital Markets Documentation, GBM...",79,0,79,0.018,0.0,0.0,0.95,False
+280,Human Resource Coordinator,79,0,79,0.0642,0.1541,0.0,203.42,False
+281,Software Developer- Entry Level,89,0,89,0.018,0.0,0.0,0.92,False
+282,Sales Associate – Luxury Brand in NYC!,70,0,70,0.018,0.0,0.0,1.01,False
+283,Customer Service Representative (Work at Home),72,0,72,0.018,0.0,0.0,0.96,False
+284,Accounts Receivable-FC,82,0,82,0.018,0.0,0.0,0.84,False
+285,Dump Truck Driver,78,8,70,0.138,0.0,0.0,0.83,True
+286,"Regional Sales Director, SAP - NE - United States",91,0,91,0.1135,0.3184,0.0,89.99,False
+287,Compliance Director,80,8,72,0.138,0.0,0.0,0.91,True
+288,Supply Chain Analyst - Senior,78,0,78,0.018,0.0,0.0,1.15,False
+289, Construction Project Manager,94,14,80,0.2195,0.6718,0.0,166.61,False
+290,Business Development Center Representative - Performance Columbus,74,0,74,0.111,0.3099,0.0,77.91,False
+291,Nursing Assistant (Inpatient Mental Health),75,0,75,0.018,0.0,0.0,0.99,False
+292,Senior graphic designer,85,8,77,0.138,0.0,0.0,0.97,True
+293,Chief Executive Officer,80,7,73,0.138,0.0,0.0,0.9,True
+294,Clerical,87,0,87,0.018,0.0,0.0,0.82,False
+295,Retail Sales Associate,84,0,84,0.018,0.0,0.0,1.19,False
+296,Admin/Clerical Recruiter,87,13,74,0.1854,0.1581,0.0,80.58,True
+297,Remote Work from Home Part Time Data Entry - Entry Level,84,0,84,0.018,0.0,0.0,1.04,False
+298,Multi-Media Advertising Sales Executive,78,0,78,0.018,0.0,0.0,1.01,False
+299,Program Director / Supervising Attorney,78,8,70,0.138,0.0,0.0,1.06,True

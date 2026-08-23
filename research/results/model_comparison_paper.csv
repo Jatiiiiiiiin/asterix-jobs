@@ -1,0 +1,3 @@
+model,Pearson_r,MAE,RMSE
+Asterix AI Engine (MiniLM + Skill),0.9508,6.499,8.214
+TF-IDF Baseline,0.4348,32.597,38.595

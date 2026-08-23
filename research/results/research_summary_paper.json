@@ -1,0 +1,58 @@
+{
+  "paper_title": "Asterix Jobs: AI-Powered Recruitment Matching",
+  "generated_at": "2026-08-23 22:22:10",
+  "system": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "dim": 384,
+    "formula": "0.30*sem+0.50*skill+0.20*(prof*0.7+qual*0.3)"
+  },
+  "exp1_accuracy": {
+    "n": 300,
+    "MAE": 6.499,
+    "RMSE": 8.214,
+    "Pearson_r": 0.9508,
+    "slope": 72.0354
+  },
+  "exp2_comparison": {
+    "ai_pearson_r": 0.9508,
+    "ai_MAE": 6.499,
+    "tfidf_pearson_r": 0.4348,
+    "tfidf_MAE": 32.597
+  },
+  "exp3_scalability": {
+    "peak_rps": 5532.7,
+    "with_cache_rps": 19364.5,
+    "concurrent_users": 193644,
+    "zero_errors": true
+  },
+  "exp4_latency": {
+    "tokenize_ms": 0.235,
+    "embed_cold_ms": 99.344,
+    "embed_warm_ms": 0.001,
+    "cosine_ms": 0.092,
+    "skill_ms": 0.614
+  },
+  "exp5_bias": {
+    "mean_score": 72.0,
+    "std_score": 0.1642,
+    "min_score": 71.78,
+    "max_score": 72.28,
+    "score_range": 0.504,
+    "male_mean": 72.067,
+    "female_mean": 72.003,
+    "gender_ttest_p": 0.72,
+    "anova_p": 0.91,
+    "interpretation": "No significant bias detected (p > 0.05)"
+  },
+  "exp7_capacity": {
+    "max_stable_users": 10000,
+    "peak_utilization_pct": 1.5
+  },
+  "exp8_cache": {
+    "cold_mean_ms": 56.43,
+    "cold_p95_ms": 81.79,
+    "warm_mean_ms": 0.000886,
+    "warm_p95_ms": 0.001188,
+    "speedup_factor": 63663.0
+  }
+}

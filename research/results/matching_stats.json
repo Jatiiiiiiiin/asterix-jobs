@@ -1,0 +1,14 @@
+{
+  "n": 300,
+  "MAE": 41.103,
+  "RMSE": 47.705,
+  "Pearson_r": -0.0216,
+  "Pearson_p": 0.71,
+  "Spearman_rho": -0.0428,
+  "Spearman_p": 0.46,
+  "mean_latency_ms": 47.61,
+  "median_latency_ms": 1.02,
+  "p95_latency_ms": 175.19,
+  "p99_latency_ms": 228.0,
+  "pairs_scored_zero": 202
+}
