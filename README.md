@@ -1,10 +1,10 @@
 
 
-# Asterix Jobs
+# Asterix Jobs!!
 
 Asterix Jobs is a job discovery and recruitment application with a Vite frontend and a FastAPI-powered AI engine.
 
-## Run Locally
+## Run Locally!!
 
 **Prerequisites:** Node.js and Python 3.10+
 
@@ -16,7 +16,7 @@ Asterix Jobs is a job discovery and recruitment application with a Vite frontend
 3. Start the frontend:
    `npm run dev`
 
-### AI backend
+### AI backend!!
 
 In a second terminal:
 
